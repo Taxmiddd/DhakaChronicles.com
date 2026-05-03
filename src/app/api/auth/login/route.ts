@@ -2,8 +2,13 @@ import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/db/server'
 import { LoginSchema } from '@/lib/validations'
 import { supabaseAdmin } from '@/lib/db/admin'
+import { rateLimit } from '@/lib/utils/rate-limit'
 
 export async function POST(request: Request) {
+  // Reduce credential stuffing / brute-force attempts
+  const rateLimitError = rateLimit(request, 10, 10 * 60 * 1000, 'auth-login')
+  if (rateLimitError) return rateLimitError
+
   try {
     const body = await request.json()
     const validated = LoginSchema.safeParse(body)

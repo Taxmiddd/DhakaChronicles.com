@@ -26,9 +26,9 @@ interface TrafficSource {
 interface TopArticle {
   id: string
   title: string
-  slug: string
+  slug?: string
   views: number
-  published_at: string
+  published_at?: string
 }
 
 interface AuthorStat {
@@ -36,6 +36,11 @@ interface AuthorStat {
   full_name: string
   article_count: number
   total_views: number
+}
+
+interface ViewsChartPoint {
+  date: string
+  views: number
 }
 
 const MOCK_VIEWS_CHART = [
@@ -49,6 +54,82 @@ const MOCK_VIEWS_CHART = [
 ]
 
 const COLORS = ['#00A651', '#F42A41', '#F59E0B', '#8B5CF6', '#06B6D4']
+
+const DEFAULT_STATS: DashboardStats = {
+  total_articles: 0,
+  total_views: 0,
+  total_users: 0,
+  active_now: 0,
+  views_today: 0,
+  views_this_week: 0,
+}
+
+function toSafeNumber(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0
+}
+
+function normalizeStats(payload: unknown): DashboardStats {
+  const data = payload && typeof payload === 'object' ? payload as Record<string, unknown> : {}
+  return {
+    total_articles: toSafeNumber(data.total_articles),
+    total_views: toSafeNumber(data.total_views),
+    total_users: toSafeNumber(data.total_users),
+    active_now: toSafeNumber(data.active_now),
+    views_today: toSafeNumber(data.views_today),
+    views_this_week: toSafeNumber(data.views_this_week),
+  }
+}
+
+function normalizeTraffic(payload: unknown): TrafficSource[] {
+  if (!Array.isArray(payload)) return []
+  return payload
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const row = item as Record<string, unknown>
+      const source = typeof row.source === 'string' ? row.source : 'Other'
+      const visits = toSafeNumber(row.visits ?? row.count)
+      const percentage = toSafeNumber(row.percentage)
+      return { source, visits, percentage }
+    })
+    .filter((item): item is TrafficSource => item !== null)
+}
+
+function normalizeArticles(payload: unknown): TopArticle[] {
+  if (!Array.isArray(payload)) return []
+  return payload
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const row = item as Record<string, unknown>
+      if (typeof row.id !== 'string' || typeof row.title !== 'string') return null
+      return {
+        id: row.id,
+        title: row.title,
+        slug: typeof row.slug === 'string' ? row.slug : undefined,
+        views: toSafeNumber(row.views ?? row.view_count),
+        published_at: typeof row.published_at === 'string' ? row.published_at : undefined,
+      }
+    })
+    .filter((item): item is TopArticle => item !== null)
+}
+
+function normalizeAuthors(payload: unknown): AuthorStat[] {
+  if (!Array.isArray(payload)) return []
+  return payload
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const row = item as Record<string, unknown>
+      if (typeof row.id !== 'string') return null
+      return {
+        id: row.id,
+        full_name: typeof row.full_name === 'string'
+          ? row.full_name
+          : (typeof row.name === 'string' ? row.name : 'Unknown'),
+        article_count: toSafeNumber(row.article_count ?? row.articles_published),
+        total_views: toSafeNumber(row.total_views),
+      }
+    })
+    .filter((item): item is AuthorStat => item !== null)
+}
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -67,10 +148,13 @@ export default function AnalyticsPage() {
   const [traffic, setTraffic] = useState<TrafficSource[]>([])
   const [topArticles, setTopArticles] = useState<TopArticle[]>([])
   const [authors, setAuthors] = useState<AuthorStat[]>([])
+  const [viewsChart, setViewsChart] = useState<ViewsChartPoint[]>(MOCK_VIEWS_CHART)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchAll() {
+    let mounted = true
+
+    async function fetchAll(isBackgroundRefresh = false) {
       try {
         const [dashRes, trafficRes, articlesRes, authorsRes] = await Promise.allSettled([
           fetch('/api/analytics/dashboard'),
@@ -79,29 +163,45 @@ export default function AnalyticsPage() {
           fetch('/api/analytics/authors'),
         ])
 
+        if (!mounted) return
+
         if (dashRes.status === 'fulfilled' && dashRes.value.ok) {
           const d = await dashRes.value.json()
-          setStats(d.stats ?? d)
+          const dashboardData = d.stats ?? d.data ?? d
+          setStats(normalizeStats(dashboardData))
+          if (Array.isArray(dashboardData?.views_last_7_days)) {
+            const normalizedViews = normalizeViewsChart(dashboardData.views_last_7_days)
+            if (normalizedViews.length > 0) setViewsChart(normalizedViews)
+          }
         }
         if (trafficRes.status === 'fulfilled' && trafficRes.value.ok) {
           const d = await trafficRes.value.json()
-          setTraffic(d.sources ?? d)
+          setTraffic(normalizeTraffic(d.sources ?? d.data?.sources ?? d.data ?? d))
         }
         if (articlesRes.status === 'fulfilled' && articlesRes.value.ok) {
           const d = await articlesRes.value.json()
-          setTopArticles(d.articles ?? d.data ?? [])
+          setTopArticles(normalizeArticles(d.articles ?? d.data ?? []))
         }
         if (authorsRes.status === 'fulfilled' && authorsRes.value.ok) {
           const d = await authorsRes.value.json()
-          setAuthors(d.authors ?? d.data ?? [])
+          setAuthors(normalizeAuthors(d.authors ?? d.data ?? []))
         }
       } catch {
-        toast.error('Failed to load analytics')
+        if (!isBackgroundRefresh) toast.error('Failed to load analytics')
       } finally {
-        setLoading(false)
+        if (mounted) setLoading(false)
       }
     }
+
     fetchAll()
+    const interval = setInterval(() => {
+      fetchAll(true)
+    }, 15000)
+
+    return () => {
+      mounted = false
+      clearInterval(interval)
+    }
   }, [])
 
   async function handleExport(format: 'csv' | 'json') {
@@ -120,12 +220,14 @@ export default function AnalyticsPage() {
     }
   }
 
-  const statCards = stats
+  const displayStats = stats ?? DEFAULT_STATS
+
+  const statCards = displayStats
     ? [
-        { label: 'Total Articles', value: stats.total_articles.toLocaleString(), icon: FileText, color: 'text-dc-green' },
-        { label: 'Total Views', value: (stats.total_views / 1000).toFixed(1) + 'K', icon: Eye, color: 'text-dc-green' },
-        { label: 'Active Users', value: stats.total_users?.toLocaleString() ?? '—', icon: Users, color: 'text-dc-green' },
-        { label: 'Real-time Visitors', value: stats.active_now?.toString() ?? '—', icon: TrendingUp, color: 'text-dc-red' },
+        { label: 'Total Articles', value: displayStats.total_articles.toLocaleString(), icon: FileText, color: 'text-dc-green' },
+        { label: 'Total Views', value: (displayStats.total_views / 1000).toFixed(1) + 'K', icon: Eye, color: 'text-dc-green' },
+        { label: 'Active Users', value: displayStats.total_users.toLocaleString(), icon: Users, color: 'text-dc-green' },
+        { label: 'Real-time Visitors', value: displayStats.active_now.toString(), icon: TrendingUp, color: 'text-dc-red' },
       ]
     : []
 
@@ -175,7 +277,7 @@ export default function AnalyticsPage() {
           <div className="glass rounded-xl p-6">
             <h2 className="text-lg font-headline font-bold text-white mb-6">Views — Last 7 Days</h2>
             <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={MOCK_VIEWS_CHART} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+              <LineChart data={viewsChart} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -305,4 +407,19 @@ export default function AnalyticsPage() {
       )}
     </div>
   )
+}
+
+function normalizeViewsChart(payload: unknown): ViewsChartPoint[] {
+  if (!Array.isArray(payload)) return []
+  return payload
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const row = item as Record<string, unknown>
+      if (typeof row.date !== 'string') return null
+      return {
+        date: row.date,
+        views: toSafeNumber(row.views),
+      }
+    })
+    .filter((item): item is ViewsChartPoint => item !== null)
 }

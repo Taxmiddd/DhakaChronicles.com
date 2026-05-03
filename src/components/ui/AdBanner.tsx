@@ -1,46 +1,227 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Sparkles } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import Image from 'next/image'
 
-type AdSize = 'bite-sized' | 'banner' | 'sidebar-tall'
+export type AdPosition =
+  | 'homepage_banner'
+  | 'article_sidebar'
+  | 'article_inline'
+  | 'category_banner'
+  | 'feed_native'
+  | 'sticky_mobile'
+  | 'before_footer'
 
-export default function AdBanner({ size = 'banner' }: { size?: AdSize }) {
-  const [mounted, setMounted] = useState(false)
+export type AdVariant = 'banner' | 'native' | 'bite' | 'sticky'
+
+interface Ad {
+  id: string
+  image_url: string
+  link_url: string
+  title: string
+  client_name: string
+}
+
+interface AdBannerProps {
+  position: AdPosition
+  variant?: AdVariant
+  className?: string
+}
+
+export default function AdBanner({ position, variant = 'banner', className = 'w-full h-[90px]' }: AdBannerProps) {
+  const [ad, setAd] = useState<Ad | null | undefined>(undefined)
+  const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    fetch(`/api/ads?position=${position}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => setAd(data))
+      .catch(() => setAd(null))
+  }, [position])
 
-  if (!mounted) return null
+  const trackClick = useCallback(() => {
+    if (ad) fetch(`/api/ads/click?id=${ad.id}`, { method: 'POST' }).catch(() => {})
+  }, [ad])
 
-  // Size configurations mapping to aesthetic "Matte Intelligence" theme
-  const sizeConfig = {
-    'bite-sized': 'w-full h-[100px] sm:h-[120px]',
-    'banner': 'w-full h-[60px] sm:h-[90px]',
-    'sidebar-tall': 'w-full h-[300px] sm:h-[600px]',
+  if (ad === undefined || ad === null || dismissed) return null
+
+  // ── Sticky bottom bar (mobile only, dismissible) ──────────────────────────
+  if (variant === 'sticky') {
+    return (
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 sm:hidden"
+        style={{
+          background: 'var(--background)',
+          borderTop: '1px solid var(--dc-border)',
+          boxShadow: '0 -4px 20px rgba(0,0,0,0.12)',
+        }}
+      >
+        <div className="flex items-center h-[60px] px-3 gap-2">
+          <a
+            href={ad.link_url}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            onClick={trackClick}
+            className="flex-1 flex items-center gap-3 min-w-0 overflow-hidden"
+          >
+            <div
+              className="relative w-11 h-11 rounded-lg shrink-0 overflow-hidden"
+              style={{ background: 'var(--dc-surface-2)' }}
+            >
+              <Image
+                src={ad.image_url}
+                alt={ad.title}
+                fill
+                className="object-cover"
+                sizes="44px"
+                unoptimized={ad.image_url.startsWith('http')}
+              />
+            </div>
+            <div className="min-w-0">
+              <span
+                className="block text-[9px] font-bold uppercase tracking-widest mb-0.5"
+                style={{ color: 'var(--dc-green)' }}
+              >
+                Sponsored
+              </span>
+              <p
+                className="text-xs font-semibold leading-tight truncate"
+                style={{ color: 'var(--dc-text)' }}
+              >
+                {ad.title}
+              </p>
+            </div>
+          </a>
+          <a
+            href={ad.link_url}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            onClick={trackClick}
+            className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-white whitespace-nowrap"
+            style={{ background: 'var(--dc-green)' }}
+          >
+            Learn More
+          </a>
+          <button
+            onClick={() => setDismissed(true)}
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-lg leading-none"
+            style={{ color: 'var(--dc-text-muted)' }}
+            aria-label="Close ad"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    )
   }
 
-  return (
-    <div className={`relative overflow-hidden rounded-xl bg-dc-surface border border-dc-border flex items-center justify-center group ${sizeConfig[size]}`}>
-      {/* Aesthetic shimmer effect representing the ad loading/placeholder */}
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-shimmer" />
-      
-      {/* Actual AdSense script would go here in production. For now, a sleek placeholder */}
-      <div className="flex flex-col items-center text-dc-text-muted/50">
-        <Sparkles className="w-5 h-5 mb-1 opacity-50" />
-        <span className="text-[10px] uppercase tracking-widest font-bold">Advertisement</span>
-      </div>
+  // ── Native card — blends seamlessly into article feed ────────────────────
+  if (variant === 'native') {
+    return (
+      <a
+        href={ad.link_url}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        onClick={trackClick}
+        className="group flex gap-3 py-3"
+        aria-label={`Sponsored: ${ad.title}`}
+      >
+        <div
+          className="relative w-20 h-[60px] rounded-lg overflow-hidden shrink-0"
+          style={{ background: 'var(--dc-surface-2)' }}
+        >
+          <Image
+            src={ad.image_url}
+            alt={ad.title}
+            fill
+            className="object-cover"
+            sizes="80px"
+            unoptimized={ad.image_url.startsWith('http')}
+          />
+        </div>
+        <div className="min-w-0 flex-1 flex flex-col justify-center">
+          <span
+            className="text-[9px] font-bold uppercase tracking-widest block mb-1"
+            style={{ color: 'var(--dc-text-muted)' }}
+          >
+            Sponsored · {ad.client_name}
+          </span>
+          <p
+            className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-dc-green transition-colors"
+            style={{ color: 'var(--dc-text)' }}
+          >
+            {ad.title}
+          </p>
+        </div>
+      </a>
+    )
+  }
 
-      {/* 
-        // Production AdSense Implementation:
-        <ins className="adsbygoogle block"
-             data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_ID}
-             data-ad-slot="YOUR_AD_SLOT_ID"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-      */}
-    </div>
+  // ── Bite-sized compact strip ─────────────────────────────────────────────
+  if (variant === 'bite') {
+    return (
+      <a
+        href={ad.link_url}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        onClick={trackClick}
+        className={`group flex items-center gap-3 rounded-xl overflow-hidden px-3 ${className}`}
+        style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
+        aria-label={`Sponsored: ${ad.title}`}
+      >
+        <div
+          className="relative w-9 h-9 rounded-lg overflow-hidden shrink-0"
+          style={{ background: 'var(--dc-surface-2)' }}
+        >
+          <Image
+            src={ad.image_url}
+            alt={ad.title}
+            fill
+            className="object-cover"
+            sizes="36px"
+            unoptimized={ad.image_url.startsWith('http')}
+          />
+        </div>
+        <span
+          className="text-xs font-semibold truncate flex-1 group-hover:text-dc-green transition-colors"
+          style={{ color: 'var(--dc-text)' }}
+        >
+          {ad.title}
+        </span>
+        <span
+          className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+          style={{ background: 'var(--dc-surface-2)', color: 'var(--dc-text-muted)' }}
+        >
+          Ad
+        </span>
+      </a>
+    )
+  }
+
+  // ── Default: banner (full-width image) ───────────────────────────────────
+  return (
+    <a
+      href={ad.link_url}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      className={`relative block overflow-hidden rounded-xl ${className}`}
+      onClick={trackClick}
+      aria-label={`Advertisement: ${ad.title}`}
+    >
+      <Image
+        src={ad.image_url}
+        alt={ad.title}
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, 728px"
+        unoptimized={ad.image_url.startsWith('http')}
+      />
+      <span
+        className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+        style={{ background: 'rgba(0,0,0,0.45)', color: 'rgba(255,255,255,0.65)' }}
+      >
+        Ad
+      </span>
+    </a>
   )
 }

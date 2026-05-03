@@ -15,7 +15,7 @@ export async function GET() {
     // Here we'll fetch authors and their article counts as a basic example.
     const { data: authors, error } = await supabaseAdmin
       .from('users')
-      .select('id, name, role')
+      .select('id, full_name, role')
       .in('role', ['admin', 'founder', 'publisher'])
 
     if (error) throw error
@@ -33,7 +33,7 @@ export async function GET() {
       const totalViews = authorArticles.reduce((sum, article) => sum + (article.view_count || 0), 0)
       return {
         id: author.id,
-        name: author.name,
+        full_name: author.full_name,
         role: author.role,
         articles_published: authorArticles.length,
         total_views: totalViews

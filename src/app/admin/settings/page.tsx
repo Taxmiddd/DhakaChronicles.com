@@ -84,11 +84,11 @@ export default function AdminSettingsPage() {
           </label>
           <div>
             <label className="form-label">Articles per Page</label>
-            <select className="form-input w-40">
-              <option>10</option>
-              <option>20</option>
-              <option selected>30</option>
-              <option>50</option>
+            <select className="form-input w-40" defaultValue="30">
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="50">50</option>
             </select>
           </div>
         </section>

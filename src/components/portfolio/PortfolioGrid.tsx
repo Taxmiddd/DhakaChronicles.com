@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
+import Image from 'next/image'
+import { ExternalLink, TrendingUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ExternalLink } from 'lucide-react'
 
 interface PortfolioItem {
   id: string
@@ -16,123 +17,193 @@ interface PortfolioItem {
   external_link: string | null
 }
 
-export default function PortfolioGrid({ items }: { items: PortfolioItem[] }) {
-  const [filter, setFilter] = useState('All')
+const CATEGORY_COLORS: Record<string, string> = {
+  Fashion:   '#EC4899',
+  'F&B':     '#F59E0B',
+  Tech:      '#06B6D4',
+  Lifestyle: '#8B5CF6',
+  Corporate: '#00A651',
+  Media:     '#F42A41',
+  NGO:       '#6366F1',
+}
 
-  const categories = useMemo(() => {
-    const cats = new Set(items.map((item) => item.category))
-    return ['All', ...Array.from(cats).sort()]
-  }, [items])
+export function PortfolioGrid({ items, categories }: { items: PortfolioItem[]; categories: string[] }) {
+  const [active, setActive] = useState('All')
 
-  const filteredItems = useMemo(() => {
-    if (filter === 'All') return items
-    return items.filter((item) => item.category === filter)
-  }, [items, filter])
+  const filtered = active === 'All' ? items : items.filter(i => i.category === active)
 
   return (
-    <div className="py-12">
-      {/* Filters */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setFilter(cat)}
-            className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-              filter === cat
-                ? 'bg-[#00A651] text-white shadow-[0_0_15px_rgba(0,166,81,0.3)]'
-                : 'bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+    <>
+      {/* Filter chips */}
+      {categories.length > 1 && (
+        <div className="flex flex-wrap gap-2 mb-10">
+          {['All', ...categories].map(cat => {
+            const isActive = active === cat
+            const color = cat === 'All' ? 'var(--dc-green)' : (CATEGORY_COLORS[cat] ?? '#888')
+            return (
+              <button
+                key={cat}
+                onClick={() => setActive(cat)}
+                className="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200"
+                style={
+                  isActive
+                    ? { background: color, borderColor: color, color: '#fff' }
+                    : { color: color, borderColor: `${color}40`, background: `${color}12` }
+                }
+              >
+                {cat}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {/* Grid */}
-      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <AnimatePresence>
-          {filteredItems.map((item) => (
-            <motion.div
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
+      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <AnimatePresence mode="popLayout">
+          {filtered.map(item => (
+            <motion.article
               key={item.id}
-              className="group relative bg-[#0a0a0a] border border-white/10 hover:border-[#00A651]/50 rounded-2xl overflow-hidden shadow-xl transition-colors duration-500 flex flex-col h-full"
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.25 }}
+              className="group rounded-2xl overflow-hidden flex flex-col"
+              style={{
+                background: 'var(--dc-surface)',
+                border: '1px solid var(--dc-border)',
+                boxShadow: 'var(--card-shadow)',
+              }}
             >
               {/* Image */}
-              <div className="w-full aspect-video overflow-hidden bg-black/50 relative">
+              <div className="relative h-52 overflow-hidden" style={{ background: 'var(--dc-surface-2)' }}>
                 {item.featured_image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={item.featured_image_url}
                     alt={item.project_name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-700 font-headline font-bold text-xl">
-                    {item.brand_name}
+                  <div
+                    className="w-full h-full flex items-center justify-center"
+                    style={{ background: `${CATEGORY_COLORS[item.category] ?? '#888'}10` }}
+                  >
+                    {item.logo_url ? (
+                      <Image
+                        src={item.logo_url}
+                        alt={item.brand_name}
+                        width={120}
+                        height={48}
+                        className="object-contain opacity-40"
+                      />
+                    ) : (
+                      <span
+                        className="text-4xl font-black font-headline opacity-10"
+                        style={{ color: 'var(--dc-text)' }}
+                      >
+                        {item.brand_name.slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
                   </div>
                 )}
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-80" />
-                
-                {/* Logo */}
-                {item.logo_url && (
-                  <div className="absolute bottom-4 left-6 bg-white/10 backdrop-blur-md p-2 rounded-lg border border-white/20">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.logo_url} alt={item.brand_name} className="h-8 w-auto object-contain" />
+
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+
+                {/* Category badge */}
+                <span
+                  className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full backdrop-blur-md"
+                  style={{
+                    background: `${CATEGORY_COLORS[item.category] ?? '#888'}25`,
+                    color: CATEGORY_COLORS[item.category] ?? 'var(--dc-text-muted)',
+                    border: `1px solid ${CATEGORY_COLORS[item.category] ?? '#888'}35`,
+                  }}
+                >
+                  {item.category}
+                </span>
+
+                {/* Logo overlay */}
+                {item.logo_url && item.featured_image_url && (
+                  <div
+                    className="absolute bottom-3 left-3 px-2 py-1.5 rounded-lg backdrop-blur-md"
+                    style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.15)' }}
+                  >
+                    <Image
+                      src={item.logo_url}
+                      alt={item.brand_name}
+                      width={60}
+                      height={24}
+                      className="h-5 w-auto object-contain"
+                    />
                   </div>
                 )}
               </div>
 
-              {/* Content */}
-              <div className="p-6 flex flex-col flex-1">
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-[10px] tracking-widest font-bold uppercase text-[#00A651]">
-                    {item.category}
+              {/* Body */}
+              <div className="p-5 flex flex-col flex-1">
+                {/* Brand name */}
+                {!item.logo_url && (
+                  <span className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--dc-text-muted)' }}>
+                    {item.brand_name}
                   </span>
-                </div>
-                
-                <h3 className="font-headline font-bold text-xl text-white mb-2 leading-tight">
-                  {item.project_name}
-                </h3>
-                
-                <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3">
-                  {item.description}
-                </p>
-
-                {item.outcome && (
-                  <div className="mt-auto mb-6 bg-[#00A651]/10 border border-[#00A651]/20 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-[#00A651] uppercase mb-1">Impact</p>
-                    <p className="text-sm text-gray-300 font-medium">{item.outcome}</p>
+                )}
+                {item.logo_url && !item.featured_image_url && (
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <Image src={item.logo_url} alt={item.brand_name} width={24} height={24} className="object-contain" />
+                    <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--dc-text-muted)' }}>
+                      {item.brand_name}
+                    </span>
                   </div>
                 )}
 
-                {item.external_link ? (
+                <h3
+                  className="font-headline font-bold text-lg leading-snug mb-2 group-hover:text-dc-green transition-colors"
+                  style={{ color: 'var(--dc-text)' }}
+                >
+                  {item.project_name}
+                </h3>
+
+                <p className="text-sm leading-relaxed flex-1" style={{ color: 'var(--dc-text-muted)' }}>
+                  {item.description}
+                </p>
+
+                {/* Outcome */}
+                {item.outcome && (
+                  <div
+                    className="mt-4 flex items-start gap-2 px-3 py-2 rounded-lg text-xs font-semibold"
+                    style={{ background: 'rgba(0,166,81,0.08)', color: 'var(--dc-green)', border: '1px solid rgba(0,166,81,0.15)' }}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    {item.outcome}
+                  </div>
+                )}
+
+                {/* External link */}
+                {item.external_link && (
                   <a
                     href={item.external_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-auto inline-flex items-center gap-2 text-sm font-bold text-white group-hover:text-[#00A651] transition-colors"
+                    className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold hover:underline"
+                    style={{ color: 'var(--dc-green)' }}
                   >
-                    View Case Study <ExternalLink className="w-4 h-4" />
+                    View campaign <ExternalLink className="w-3 h-3" />
                   </a>
-                ) : (
-                  <div className="mt-auto" />
                 )}
               </div>
-            </motion.div>
+            </motion.article>
           ))}
         </AnimatePresence>
       </motion.div>
-      
-      {filteredItems.length === 0 && (
-        <div className="text-center py-20 text-gray-500">
-          No projects found in this category.
-        </div>
+
+      {filtered.length === 0 && (
+        <p className="text-center py-16 text-sm" style={{ color: 'var(--dc-text-muted)' }}>
+          No campaigns in this category yet.
+        </p>
       )}
-    </div>
+    </>
   )
 }

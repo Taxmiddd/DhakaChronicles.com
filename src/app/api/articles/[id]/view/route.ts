@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/db/admin'
 import { getSession } from '@/lib/auth/session'
+import { rateLimit } from '@/lib/utils/rate-limit'
 
 type Params = { params: Promise<{ id: string }> }
 
 export async function POST(request: Request, { params }: Params) {
+  // Protect analytics writes from spam bursts
+  const rateLimitError = rateLimit(request, 120, 60000, 'article-view-track')
+  if (rateLimitError) return rateLimitError
+
   const { id } = await params
   const user = await getSession()
 

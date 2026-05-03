@@ -12,7 +12,7 @@ export async function GET() {
 
     const { data, error } = await supabaseAdmin
       .from('users')
-      .select('id, full_name, email, role, avatar_url, created_at')
+      .select('id, full_name, email, role, created_at')
       .order('created_at', { ascending: false })
 
     if (error) throw error
@@ -63,14 +63,16 @@ export async function POST(request: Request) {
       password: tempPassword,
       email_confirm: true,
       app_metadata: { role },
-      user_metadata: { full_name: full_name.trim() },
+      user_metadata: {
+        full_name: full_name.trim(),
+      },
     })
 
     if (authError || !authData.user) {
       return NextResponse.json({ error: authError?.message || 'Failed to create user' }, { status: 400 })
     }
 
-    // Sync profile row
+    // Sync profile row (admin users only, no team profile data)
     await supabaseAdmin.from('users').upsert({
       id: authData.user.id,
       email: email.toLowerCase().trim(),

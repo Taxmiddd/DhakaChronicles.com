@@ -21,6 +21,7 @@ import {
   ClipboardList,
   Briefcase,
   User,
+  Megaphone,
 } from 'lucide-react'
 import { Facebook } from '@/components/ui/BrandIcons'
 import { cn } from '@/lib/utils'
@@ -49,16 +50,18 @@ const navGroups = [
   {
     label: 'Content',
     items: [
-      { name: 'Podcasts', href: '/admin/podcasts', icon: Headphones },
-      { name: 'Portfolio', href: '/admin/portfolio', icon: Briefcase },
-      { name: 'Facebook Sync', href: '/admin/facebook-sync', icon: Facebook },
+      { name: 'Podcasts',      href: '/admin/podcasts',       icon: Headphones },
+      { name: 'Portfolio',     href: '/admin/portfolio',      icon: Briefcase  },
+      { name: 'Ad Manager',    href: '/admin/ads',            icon: Megaphone  },
+      { name: 'Facebook Sync', href: '/admin/facebook-sync',  icon: Facebook   },
     ],
   },
   {
     label: 'System',
     items: [
       { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-      { name: 'Users', href: '/admin/users', icon: Users },
+      { name: 'Admin Users', href: '/admin/users', icon: Users },
+      { name: 'Team Members', href: '/admin/team-members-page', icon: Users },
       { name: 'Settings', href: '/admin/settings', icon: Settings },
       { name: 'My Profile', href: '/admin/profile', icon: User },
     ],

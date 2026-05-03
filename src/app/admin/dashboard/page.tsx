@@ -18,8 +18,9 @@ interface Stats {
 interface TopArticle {
   id: string
   title: string
-  views: number
-  published_at: string
+  views?: number
+  view_count?: number
+  published_at?: string
 }
 
 interface TrafficSource {
@@ -42,6 +43,65 @@ const FALLBACK_TRAFFIC: TrafficSource[] = [
   { source: 'Other', percentage: 4 },
 ]
 
+const DEFAULT_STATS: Stats = {
+  total_articles: 0,
+  total_views: 0,
+  total_users: 0,
+  active_now: 0,
+  published_today: 0,
+  pending_review: 0,
+}
+
+function toSafeNumber(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0
+}
+
+function normalizeStats(payload: unknown): Stats {
+  const data = (payload && typeof payload === 'object') ? payload as Record<string, unknown> : {}
+  return {
+    total_articles: toSafeNumber(data.total_articles),
+    total_views: toSafeNumber(data.total_views),
+    total_users: toSafeNumber(data.total_users),
+    active_now: toSafeNumber(data.active_now),
+    published_today: toSafeNumber(data.published_today),
+    pending_review: toSafeNumber(data.pending_review),
+  }
+}
+
+function normalizeTopArticles(payload: unknown): TopArticle[] {
+  if (!Array.isArray(payload)) return []
+  return payload
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const row = item as Record<string, unknown>
+      if (typeof row.id !== 'string' || typeof row.title !== 'string') return null
+      return {
+        id: row.id,
+        title: row.title,
+        views: toSafeNumber(row.views ?? row.view_count),
+        view_count: toSafeNumber(row.view_count),
+        published_at: typeof row.published_at === 'string' ? row.published_at : undefined,
+      }
+    })
+    .filter((item): item is TopArticle => item !== null)
+}
+
+function normalizeTraffic(payload: unknown): TrafficSource[] {
+  if (!Array.isArray(payload)) return FALLBACK_TRAFFIC
+  const parsed = payload
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const row = item as Record<string, unknown>
+      if (typeof row.source !== 'string') return null
+      return {
+        source: row.source,
+        percentage: toSafeNumber(row.percentage),
+      }
+    })
+    .filter((item): item is TrafficSource => item !== null)
+  return parsed.length > 0 ? parsed : FALLBACK_TRAFFIC
+}
+
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [topArticles, setTopArticles] = useState<TopArticle[]>([])
@@ -49,8 +109,8 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true)
   const [lastRefresh, setLastRefresh] = useState(new Date())
 
-  async function fetchData() {
-    setLoading(true)
+  async function fetchData(isBackgroundRefresh = false) {
+    if (!isBackgroundRefresh) setLoading(true)
     try {
       const [dashRes, articlesRes, trafficRes] = await Promise.allSettled([
         fetch('/api/analytics/dashboard'),
@@ -60,34 +120,33 @@ export default function AdminDashboardPage() {
 
       if (dashRes.status === 'fulfilled' && dashRes.value.ok) {
         const d = await dashRes.value.json()
-        setStats(d.stats ?? d)
+        setStats(normalizeStats(d.stats ?? d.data ?? d))
       }
       if (articlesRes.status === 'fulfilled' && articlesRes.value.ok) {
         const d = await articlesRes.value.json()
-        setTopArticles(d.articles ?? d.data ?? [])
+        setTopArticles(normalizeTopArticles(d.articles ?? d.data ?? []))
       }
       if (trafficRes.status === 'fulfilled' && trafficRes.value.ok) {
         const d = await trafficRes.value.json()
-        if (d.sources?.length) setTraffic(d.sources)
+        setTraffic(normalizeTraffic(d.sources ?? d.data?.sources ?? d.data ?? []))
       }
     } catch {
-      toast.error('Failed to load dashboard data')
+      if (!isBackgroundRefresh) toast.error('Failed to load dashboard data')
     } finally {
       setLoading(false)
       setLastRefresh(new Date())
     }
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => {
+    fetchData()
+    const interval = setInterval(() => {
+      fetchData(true)
+    }, 15000)
+    return () => clearInterval(interval)
+  }, [])
 
-  const displayStats = stats ?? {
-    total_articles: 0,
-    total_views: 0,
-    total_users: 0,
-    active_now: 0,
-    published_today: 0,
-    pending_review: 0,
-  }
+  const displayStats = stats ?? DEFAULT_STATS
 
   return (
     <div className="space-y-6">
@@ -171,7 +230,7 @@ export default function AdminDashboardPage() {
                   {topArticles.map(article => (
                     <tr key={article.id}>
                       <td className="font-medium text-dc-text truncate max-w-[320px]">{article.title}</td>
-                      <td className="text-right font-mono text-dc-green">{article.views?.toLocaleString() ?? 0}</td>
+                      <td className="text-right font-mono text-dc-green">{(article.views ?? article.view_count ?? 0).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>

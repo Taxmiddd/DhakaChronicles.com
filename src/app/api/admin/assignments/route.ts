@@ -13,7 +13,8 @@ export async function GET(request: Request) {
       .from('story_assignments')
       .select(`
         *,
-        assignee:users(full_name),
+        assignee:users!story_assignments_assignee_id_fkey(full_name),
+        assigned_by_user:users!story_assignments_assigned_by_fkey(full_name),
         category:categories(name, color)
       `)
       .order('created_at', { ascending: false })

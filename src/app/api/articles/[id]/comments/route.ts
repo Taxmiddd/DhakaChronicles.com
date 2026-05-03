@@ -57,7 +57,7 @@ import { rateLimit } from '@/lib/utils/rate-limit'
 
 export async function POST(request: Request, { params }: Params) {
   // Strict rate limit: 10 comments per minute per IP
-  const rateLimitError = rateLimit(request, 10, 60000)
+  const rateLimitError = rateLimit(request, 10, 60000, 'article-comments-create')
   if (rateLimitError) return rateLimitError
 
   const { id } = await params

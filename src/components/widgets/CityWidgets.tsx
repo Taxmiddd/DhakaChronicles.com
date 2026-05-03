@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react'
 import { Wind, Droplets, Thermometer, Navigation } from 'lucide-react'
 
 interface WeatherData {
+  location_name?: string
+  lat?: number
+  lon?: number
   temp: number
   feels_like: number
   humidity: number
@@ -15,6 +18,13 @@ interface WeatherData {
   aqi_label: string
   aqi_color: string
   aqi_pm25: number
+  live_traffic_available?: boolean
+  traffic_level?: string
+  traffic_color?: string
+  traffic_speed_kmh?: number | null
+  free_flow_speed_kmh?: number | null
+  congestion_percent?: number | null
+  updated_at?: string
 }
 
 function WeatherIcon({ icon, size = 32 }: { icon: string; size?: number }) {
@@ -32,12 +42,54 @@ function WeatherIcon({ icon, size = 32 }: { icon: string; size?: number }) {
 export function CityWidgets() {
   const [data, setData] = useState<WeatherData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [coords, setCoords] = useState<{ lat: number; lon: number }>({ lat: 23.8103, lon: 90.4125 })
+  const [locationAllowed, setLocationAllowed] = useState<boolean | null>(null)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+
+  const fetchLocalData = (lat: number, lon: number) => {
+    fetch(`/api/weather?lat=${lat}&lon=${lon}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return
+        setData(d)
+        setLastUpdated(new Date())
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }
 
   useEffect(() => {
-    fetch('/api/weather')
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { setData(d); setLoading(false) })
-      .catch(() => setLoading(false))
+    let intervalId: ReturnType<typeof setInterval> | undefined
+
+    const startPolling = (lat: number, lon: number) => {
+      fetchLocalData(lat, lon)
+      intervalId = setInterval(() => fetchLocalData(lat, lon), 60_000)
+    }
+
+    if (!navigator.geolocation) {
+      setLocationAllowed(false)
+      startPolling(coords.lat, coords.lon)
+      return () => { if (intervalId) clearInterval(intervalId) }
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const next = {
+          lat: Number(position.coords.latitude.toFixed(4)),
+          lon: Number(position.coords.longitude.toFixed(4)),
+        }
+        setLocationAllowed(true)
+        setCoords(next)
+        startPolling(next.lat, next.lon)
+      },
+      () => {
+        setLocationAllowed(false)
+        startPolling(coords.lat, coords.lon)
+      },
+      { enableHighAccuracy: false, timeout: 7000, maximumAge: 120000 }
+    )
+
+    return () => { if (intervalId) clearInterval(intervalId) }
   }, [])
 
   if (loading) {
@@ -86,11 +138,16 @@ export function CityWidgets() {
         </div>
         <div className="ml-auto text-right shrink-0">
           <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--dc-text-muted)' }}>
-            Dhaka
+            {data.location_name || 'Current area'}
           </p>
           <p className="text-[11px] mt-0.5" style={{ color: 'var(--dc-text-muted)' }}>
             Feels {data.feels_like}°C
           </p>
+          {lastUpdated && (
+            <p className="text-[10px] mt-0.5" style={{ color: 'var(--dc-text-muted)' }}>
+              Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          )}
         </div>
       </div>
 
@@ -138,7 +195,7 @@ export function CityWidgets() {
 
       {/* ── Traffic ── */}
       <a
-        href="https://www.google.com/maps/search/Dhaka+traffic/@23.8103,90.4125,12z/data=!5m1!1e1"
+        href={`https://www.google.com/maps/@${data.lat ?? coords.lat},${data.lon ?? coords.lon},13z/data=!5m1!1e1`}
         target="_blank"
         rel="noopener noreferrer"
         className="rounded-xl px-4 py-3 flex items-center gap-3 group transition-all hover:border-dc-green"
@@ -152,7 +209,16 @@ export function CityWidgets() {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold" style={{ color: 'var(--dc-text)' }}>Live Traffic</p>
-          <p className="text-[11px]" style={{ color: 'var(--dc-text-muted)' }}>Dhaka city roads</p>
+          {data.live_traffic_available ? (
+            <p className="text-[11px]" style={{ color: data.traffic_color || 'var(--dc-text-muted)' }}>
+              {data.traffic_level} · {data.traffic_speed_kmh ?? '—'} km/h
+              {typeof data.congestion_percent === 'number' ? ` · ${data.congestion_percent}% congestion` : ''}
+            </p>
+          ) : (
+            <p className="text-[11px]" style={{ color: 'var(--dc-text-muted)' }}>
+              {locationAllowed ? 'Traffic layer for your area' : 'Traffic layer (Dhaka fallback)'}
+            </p>
+          )}
           <p className="text-[11px] text-dc-green mt-0.5 font-medium group-hover:underline">
             View on Google Maps →
           </p>

@@ -10,18 +10,43 @@ interface RateLimitTracker {
 // For distributed strict rate limiting, consider migrating to @upstash/ratelimit.
 const ipTracker = new Map<string, RateLimitTracker>()
 
-export function rateLimit(request: Request, limit: number = 100, windowMs: number = 60000) {
-  // Extract IP from headers
-  const ip = request.headers.get('x-forwarded-for') || 
-             request.headers.get('x-real-ip') || 
-             'anonymous'
+function getClientIp(request: Request) {
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  if (forwardedFor) {
+    const first = forwardedFor.split(',')[0]?.trim()
+    if (first) return first
+  }
+  return request.headers.get('x-real-ip') || 'anonymous'
+}
+
+let lastCleanupAt = 0
+
+function cleanupExpired(now: number, windowMs: number) {
+  if (now - lastCleanupAt < 60000) return
+  for (const [key, tracker] of ipTracker.entries()) {
+    if (now - tracker.lastReset > windowMs * 2) {
+      ipTracker.delete(key)
+    }
+  }
+  lastCleanupAt = now
+}
+
+export function rateLimit(
+  request: Request,
+  limit: number = 100,
+  windowMs: number = 60000,
+  key: string = 'global'
+) {
+  const ip = getClientIp(request)
+  const bucket = `${key}:${ip}`
 
   const now = Date.now()
-  let tracker = ipTracker.get(ip)
+  cleanupExpired(now, windowMs)
+  let tracker = ipTracker.get(bucket)
 
   if (!tracker) {
     tracker = { count: 1, lastReset: now }
-    ipTracker.set(ip, tracker)
+    ipTracker.set(bucket, tracker)
     return null // Allow request
   }
 
@@ -29,13 +54,13 @@ export function rateLimit(request: Request, limit: number = 100, windowMs: numbe
   if (now - tracker.lastReset > windowMs) {
     tracker.count = 1
     tracker.lastReset = now
-    ipTracker.set(ip, tracker)
+    ipTracker.set(bucket, tracker)
     return null // Allow request
   }
 
   // Increment count
   tracker.count++
-  ipTracker.set(ip, tracker)
+  ipTracker.set(bucket, tracker)
 
   if (tracker.count > limit) {
     return NextResponse.json(

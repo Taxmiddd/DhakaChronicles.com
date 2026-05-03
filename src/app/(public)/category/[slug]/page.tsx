@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
 import { ArticleCard } from '@/components/article/ArticleCard'
+import AdBanner from '@/components/ui/AdBanner'
 import { supabaseAdmin } from '@/lib/db/admin'
 
 export const revalidate = 120
@@ -119,9 +120,15 @@ export default async function CategoryPage({ params }: Props) {
               {/* First article: grid card (larger) */}
               <ArticleCard key={articles[0].id} variant="grid" {...(articles[0] as any)} />
 
-              {/* Rest: list cards */}
+              {/* Rest: list cards with native ad injected after 3rd */}
               <div className="divide-y" style={{ borderColor: 'var(--dc-border)' }}>
-                {articles.slice(1).map(a => (
+                {articles.slice(1, 4).map(a => (
+                  <ArticleCard key={a.id} variant="list" {...(a as any)} />
+                ))}
+                {articles.length > 4 && (
+                  <AdBanner position="feed_native" variant="native" />
+                )}
+                {articles.slice(4).map(a => (
                   <ArticleCard key={a.id} variant="list" {...(a as any)} />
                 ))}
               </div>
@@ -129,8 +136,11 @@ export default async function CategoryPage({ params }: Props) {
           )}
         </div>
 
-        {/* Sidebar: other categories */}
+        {/* Sidebar */}
         <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
+          {/* Category banner ad */}
+          <AdBanner position="category_banner" className="w-full h-[250px]" />
+
           <div className="glass p-5 rounded-xl">
             <h3
               className="font-headline font-bold text-base mb-4"

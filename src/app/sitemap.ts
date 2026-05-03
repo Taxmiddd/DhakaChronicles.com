@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/db/admin'
+import { slugify } from '@/lib/utils'
 import { MetadataRoute } from 'next'
 
 export const revalidate = 3600
@@ -16,6 +17,7 @@ const STATIC: MetadataRoute.Sitemap = (
     { url: `${BASE}/portfolio`,   freq: 'weekly'  as Freq, priority: 0.6 },
     { url: `${BASE}/advertise`,   freq: 'monthly' as Freq, priority: 0.5 },
     { url: `${BASE}/about`,       freq: 'monthly' as Freq, priority: 0.5 },
+    { url: `${BASE}/team`,        freq: 'monthly' as Freq, priority: 0.5 },
     { url: `${BASE}/contact`,     freq: 'monthly' as Freq, priority: 0.5 },
     { url: `${BASE}/careers`,     freq: 'weekly'  as Freq, priority: 0.5 },
     { url: `${BASE}/tips`,        freq: 'monthly' as Freq, priority: 0.4 },
@@ -31,7 +33,7 @@ const STATIC: MetadataRoute.Sitemap = (
 }))
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [{ data: articles }, { data: categories }] = await Promise.all([
+  const [{ data: articles }, { data: categories }, { data: authors }] = await Promise.all([
     supabaseAdmin
       .from('articles')
       .select('slug, updated_at, published_at, is_featured')
@@ -41,6 +43,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     supabaseAdmin
       .from('categories')
       .select('slug, updated_at'),
+    supabaseAdmin
+      .from('users')
+      .select('full_name, updated_at')
+      .eq('is_active', true),
   ])
 
   const articlePages: MetadataRoute.Sitemap = (articles ?? []).map(a => ({
@@ -57,5 +63,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...STATIC, ...categoryPages, ...articlePages]
+  const authorPages: MetadataRoute.Sitemap = (authors ?? [])
+    .filter(u => u.full_name)
+    .map(u => ({
+      url: `${BASE}/author/${slugify(u.full_name!)}`,
+      lastModified: new Date(u.updated_at ?? Date.now()),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    }))
+
+  return [...STATIC, ...authorPages, ...categoryPages, ...articlePages]
 }

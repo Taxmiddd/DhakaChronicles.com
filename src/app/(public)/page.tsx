@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { TrendingUp, ChevronRight, Mail } from 'lucide-react'
 import { ArticleCard } from '@/components/article/ArticleCard'
 import { CityWidgets } from '@/components/widgets/CityWidgets'
+import AdBanner from '@/components/ui/AdBanner'
 import { supabaseAdmin } from '@/lib/db/admin'
 
 export const metadata: Metadata = {
@@ -170,6 +171,26 @@ export default async function HomePage() {
       {/* ── City Widgets ── */}
       <CityWidgets />
 
+      {/* ── Mobile category quick-nav ── */}
+      <div className="sm:hidden -mx-4 mb-5 overflow-x-auto scrollbar-none">
+        <div className="flex gap-2 px-4 pb-1 pt-1">
+          {displayCategories.map(cat => (
+            <Link
+              key={cat.slug}
+              href={`/category/${cat.slug}`}
+              className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all"
+              style={{
+                background: `${cat.color ?? '#00A651'}15`,
+                color: cat.color ?? '#00A651',
+                border: `1px solid ${cat.color ?? '#00A651'}30`,
+              }}
+            >
+              {cat.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* ── Hero + Featured ── */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
         {/* Hero */}
@@ -198,6 +219,9 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── Homepage banner ad ── */}
+      <AdBanner position="homepage_banner" className="w-full h-[60px] sm:h-[90px] mb-8" />
+
       {/* ── Latest + Trending ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
 
@@ -215,7 +239,14 @@ export default async function HomePage() {
 
           {latest.length > 0 ? (
             <div>
-              {latest.map(a => (
+              {latest.slice(0, 4).map(a => (
+                <ArticleCard key={a.id} variant="list" {...a} />
+              ))}
+              {/* Native feed ad between articles */}
+              <div style={{ borderTop: '1px solid var(--dc-border)' }}>
+                <AdBanner position="feed_native" variant="native" />
+              </div>
+              {latest.slice(4).map(a => (
                 <ArticleCard key={a.id} variant="list" {...a} />
               ))}
             </div>
@@ -313,10 +344,12 @@ export default async function HomePage() {
             <Link
               key={cat.slug}
               href={`/category/${cat.slug}`}
-              className="group flex flex-col items-center gap-2.5 p-4 rounded-xl text-center transition-all hover:shadow-md"
+              className="group flex flex-col items-center gap-2.5 p-4 rounded-xl text-center transition-all hover:shadow-md overflow-hidden relative"
               style={{
                 background: 'var(--dc-surface)',
                 border: '1px solid var(--dc-border)',
+                borderTopColor: cat.color ?? '#00A651',
+                borderTopWidth: '3px',
               }}
             >
               <div
@@ -324,14 +357,14 @@ export default async function HomePage() {
                 style={{ background: `${cat.color ?? '#00A651'}15` }}
               >
                 <span
-                  className="w-3.5 h-3.5 rounded-full"
+                  className="w-4 h-4 rounded-full transition-transform group-hover:scale-110"
                   style={{ background: cat.color ?? '#00A651' }}
                 />
               </div>
               <div>
                 <p
-                  className="font-bold text-sm group-hover:text-dc-green transition-colors"
-                  style={{ color: 'var(--dc-text)' }}
+                  className="font-bold text-sm transition-colors"
+                  style={{ color: cat.color ?? 'var(--dc-text)' }}
                 >
                   {cat.name}
                 </p>

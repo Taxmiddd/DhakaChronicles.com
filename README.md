@@ -143,6 +143,10 @@ FACEBOOK_VERIFY_TOKEN=
 
 # Cron Security
 CRON_SECRET=
+
+# Local Weather / AQI / Traffic widgets
+OPENWEATHERMAP_API_KEY=
+TOMTOM_API_KEY=   # optional: enables numeric live traffic speed/congestion
 ```
 
 ### Development

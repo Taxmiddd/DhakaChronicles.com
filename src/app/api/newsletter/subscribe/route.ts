@@ -5,7 +5,7 @@ import { rateLimit } from '@/lib/utils/rate-limit'
 
 export async function POST(request: Request) {
   // Strict rate limit: 5 requests per minute
-  const rateLimitError = rateLimit(request, 5, 60000)
+  const rateLimitError = rateLimit(request, 5, 60000, 'newsletter-subscribe')
   if (rateLimitError) return rateLimitError
 
   try {

@@ -11,28 +11,68 @@ export async function GET() {
   }
 
   try {
-    // Basic aggregation for traffic sources from article_views table
-    // Note: Requires complex SQL or RPC in Supabase. We return a placeholder structure.
-    
-    // Example:
-    // const { data, error } = await supabaseAdmin.rpc('get_traffic_sources')
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const { data, error } = await supabaseAdmin
+      .from('article_views')
+      .select('referrer, device_type')
+      .gte('viewed_at', since)
 
-    const mockData = {
-      sources: [
-        { source: 'Direct', count: 4520, percentage: 45 },
-        { source: 'Facebook', count: 3010, percentage: 30 },
-        { source: 'Google', count: 1500, percentage: 15 },
-        { source: 'Twitter', count: 500, percentage: 5 },
-        { source: 'Other', count: 500, percentage: 5 }
-      ],
-      devices: [
-        { type: 'Mobile', percentage: 65 },
-        { type: 'Desktop', percentage: 30 },
-        { type: 'Tablet', percentage: 5 }
-      ]
+    if (error) throw error
+
+    const sourceCounts = new Map<string, number>()
+    const deviceCounts = new Map<string, number>()
+
+    function normalizeSource(referrer: string | null): string {
+      if (!referrer) return 'Direct'
+      try {
+        const host = new URL(referrer).hostname.toLowerCase()
+        if (host.includes('facebook')) return 'Facebook'
+        if (host.includes('google')) return 'Google'
+        if (host.includes('twitter') || host.includes('x.com') || host.includes('t.co')) return 'Twitter'
+        if (host.includes('instagram')) return 'Instagram'
+        if (host.includes('youtube')) return 'YouTube'
+        if (host.includes('bing')) return 'Bing'
+        return 'Other'
+      } catch {
+        return 'Other'
+      }
     }
 
-    return NextResponse.json({ success: true, data: mockData })
+    function normalizeDevice(deviceType: string | null): string {
+      const value = (deviceType ?? '').toLowerCase()
+      if (value === 'mobile') return 'Mobile'
+      if (value === 'tablet') return 'Tablet'
+      if (value === 'desktop') return 'Desktop'
+      return 'Desktop'
+    }
+
+    for (const row of data ?? []) {
+      const source = normalizeSource(row.referrer)
+      const device = normalizeDevice(row.device_type)
+      sourceCounts.set(source, (sourceCounts.get(source) ?? 0) + 1)
+      deviceCounts.set(device, (deviceCounts.get(device) ?? 0) + 1)
+    }
+
+    const total = (data ?? []).length || 1
+    const sources = Array.from(sourceCounts.entries())
+      .map(([source, count]) => ({
+        source,
+        count,
+        visits: count,
+        percentage: Math.round((count / total) * 100),
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6)
+
+    const devices = Array.from(deviceCounts.entries())
+      .map(([type, count]) => ({
+        type,
+        count,
+        percentage: Math.round((count / total) * 100),
+      }))
+      .sort((a, b) => b.count - a.count)
+
+    return NextResponse.json({ success: true, data: { sources, devices } })
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }

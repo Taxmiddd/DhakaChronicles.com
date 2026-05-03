@@ -1,4 +1,6 @@
 import { NewsArticle, WithContext } from 'schema-dts'
+import Script from 'next/script'
+import { slugify } from '@/lib/utils'
 
 interface JsonLdProps {
   article: {
@@ -36,7 +38,9 @@ export default function JsonLd({ article }: JsonLdProps) {
     author: {
       '@type': 'Person',
       name: article.author?.full_name ?? 'Dhaka Chronicles Staff',
-      url: BASE,
+      url: article.author?.full_name
+        ? `${BASE}/author/${slugify(article.author.full_name)}`
+        : BASE,
     },
     publisher: {
       '@type': 'NewsMediaOrganization',
@@ -72,12 +76,16 @@ export default function JsonLd({ article }: JsonLdProps) {
 
   return (
     <>
-      <script
+      <Script
+        id={`news-article-jsonld-${article.slug}`}
         type="application/ld+json"
+        strategy="beforeInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(newsArticle) }}
       />
-      <script
+      <Script
+        id={`breadcrumb-jsonld-${article.slug}`}
         type="application/ld+json"
+        strategy="beforeInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
     </>

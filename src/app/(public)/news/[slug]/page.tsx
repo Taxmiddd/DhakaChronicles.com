@@ -9,9 +9,10 @@ import ArticleReactions from '@/components/article/ArticleReactions'
 import ShareButtons from '@/components/article/ShareButtons'
 import JsonLd from '@/components/seo/JsonLd'
 import LiveBlogFeed from '@/components/article/LiveBlogFeed'
+import AdBanner from '@/components/ui/AdBanner'
 import { supabaseAdmin } from '@/lib/db/admin'
 import { renderTipTap } from '@/lib/utils/tiptap'
-import { timeAgo, formatViewCount } from '@/lib/utils'
+import { timeAgo, formatViewCount, slugify } from '@/lib/utils'
 
 export const revalidate = 60
 
@@ -22,7 +23,7 @@ const ARTICLE_SELECT = `
   reading_time, view_count, is_breaking, is_featured, article_type,
   allow_comments, category_id,
   category:categories(name, slug, color),
-  author:users(full_name, role, avatar_url, bio)
+  author:users(full_name, role, avatar_url, bio, twitter_url, linkedin_url, facebook_url)
 `
 
 type Props = { params: Promise<{ slug: string }> }
@@ -165,29 +166,44 @@ export default async function ArticlePage({ params }: Props) {
             style={{ borderTop: '1px solid var(--dc-border)', borderBottom: '1px solid var(--dc-border)' }}
           >
             {/* Author */}
-            <div className="flex items-center gap-3">
-              {author?.avatar_url ? (
-                <Image
-                  src={author.avatar_url}
-                  alt={author.full_name ?? 'Author'}
-                  width={40}
-                  height={40}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-sm shrink-0">
-                  {(author?.full_name ?? 'DC').substring(0, 2).toUpperCase()}
+            {author ? (
+              <Link
+                href={`/author/${slugify(author.full_name ?? '')}`}
+                className="flex items-center gap-3 group"
+              >
+                {author.avatar_url ? (
+                  <Image
+                    src={author.avatar_url}
+                    alt={author.full_name ?? 'Author'}
+                    width={40}
+                    height={40}
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-sm shrink-0">
+                    {(author.full_name ?? 'DC').substring(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <p className="font-semibold text-sm group-hover:text-dc-green transition-colors" style={{ color: 'var(--dc-text)' }}>
+                    {author.full_name}
+                  </p>
+                  <p className="text-xs capitalize" style={{ color: 'var(--dc-text-muted)' }}>
+                    {author.role ?? 'Staff Reporter'}
+                  </p>
                 </div>
-              )}
-              <div>
-                <p className="font-semibold text-sm" style={{ color: 'var(--dc-text)' }}>
-                  {author?.full_name ?? 'Dhaka Chronicles'}
-                </p>
-                <p className="text-xs capitalize" style={{ color: 'var(--dc-text-muted)' }}>
-                  {author?.role ?? 'Staff Reporter'}
-                </p>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-sm shrink-0">
+                  DC
+                </div>
+                <div>
+                  <p className="font-semibold text-sm" style={{ color: 'var(--dc-text)' }}>Dhaka Chronicles</p>
+                  <p className="text-xs" style={{ color: 'var(--dc-text-muted)' }}>Staff Reporter</p>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Meta stats */}
             <div className="flex flex-wrap items-center gap-3 ml-auto text-xs" style={{ color: 'var(--dc-text-muted)' }}>
@@ -250,6 +266,55 @@ export default async function ArticlePage({ params }: Props) {
             <LiveBlogFeed articleId={article.id} />
           )}
 
+          {/* ── Mobile: related stories horizontal scroll ── */}
+          {related.length > 0 && (
+            <div className="lg:hidden mt-8 -mx-4">
+              <h3
+                className="px-4 font-headline font-bold text-sm mb-3 uppercase tracking-wide"
+                style={{ color: 'var(--dc-text-muted)' }}
+              >
+                Related Stories
+              </h3>
+              <div className="flex gap-3 px-4 overflow-x-auto scrollbar-none pb-2">
+                {related.map(r => {
+                  const rColor = r.category?.color ?? '#00A651'
+                  return (
+                    <Link key={r.id} href={`/news/${r.slug}`} className="group shrink-0 w-[172px]">
+                      <div
+                        className="w-full h-[100px] rounded-xl overflow-hidden mb-2"
+                        style={{ background: `${rColor}15` }}
+                      >
+                        {r.featured_image_url && (
+                          <img
+                            src={r.featured_image_url}
+                            alt={r.title}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      {r.category && (
+                        <span className="text-[10px] font-bold uppercase" style={{ color: rColor }}>
+                          {r.category.name}
+                        </span>
+                      )}
+                      <p
+                        className="text-xs font-semibold leading-tight mt-0.5 line-clamp-2 group-hover:text-dc-green transition-colors"
+                        style={{ color: 'var(--dc-text)' }}
+                      >
+                        {r.title}
+                      </p>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── Mobile bite-sized ad strip ── */}
+          <div className="lg:hidden mt-4">
+            <AdBanner position="article_inline" variant="bite" className="w-full h-[50px]" />
+          </div>
+
           {/* Share */}
           <div className="pt-6 border-t" style={{ borderColor: 'var(--dc-border)' }}>
             <ShareButtons slug={slug} title={article.title} />
@@ -266,26 +331,55 @@ export default async function ArticlePage({ params }: Props) {
               className="mt-8 p-5 rounded-xl flex gap-4"
               style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
             >
-              {author.avatar_url ? (
-                <Image
-                  src={author.avatar_url}
-                  alt={author.full_name ?? 'Author'}
-                  width={56}
-                  height={56}
-                  className="w-14 h-14 rounded-full object-cover shrink-0"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-lg shrink-0">
-                  {(author.full_name ?? 'DC').substring(0, 2).toUpperCase()}
-                </div>
-              )}
+              <Link href={`/author/${slugify(author.full_name ?? '')}`} className="shrink-0">
+                {author.avatar_url ? (
+                  <Image
+                    src={author.avatar_url}
+                    alt={author.full_name ?? 'Author'}
+                    width={56}
+                    height={56}
+                    className="w-14 h-14 rounded-full object-cover hover:opacity-90 transition-opacity"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-lg">
+                    {(author.full_name ?? 'DC').substring(0, 2).toUpperCase()}
+                  </div>
+                )}
+              </Link>
               <div className="min-w-0">
-                <p className="font-bold" style={{ color: 'var(--dc-text)' }}>{author.full_name}</p>
-                <p className="text-sm capitalize" style={{ color: 'var(--dc-text-muted)' }}>{author.role ?? 'Staff Reporter'}</p>
+                <Link
+                  href={`/author/${slugify(author.full_name ?? '')}`}
+                  className="font-bold hover:text-dc-green transition-colors"
+                  style={{ color: 'var(--dc-text)' }}
+                >
+                  {author.full_name}
+                </Link>
+                <p className="text-sm capitalize" style={{ color: 'var(--dc-text-muted)' }}>
+                  {author.role ?? 'Staff Reporter'}
+                </p>
                 {author.bio && (
                   <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
                     {author.bio}
                   </p>
+                )}
+                {(author.twitter_url || author.linkedin_url || author.facebook_url) && (
+                  <div className="flex gap-3 mt-3 text-xs font-semibold" style={{ color: 'var(--dc-text-muted)' }}>
+                    {author.twitter_url && (
+                      <a href={author.twitter_url} target="_blank" rel="noopener noreferrer" className="hover:text-dc-green transition-colors">
+                        Twitter / X
+                      </a>
+                    )}
+                    {author.linkedin_url && (
+                      <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-dc-green transition-colors">
+                        LinkedIn
+                      </a>
+                    )}
+                    {author.facebook_url && (
+                      <a href={author.facebook_url} target="_blank" rel="noopener noreferrer" className="hover:text-dc-green transition-colors">
+                        Facebook
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
@@ -350,6 +444,9 @@ export default async function ArticlePage({ params }: Props) {
             </div>
           )}
 
+          {/* Sidebar ad */}
+          <AdBanner position="article_sidebar" className="w-full h-[300px] sm:h-[600px]" />
+
           {/* Newsletter */}
           <div
             className="p-5 rounded-xl"
@@ -374,6 +471,9 @@ export default async function ArticlePage({ params }: Props) {
               </button>
             </form>
           </div>
+
+          {/* Inline ad below newsletter */}
+          <AdBanner position="article_inline" className="w-full h-[250px]" />
         </aside>
       </div>
     </div>

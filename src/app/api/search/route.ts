@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/db/admin'
+import { rateLimit } from '@/lib/utils/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
+  // Protect search queries from high-frequency scraping
+  const rateLimitError = rateLimit(request, 60, 60000, 'search-read')
+  if (rateLimitError) return rateLimitError
+
   const { searchParams } = new URL(request.url)
   const q = searchParams.get('q')?.trim()
   const category = searchParams.get('category')

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { UserPlus, Mail, Shield, Trash2, Loader2, X, Save } from 'lucide-react'
+import { UserPlus, Mail, Users, Trash2, Loader2, X, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 
@@ -13,12 +13,11 @@ interface User {
   article_count?: number
   created_at: string
   avatar_url?: string
-}
-
-const ROLE_BADGE: Record<string, string> = {
-  founder: 'badge badge-red',
-  admin: 'badge badge-green',
-  publisher: 'badge badge-gray',
+  bio?: string | null
+  twitter_url?: string | null
+  linkedin_url?: string | null
+  facebook_url?: string | null
+  is_active?: boolean
 }
 
 const ROLES: User['role'][] = ['founder', 'admin', 'publisher']
@@ -64,11 +63,15 @@ export default function AdminUsersPage() {
       const res = await fetch('/api/admin/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: inviteEmail, full_name: inviteName, role: inviteRole }),
+        body: JSON.stringify({
+          email: inviteEmail,
+          full_name: inviteName,
+          role: inviteRole,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed')
-      toast.success('User invited successfully')
+      toast.success('Admin user created successfully')
       setShowInvite(false)
       setInviteEmail('')
       setInviteName('')
@@ -118,8 +121,8 @@ export default function AdminUsersPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-headline font-bold text-white">Team & Users</h1>
-          <p className="text-dc-muted text-sm mt-1">Manage editorial team members and their roles</p>
+          <h1 className="text-2xl font-headline font-bold text-white">Admin Users</h1>
+          <p className="text-dc-muted text-sm mt-1">Manage editorial team access and roles</p>
         </div>
         <button onClick={() => setShowInvite(true)} className="btn-primary gap-2">
           <UserPlus className="w-4 h-4" /> Invite User
@@ -216,12 +219,18 @@ export default function AdminUsersPage() {
       {/* Invite Modal */}
       {showInvite && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 w-full max-w-md shadow-2xl">
+          <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-headline font-bold text-white">Invite Team Member</h3>
+              <h3 className="text-lg font-headline font-bold text-white">Invite Admin User</h3>
               <button onClick={() => setShowInvite(false)} className="p-1 text-dc-muted hover:text-white">
                 <X className="w-5 h-5" />
               </button>
+            </div>
+            <div className="rounded-xl border border-dc-border p-3 mb-4 flex items-start gap-3 bg-dc-surface-2/30">
+              <Users className="w-4 h-4 text-dc-green mt-0.5 shrink-0" />
+              <p className="text-xs text-dc-muted leading-relaxed">
+                This creates an admin account for editorial team access. For public team profiles, use <span className="text-white">Team Members</span> instead.
+              </p>
             </div>
             <form onSubmit={handleInvite} className="space-y-4">
               <div>

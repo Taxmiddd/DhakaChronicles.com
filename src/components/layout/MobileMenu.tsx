@@ -207,6 +207,7 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
           </div>
           {[
             { label: 'Podcasts',  href: '/podcasts' },
+            { label: 'Our Team',  href: '/team' },
             { label: 'About Us',  href: '/about' },
             { label: 'Contact',   href: '/contact' },
             { label: 'Advertise', href: '/advertise' },

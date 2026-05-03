@@ -114,86 +114,90 @@ const WEBSITE_SCHEMA = {
   },
 }
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <body className="min-h-dvh flex flex-col" style={{ background: 'var(--background)', color: 'var(--dc-text)' }}>
+        {isProduction && (
+          <>
+            <Script
+              id="org-schema"
+              type="application/ld+json"
+              strategy="beforeInteractive"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }}
+            />
+            <Script
+              id="website-schema"
+              type="application/ld+json"
+              strategy="beforeInteractive"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
+            />
+            <Script
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+            />
+            <Script
+              id="google-analytics"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
+                    page_path: window.location.pathname,
+                  });
+                `,
+              }}
+            />
+            <Script
+              id="hotjar"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  (function(h,o,t,j,a,r){
+                      h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+                      h._hjSettings={hjid:${process.env.NEXT_PUBLIC_HOTJAR_ID || '1234567'},hjsv:6};
+                      a=o.getElementsByTagName('head')[0];
+                      r=o.createElement('script');r.async=1;
+                      r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+                      a.appendChild(r);
+                  })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+                `,
+              }}
+            />
+            <Script
+              src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
+              strategy="lazyOnload"
+            />
+            <Script
+              id="onesignal-init"
+              strategy="lazyOnload"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.OneSignalDeferred = window.OneSignalDeferred || [];
+                  OneSignalDeferred.push(function(OneSignal) {
+                    OneSignal.init({
+                      appId: "${process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || ''}",
+                    });
+                  });
+                `,
+              }}
+            />
+          </>
+        )}
+
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
-        />
-        {/* Google Analytics 4 */}
-        <Script
-          strategy="afterInteractive"
-          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
-        />
-        <Script
-          id="google-analytics"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}', {
-                page_path: window.location.pathname,
-              });
-            `,
-          }}
-        />
-
-        {/* Hotjar Tracking Code */}
-        <Script
-          id="hotjar"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(h,o,t,j,a,r){
-                  h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-                  h._hjSettings={hjid:${process.env.NEXT_PUBLIC_HOTJAR_ID || '1234567'},hjsv:6};
-                  a=o.getElementsByTagName('head')[0];
-                  r=o.createElement('script');r.async=1;
-                  r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-                  a.appendChild(r);
-              })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-            `,
-          }}
-        />
-
-        {/* OneSignal Push Notifications */}
-        <Script
-          src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
-          strategy="lazyOnload"
-        />
-        <Script
-          id="onesignal-init"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.OneSignalDeferred = window.OneSignalDeferred || [];
-              OneSignalDeferred.push(function(OneSignal) {
-                OneSignal.init({
-                  appId: "${process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID || ''}",
-                });
-              });
-            `,
-          }}
-        />
-
-        {children}
-        <CookieConsent />
-        <Toaster
-          richColors
-          position="bottom-right"
-        />
+          {children}
+          <CookieConsent />
+          <Toaster
+            richColors
+            position="bottom-right"
+          />
         </ThemeProvider>
       </body>
     </html>
   )
 }
-

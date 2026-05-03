@@ -1,10 +1,15 @@
 import { supabaseAdmin } from '@/lib/db/admin'
 import { NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/utils/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
 /** POST /api/tips/submit — public news tip submission */
 export async function POST(req: Request) {
+  // Prevent automated tip-spam
+  const rateLimitError = rateLimit(req, 8, 10 * 60 * 1000, 'tips-submit')
+  if (rateLimitError) return rateLimitError
+
   const body = await req.json().catch(() => ({}))
   const { subject, description, tipsterName, tipsterEmail, tipsterPhone, location, isAnonymous } = body
 
