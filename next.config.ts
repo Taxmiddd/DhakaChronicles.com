@@ -20,7 +20,7 @@ const securityHeaders = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://static.hotjar.com https://cdn.onesignal.com https://cdn.jsdelivr.net",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com",
+      "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://openweathermap.org",
       "media-src 'self' https://res.cloudinary.com https://*.supabase.co",
       "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://analytics.google.com https://onesignal.com https://api.onesignal.com wss://*.supabase.co",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com",
