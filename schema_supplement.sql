@@ -22,7 +22,9 @@ ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS reading_time  INTEGER;
 -- version counter (used by article_versions history)
 ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS version       INTEGER DEFAULT 1;
 -- scheduled_at (workflow: article scheduled for future publish)
-ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS scheduled_at  TIMESTAMPTZ;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS scheduled_at   TIMESTAMPTZ;
+-- allow_comments (toggle per-article comment section)
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS allow_comments BOOLEAN DEFAULT true;
 
 -- ── Categories: ordering and timestamps ──────────────────────────────────────
 ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;
