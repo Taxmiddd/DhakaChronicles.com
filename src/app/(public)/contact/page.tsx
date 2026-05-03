@@ -23,7 +23,7 @@ export default function ContactPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <div className="mb-10">
         <span className="text-xs font-bold uppercase tracking-widest text-dc-green">Contact</span>
-        <h1 className="font-headline font-black text-white text-4xl mt-2 mb-3">Get in Touch</h1>
+        <h1 className="font-headline font-black text-dc-text text-4xl mt-2 mb-3">Get in Touch</h1>
         <p className="text-dc-text-muted text-lg">
           Press enquiries, tips, corrections, or general feedback — we read everything.
         </p>
@@ -39,7 +39,7 @@ export default function ContactPage() {
             className="glass p-5 rounded-xl hover:border-dc-green/30 border border-transparent transition-all group">
             <item.icon className="w-5 h-5 text-dc-green mb-3" />
             <p className="text-dc-text-muted text-xs uppercase tracking-wider mb-1">{item.label}</p>
-            <p className="text-white text-sm font-medium group-hover:text-dc-green transition-colors">{item.value}</p>
+            <p className="text-dc-text text-sm font-medium group-hover:text-dc-green transition-colors">{item.value}</p>
           </a>
         ))}
       </div>
@@ -47,7 +47,7 @@ export default function ContactPage() {
       {submitted ? (
         <div className="glass p-10 rounded-2xl text-center">
           <CheckCircle className="w-14 h-14 text-dc-green mx-auto mb-4" />
-          <h2 className="font-headline font-bold text-white text-xl mb-2">Message Sent!</h2>
+          <h2 className="font-headline font-bold text-dc-text text-xl mb-2">Message Sent!</h2>
           <p className="text-dc-text-muted">We'll get back to you within 24–48 hours.</p>
           <button onClick={() => { setSubmitted(false); setForm({ name: '', email: '', subject: '', message: '' }) }}
             className="btn-ghost mt-6 px-5 py-2">
@@ -56,7 +56,7 @@ export default function ContactPage() {
         </div>
       ) : (
         <div className="glass p-8 rounded-2xl">
-          <h2 className="font-headline font-bold text-white text-xl mb-6">Send a Message</h2>
+          <h2 className="font-headline font-bold text-dc-text text-xl mb-6">Send a Message</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

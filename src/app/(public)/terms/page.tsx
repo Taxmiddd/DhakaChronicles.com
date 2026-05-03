@@ -53,7 +53,7 @@ export default function TermsPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <div className="mb-10">
         <span className="text-xs font-bold uppercase tracking-widest text-dc-green">Legal</span>
-        <h1 className="font-headline font-black text-white text-4xl mt-2 mb-3">Terms of Service</h1>
+        <h1 className="font-headline font-black text-dc-text text-4xl mt-2 mb-3">Terms of Service</h1>
         <p className="text-dc-text-muted text-sm">Last updated: April 2026</p>
       </div>
 
@@ -65,7 +65,7 @@ export default function TermsPage() {
 
         {sections.map(section => (
           <div key={section.title}>
-            <h2 className="font-headline font-bold text-white text-lg mb-2">{section.title}</h2>
+            <h2 className="font-headline font-bold text-dc-text text-lg mb-2">{section.title}</h2>
             <p className="text-dc-text leading-relaxed text-sm">{section.content}</p>
           </div>
         ))}

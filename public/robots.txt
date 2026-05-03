@@ -1,8 +1,67 @@
+# ============================================================
+# robots.txt — Dhaka Chronicles
+# https://dhakachronicles.com
+# ============================================================
+
 User-agent: *
 Allow: /
 
+# Admin & auth routes — never index
 Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+
+# Internal API routes
 Disallow: /api/auth/
 Disallow: /api/admin/
+Disallow: /api/analytics/
+Disallow: /api/cron/
+Disallow: /api/webhooks/
+
+# Next.js internals
+Disallow: /_next/
+Disallow: /api/health
+
+# Allow key public API endpoints (RSS, search, articles)
+Allow: /api/rss
+Allow: /api/search
+
+# ── Sitemaps ─────────────────────────────────────────────────
 
 Sitemap: https://dhakachronicles.com/sitemap.xml
+Sitemap: https://dhakachronicles.com/api/news-sitemap
+
+# ── Crawl-delay for heavy bots ────────────────────────────────
+
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Crawl-delay: 20
+
+User-agent: DotBot
+Disallow: /
+
+# Block AI training scrapers that don't respect content rights
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /

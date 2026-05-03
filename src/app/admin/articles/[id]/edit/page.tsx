@@ -7,12 +7,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArticleSchema, type ArticleFormData } from '@/lib/validations'
 import { TipTapEditor } from '@/components/admin/TipTapEditor'
 import { toast } from 'sonner'
-import { Loader2, ArrowLeft, Save, Send, History, Eye, Clock, Image as ImageIcon, RotateCcw } from 'lucide-react'
+import { Loader2, ArrowLeft, Save, Send, Eye, Clock, Image as ImageIcon, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { slugify } from '@/lib/utils'
 import { LiveBlogEditor } from '@/components/admin/LiveBlogEditor'
 import EditorialNotes from '@/components/admin/EditorialNotes'
 import { format } from 'date-fns'
+
+interface Category { id: string; name: string }
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -27,7 +29,14 @@ export default function EditArticlePage({ params }: Props) {
   const [currentSlug, setCurrentSlug] = useState('')
   const [activeTab, setActiveTab] = useState<'en' | 'bn'>('en')
   const [versions, setVersions] = useState<any[]>([])
-  const [showVersions, setShowVersions] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setCategories(d.categories ?? d.data ?? []) })
+      .catch(() => {})
+  }, [])
 
   const { register, handleSubmit, control, watch, setValue, reset, formState: { errors, isDirty } } =
     useForm<ArticleFormData>({
@@ -384,6 +393,16 @@ export default function EditArticlePage({ params }: Props) {
           {/* SEO & Meta */}
           <div className="glass p-5 rounded-xl space-y-4">
             <h3 className="font-headline font-bold text-white border-b border-dc-border pb-2">SEO & Media</h3>
+
+            <div>
+              <label className="form-label" htmlFor="category_id">Category</label>
+              <select {...register('category_id')} id="category_id" className="form-input text-sm">
+                <option value="">— Select Category —</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
 
             <div>
               <label className="form-label" htmlFor="slug">URL Slug</label>

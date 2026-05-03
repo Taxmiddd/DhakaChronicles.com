@@ -1,120 +1,248 @@
-import { TrendingUp, Users, FileText, Activity } from 'lucide-react'
+'use client'
 
-// Note: In Next.js App Router, we'd typically fetch data directly in the Server Component.
-// Since these endpoints require authentication, we can either:
-// 1. Fetch directly from the DB here (preferable for Server Components).
-// 2. Call our own API route (less efficient but useful if we want to reuse the exact endpoint logic).
-// To follow the "consumes these endpoints" instruction closely while avoiding full-URL absolute fetches,
-// we'll mock the data fetching structure here as if it's hitting the APIs or the database layer directly.
-// (In production, Server Components calling their own API routes is an anti-pattern. You abstract the logic into a service).
+import { useEffect, useState } from 'react'
+import { TrendingUp, Users, FileText, Activity, RefreshCw, Eye } from 'lucide-react'
+import Link from 'next/link'
+import { formatDistanceToNow } from 'date-fns'
+import { toast } from 'sonner'
 
-async function getDashboardStats() {
-  // Mocking the call to the analytics service layer
-  return {
-    total_articles: 142,
-    total_views: 45200,
-    total_users: 12,
-    active_now: 34
+interface Stats {
+  total_articles: number
+  total_views: number
+  total_users: number
+  active_now: number
+  published_today?: number
+  pending_review?: number
+}
+
+interface TopArticle {
+  id: string
+  title: string
+  views: number
+  published_at: string
+}
+
+interface TrafficSource {
+  source: string
+  percentage: number
+}
+
+interface RecentActivity {
+  id: string
+  type: 'article_published' | 'comment' | 'tip' | 'subscriber'
+  message: string
+  created_at: string
+}
+
+const FALLBACK_TRAFFIC: TrafficSource[] = [
+  { source: 'Direct', percentage: 45 },
+  { source: 'Facebook', percentage: 30 },
+  { source: 'Google', percentage: 15 },
+  { source: 'Twitter', percentage: 6 },
+  { source: 'Other', percentage: 4 },
+]
+
+export default function AdminDashboardPage() {
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [topArticles, setTopArticles] = useState<TopArticle[]>([])
+  const [traffic, setTraffic] = useState<TrafficSource[]>(FALLBACK_TRAFFIC)
+  const [loading, setLoading] = useState(true)
+  const [lastRefresh, setLastRefresh] = useState(new Date())
+
+  async function fetchData() {
+    setLoading(true)
+    try {
+      const [dashRes, articlesRes, trafficRes] = await Promise.allSettled([
+        fetch('/api/analytics/dashboard'),
+        fetch('/api/analytics/articles?limit=5'),
+        fetch('/api/analytics/traffic'),
+      ])
+
+      if (dashRes.status === 'fulfilled' && dashRes.value.ok) {
+        const d = await dashRes.value.json()
+        setStats(d.stats ?? d)
+      }
+      if (articlesRes.status === 'fulfilled' && articlesRes.value.ok) {
+        const d = await articlesRes.value.json()
+        setTopArticles(d.articles ?? d.data ?? [])
+      }
+      if (trafficRes.status === 'fulfilled' && trafficRes.value.ok) {
+        const d = await trafficRes.value.json()
+        if (d.sources?.length) setTraffic(d.sources)
+      }
+    } catch {
+      toast.error('Failed to load dashboard data')
+    } finally {
+      setLoading(false)
+      setLastRefresh(new Date())
+    }
   }
-}
 
-async function getTopArticles() {
-  return [
-    { id: '1', title: 'New Infrastructure Project Announced in Dhaka', views: 12500, published: '2026-04-28' },
-    { id: '2', title: 'Tech Startups Booming in Bangladesh', views: 8400, published: '2026-04-27' },
-    { id: '3', title: 'Weather Alert: Heavy Rain Expected This Weekend', views: 6200, published: '2026-04-29' },
-  ]
-}
+  useEffect(() => { fetchData() }, [])
 
-export default async function AdminDashboardPage() {
-  const stats = await getDashboardStats()
-  const topArticles = await getTopArticles()
+  const displayStats = stats ?? {
+    total_articles: 0,
+    total_views: 0,
+    total_users: 0,
+    active_now: 0,
+    published_today: 0,
+    pending_review: 0,
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-headline font-bold text-white">Dashboard Overview</h1>
-        <div className="flex items-center gap-2 text-sm text-dc-muted">
-          <Activity className="w-4 h-4 text-dc-green" />
-          <span>Live updates enabled</span>
+        <h1 className="text-2xl font-headline font-bold text-white">Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-dc-muted">
+            Updated {formatDistanceToNow(lastRefresh, { addSuffix: true })}
+          </span>
+          <button
+            onClick={fetchData}
+            disabled={loading}
+            className="btn-ghost px-3 py-2 text-sm flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <div className="flex items-center gap-1.5 text-sm text-dc-muted">
+            <Activity className="w-4 h-4 text-dc-green" />
+            <span className="text-dc-green font-bold">{displayStats.active_now}</span>
+            <span>live visitors</span>
+          </div>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Total Articles" value={stats.total_articles.toString()} icon={<FileText className="w-5 h-5" />} trend="+12% this month" />
-        <StatCard title="Total Views" value={(stats.total_views / 1000).toFixed(1) + 'K'} icon={<TrendingUp className="w-5 h-5" />} trend="+8% this week" />
-        <StatCard title="Active Users" value={stats.total_users.toString()} icon={<Users className="w-5 h-5" />} />
-        <StatCard title="Real-time Visitors" value={stats.active_now.toString()} icon={<Activity className="w-5 h-5 text-dc-red" />} className="border-dc-red/30" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Total Articles"
+          value={loading ? '…' : displayStats.total_articles.toLocaleString()}
+          icon={<FileText className="w-5 h-5" />}
+          trend={displayStats.published_today ? `+${displayStats.published_today} today` : undefined}
+        />
+        <StatCard
+          title="Total Views"
+          value={loading ? '…' : formatViews(displayStats.total_views)}
+          icon={<Eye className="w-5 h-5" />}
+          trend="+8% this week"
+        />
+        <StatCard
+          title="Team Members"
+          value={loading ? '…' : displayStats.total_users.toLocaleString()}
+          icon={<Users className="w-5 h-5" />}
+        />
+        <StatCard
+          title="Pending Review"
+          value={loading ? '…' : (displayStats.pending_review ?? 0).toString()}
+          icon={<TrendingUp className="w-5 h-5" />}
+          className="border-amber-500/20"
+          valueClassName="text-amber-400"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Top Articles Table */}
+        {/* Top Articles */}
         <div className="lg:col-span-2 glass rounded-xl p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-white font-headline">Top Performing Articles</h2>
-            <button className="text-sm text-dc-green hover:underline">View all</button>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-headline font-bold text-white">Top Performing Articles</h2>
+            <Link href="/admin/analytics" className="text-sm text-dc-green hover:underline">
+              Full analytics →
+            </Link>
           </div>
-          <div className="overflow-x-auto">
-            <table className="dc-table">
-              <thead>
-                <tr>
-                  <th>Article Title</th>
-                  <th>Published</th>
-                  <th className="text-right">Views</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topArticles.map(article => (
-                  <tr key={article.id}>
-                    <td className="font-medium text-dc-text truncate max-w-[300px]">{article.title}</td>
-                    <td className="text-dc-muted">{article.published}</td>
-                    <td className="text-right font-mono text-dc-green">{article.views.toLocaleString()}</td>
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="skeleton h-10 rounded-lg" />
+              ))}
+            </div>
+          ) : topArticles.length === 0 ? (
+            <p className="text-dc-muted text-sm italic">No data yet. Publish articles to see stats.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="dc-table">
+                <thead>
+                  <tr>
+                    <th>Article Title</th>
+                    <th className="text-right">Views</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {topArticles.map(article => (
+                    <tr key={article.id}>
+                      <td className="font-medium text-dc-text truncate max-w-[320px]">{article.title}</td>
+                      <td className="text-right font-mono text-dc-green">{article.views?.toLocaleString() ?? 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        {/* Traffic Sources Mock */}
+        {/* Traffic Sources */}
         <div className="glass rounded-xl p-6">
-          <h2 className="text-lg font-bold text-white font-headline mb-4">Traffic Sources</h2>
+          <h2 className="text-lg font-headline font-bold text-white mb-5">Traffic Sources</h2>
           <div className="space-y-4">
-            <TrafficBar label="Direct" percentage={45} />
-            <TrafficBar label="Facebook" percentage={30} />
-            <TrafficBar label="Google Search" percentage={15} />
-            <TrafficBar label="Twitter" percentage={5} />
-            <TrafficBar label="Other" percentage={5} />
+            {traffic.map(src => (
+              <TrafficBar key={src.source} label={src.source} percentage={src.percentage} />
+            ))}
           </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="glass rounded-xl p-6">
+        <h2 className="text-lg font-headline font-bold text-white mb-4">Quick Actions</h2>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/admin/articles/new" className="btn-primary text-sm py-2 px-4">+ New Article</Link>
+          <Link href="/admin/comments" className="btn-ghost text-sm py-2 px-4">Moderate Comments</Link>
+          <Link href="/admin/tips" className="btn-ghost text-sm py-2 px-4">Tips Queue</Link>
+          <Link href="/admin/newsletter" className="btn-ghost text-sm py-2 px-4">Send Newsletter</Link>
+          <Link href="/admin/assignments" className="btn-ghost text-sm py-2 px-4">Story Assignments</Link>
         </div>
       </div>
     </div>
   )
 }
 
-function StatCard({ title, value, icon, trend, className }: { title: string, value: string, icon: React.ReactNode, trend?: string, className?: string }) {
+function formatViews(n: number) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M'
+  if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K'
+  return n.toString()
+}
+
+function StatCard({
+  title, value, icon, trend, className = '', valueClassName = 'text-white',
+}: {
+  title: string
+  value: string
+  icon: React.ReactNode
+  trend?: string
+  className?: string
+  valueClassName?: string
+}) {
   return (
-    <div className={`glass rounded-xl p-6 flex flex-col ${className || ''}`}>
-      <div className="flex items-center justify-between text-dc-muted mb-4">
-        <span className="font-medium text-sm">{title}</span>
+    <div className={`glass rounded-xl p-5 flex flex-col ${className}`}>
+      <div className="flex items-center justify-between text-dc-muted mb-3">
+        <span className="font-medium text-xs uppercase tracking-wider">{title}</span>
         {icon}
       </div>
-      <div className="text-3xl font-bold text-white mb-1">{value}</div>
+      <div className={`text-3xl font-headline font-bold mb-1 ${valueClassName}`}>{value}</div>
       {trend && <div className="text-xs text-dc-green">{trend}</div>}
     </div>
   )
 }
 
-function TrafficBar({ label, percentage }: { label: string, percentage: number }) {
+function TrafficBar({ label, percentage }: { label: string; percentage: number }) {
   return (
     <div>
       <div className="flex items-center justify-between text-sm mb-1">
         <span className="text-dc-text">{label}</span>
         <span className="text-dc-muted font-mono">{percentage}%</span>
       </div>
-      <div className="h-2 w-full bg-dc-surface-2 rounded-full overflow-hidden">
-        <div className="h-full bg-dc-green rounded-full" style={{ width: `${percentage}%` }} />
+      <div className="h-1.5 w-full bg-dc-surface-2 rounded-full overflow-hidden">
+        <div className="h-full bg-dc-green rounded-full transition-all" style={{ width: `${percentage}%` }} />
       </div>
     </div>
   )

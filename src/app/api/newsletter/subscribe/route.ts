@@ -9,7 +9,14 @@ export async function POST(request: Request) {
   if (rateLimitError) return rateLimitError
 
   try {
-    const body = await request.json()
+    const contentType = request.headers.get('content-type') ?? ''
+    let body: unknown
+    if (contentType.includes('application/json')) {
+      body = await request.json()
+    } else {
+      const fd = await request.formData()
+      body = { email: fd.get('email') }
+    }
     const validated = NewsletterSubscribeSchema.safeParse(body)
 
     if (!validated.success) {

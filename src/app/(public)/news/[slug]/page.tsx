@@ -1,201 +1,377 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Clock, BookOpen, ChevronRight } from 'lucide-react'
+import { Clock, Eye, ChevronRight, BookOpen } from 'lucide-react'
 import CommentsSection from '@/components/article/CommentsSection'
 import ViewTracker from '@/components/article/ViewTracker'
 import ArticleReactions from '@/components/article/ArticleReactions'
-import { supabaseAdmin } from '@/lib/db/admin'
-import { format } from 'date-fns'
-import LiveBlogFeed from '@/components/article/LiveBlogFeed'
-import WeatherWidget from '@/components/ui/WeatherWidget'
-import AdBanner from '@/components/ui/AdBanner'
 import ShareButtons from '@/components/article/ShareButtons'
 import JsonLd from '@/components/seo/JsonLd'
+import LiveBlogFeed from '@/components/article/LiveBlogFeed'
+import { supabaseAdmin } from '@/lib/db/admin'
+import { renderTipTap } from '@/lib/utils/tiptap'
+import { timeAgo, formatViewCount } from '@/lib/utils'
 
-const RELATED = [
-  { id: 'r1', title: 'Dhaka Stock Exchange Hits All-Time High at 7,800 Points', slug: 'dse-all-time-high', category: 'Business', date: 'Apr 29', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&auto=format&fit=crop' },
-  { id: 'r2', title: 'Bangladesh Garment Exports Surge 14% in First Quarter', slug: 'garment-exports-q1', category: 'Business', date: 'Apr 28', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&auto=format&fit=crop' },
-  { id: 'r3', title: 'Foreign Direct Investment Reaches Record $3.2B in FY2026', slug: 'fdi-record-2026', category: 'Business', date: 'Apr 27', image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&auto=format&fit=crop' },
-]
+export const revalidate = 60
 
-async function getArticleBySlug(slug: string) {
-  const { data, error } = await supabaseAdmin
-    .from('articles')
-    .select(`
-      *,
-      author:users(full_name, role, avatar_url, bio),
-      category:categories(name)
-    `)
-    .eq('slug', slug)
-    .single()
-    
-  if (error || !data) return null
-  return data
-}
+const BASE = 'https://dhakachronicles.com'
+
+const ARTICLE_SELECT = `
+  id, title, slug, excerpt, content, featured_image_url, published_at, updated_at,
+  reading_time, view_count, is_breaking, is_featured, article_type,
+  allow_comments, category_id,
+  category:categories(name, slug, color),
+  author:users(full_name, role, avatar_url, bio)
+`
 
 type Props = { params: Promise<{ slug: string }> }
 
+async function getArticle(slug: string) {
+  try {
+    const { data } = await supabaseAdmin
+      .from('articles')
+      .select(ARTICLE_SELECT)
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .single()
+    return data
+  } catch { return null }
+}
+
+async function getRelatedArticles(categoryId: string, excludeId: string) {
+  try {
+    const { data } = await supabaseAdmin
+      .from('articles')
+      .select('id, title, slug, featured_image_url, published_at, category:categories(name, slug, color)')
+      .eq('status', 'published')
+      .eq('category_id', categoryId)
+      .neq('id', excludeId)
+      .order('published_at', { ascending: false })
+      .limit(3)
+    return (data ?? []) as unknown as {
+      id: string
+      title: string
+      slug: string
+      featured_image_url: string | null
+      published_at: string | null
+      category: { name: string; slug: string; color: string | null } | null
+    }[]
+  } catch { return [] }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const article = await getArticleBySlug(slug)
-  
+  const article = await getArticle(slug)
   if (!article) return { title: 'Not Found | Dhaka Chronicles' }
-  
+  const author = (article as any).author
+  const url = `${BASE}/news/${slug}`
   return {
     title: `${article.title} – Dhaka Chronicles`,
-    description: article.excerpt || article.title,
+    description: article.excerpt ?? article.title,
+    alternates: { canonical: url },
+    authors: author?.full_name ? [{ name: author.full_name }] : undefined,
+    openGraph: {
+      type: 'article',
+      url,
+      siteName: 'Dhaka Chronicles',
+      locale: 'en_US',
+      title: article.title,
+      description: article.excerpt ?? undefined,
+      publishedTime: article.published_at ?? undefined,
+      modifiedTime: (article as any).updated_at ?? article.published_at ?? undefined,
+      authors: author?.full_name ? [author.full_name] : undefined,
+      images: article.featured_image_url
+        ? [{ url: article.featured_image_url, width: 1200, height: 630, alt: article.title }]
+        : [{ url: `${BASE}/og-default.png`, width: 1200, height: 630, alt: 'Dhaka Chronicles' }],
+    },
   }
 }
 
 export default async function ArticlePage({ params }: Props) {
   const { slug } = await params
-  const article = await getArticleBySlug(slug)
-
+  const article = await getArticle(slug)
   if (!article) notFound()
 
-  const CAT_COLORS: Record<string, string> = {
-    Politics: '#F42A41', Business: '#00A651', Sports: '#F59E0B',
-    Culture: '#8B5CF6', Technology: '#06B6D4', Education: '#EC4899',
-  }
-  const categoryName = article.category?.name || 'News'
-  const catColor = CAT_COLORS[categoryName] || '#00A651'
+  const related = article.category_id
+    ? await getRelatedArticles(article.category_id, article.id)
+    : []
+
+  const categoryName = (article as any).category?.name ?? 'News'
+  const catColor = (article as any).category?.color ?? '#00A651'
+  const author = (article as any).author
+  const contentHtml = renderTipTap((article as any).content)
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <JsonLd article={article as any} />
       <ViewTracker articleId={article.id} />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-        {/* Article body */}
-        <article className="lg:col-span-2">
+        {/* ── Article body ── */}
+        <article className="lg:col-span-2 min-w-0">
+
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-xs text-dc-text-muted mb-6">
-            <Link href="/" className="hover:text-white transition-colors">Home</Link>
+          <nav className="flex items-center gap-1.5 text-xs mb-5" style={{ color: 'var(--dc-text-muted)' }}>
+            <Link href="/" className="hover:text-dc-green transition-colors">Home</Link>
             <ChevronRight className="w-3 h-3" />
-            <Link href={`/category/${categoryName.toLowerCase()}`} className="hover:text-white transition-colors">{categoryName}</Link>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-dc-text truncate max-w-[200px]">{article.title}</span>
+            {(article as any).category && (
+              <>
+                <Link
+                  href={`/category/${(article as any).category.slug}`}
+                  className="hover:text-dc-green transition-colors"
+                >
+                  {categoryName}
+                </Link>
+                <ChevronRight className="w-3 h-3" />
+              </>
+            )}
+            <span className="truncate max-w-[180px]" style={{ color: 'var(--dc-text)' }}>
+              {article.title}
+            </span>
           </nav>
 
-          {/* Category + Title */}
-          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: catColor }}>{categoryName}</span>
-          <h1 className="font-headline font-black text-white text-3xl sm:text-4xl leading-tight mt-2 mb-4">{article.title}</h1>
-          <p className="text-dc-text-muted text-lg leading-relaxed mb-6">{article.excerpt}</p>
+          {/* Breaking badge */}
+          {(article as any).is_breaking && (
+            <span className="inline-block bg-dc-red text-white text-xs font-black uppercase tracking-widest px-2.5 py-0.5 rounded-sm mb-3">
+              Breaking
+            </span>
+          )}
 
-          {/* Meta */}
-          <div className="flex flex-wrap items-center gap-5 py-4 border-y border-dc-border mb-6">
+          {/* Category */}
+          <span className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color: catColor }}>
+            {categoryName}
+          </span>
+
+          {/* Title */}
+          <h1
+            className="font-headline font-black text-3xl sm:text-4xl leading-tight mb-4"
+            style={{ color: 'var(--dc-text)' }}
+          >
+            {article.title}
+          </h1>
+
+          {/* Excerpt */}
+          {article.excerpt && (
+            <p className="text-lg leading-relaxed mb-5" style={{ color: 'var(--dc-text-muted)' }}>
+              {article.excerpt}
+            </p>
+          )}
+
+          {/* Meta bar */}
+          <div
+            className="flex flex-wrap items-center gap-4 py-4 mb-6"
+            style={{ borderTop: '1px solid var(--dc-border)', borderBottom: '1px solid var(--dc-border)' }}
+          >
+            {/* Author */}
             <div className="flex items-center gap-3">
-              {article.author?.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={article.author.avatar_url} alt="Author" className="w-10 h-10 rounded-full object-cover" />
+              {author?.avatar_url ? (
+                <Image
+                  src={author.avatar_url}
+                  alt={author.full_name ?? 'Author'}
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-sm">
-                  {article.author?.full_name?.substring(0, 2).toUpperCase() || 'DC'}
+                <div className="w-10 h-10 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-sm shrink-0">
+                  {(author?.full_name ?? 'DC').substring(0, 2).toUpperCase()}
                 </div>
               )}
               <div>
-                <p className="text-white font-semibold text-sm">{article.author?.full_name || 'Dhaka Chronicles'}</p>
-                <p className="text-dc-text-muted text-xs">{article.author?.role || 'Staff Reporter'}</p>
+                <p className="font-semibold text-sm" style={{ color: 'var(--dc-text)' }}>
+                  {author?.full_name ?? 'Dhaka Chronicles'}
+                </p>
+                <p className="text-xs capitalize" style={{ color: 'var(--dc-text-muted)' }}>
+                  {author?.role ?? 'Staff Reporter'}
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-4 text-sm text-dc-text-muted ml-auto">
-              <span>{article.published_at ? format(new Date(article.published_at), 'MMM d, yyyy') : 'Draft'}</span>
-              <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" />5 min read</span>
-              <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" />{article.views_count?.toLocaleString() || 0} views</span>
-            </div>
-          </div>
 
-          <div className="mb-8">
-            <AdBanner size="banner" />
+            {/* Meta stats */}
+            <div className="flex flex-wrap items-center gap-3 ml-auto text-xs" style={{ color: 'var(--dc-text-muted)' }}>
+              {article.published_at && (
+                <span>{timeAgo(article.published_at)}</span>
+              )}
+              {(article as any).reading_time && (
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3.5 h-3.5" />
+                  {(article as any).reading_time} min read
+                </span>
+              )}
+              {(article as any).view_count > 0 && (
+                <span className="flex items-center gap-1">
+                  <Eye className="w-3.5 h-3.5" />
+                  {formatViewCount((article as any).view_count)}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Hero image */}
-          {article.article_type === 'video' && article.featured_image_url ? (
+          {(article as any).article_type === 'video' && article.featured_image_url ? (
             <div className="w-full aspect-video rounded-xl overflow-hidden mb-8 bg-black">
-              <iframe 
-                src={article.featured_image_url} 
-                className="w-full h-full" 
-                allowFullScreen 
+              <iframe
+                src={article.featured_image_url}
+                className="w-full h-full"
+                allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              ></iframe>
+              />
             </div>
           ) : article.featured_image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={article.featured_image_url} alt={article.title} className="w-full aspect-video object-cover rounded-xl mb-8" />
+            <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-8">
+              <Image
+                src={article.featured_image_url}
+                alt={article.title}
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
+              />
+            </div>
           ) : null}
 
-          {/* Content */}
-          <div className="prose-dc" dangerouslySetInnerHTML={{ __html: article.content.content ? article.content.content.map((block: any) => `<p>${block.content?.[0]?.text || ''}</p>`).join('') : '' }} />
+          {/* Article content */}
+          {contentHtml ? (
+            <div
+              className="prose-dc mb-8"
+              dangerouslySetInnerHTML={{ __html: contentHtml }}
+            />
+          ) : (
+            <div className="py-8 mb-8 text-center rounded-xl" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}>
+              <BookOpen className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--dc-text-muted)' }} />
+              <p style={{ color: 'var(--dc-text-muted)' }}>Article content not available.</p>
+            </div>
+          )}
 
-          {/* Live Blog Feed */}
-          {article.article_type === 'live_blog' && (
+          {/* Live blog */}
+          {(article as any).article_type === 'live_blog' && (
             <LiveBlogFeed articleId={article.id} />
           )}
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-dc-border">
-            {/* Real tags need a join query, bypassing for now */}
+          {/* Share */}
+          <div className="pt-6 border-t" style={{ borderColor: 'var(--dc-border)' }}>
+            <ShareButtons slug={slug} title={article.title} />
           </div>
 
-          {/* Share */}
-          <ShareButtons slug={slug} title={article.title} />
-
           {/* Reactions */}
-          <div className="mt-6">
+          <div className="mt-4">
             <ArticleReactions articleId={article.id} />
           </div>
 
           {/* Author bio */}
-          <div className="glass p-6 rounded-xl mt-8 flex gap-4">
-            {article.author?.avatar_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={article.author.avatar_url} alt="Author" className="w-14 h-14 rounded-full object-cover shrink-0" />
-            ) : (
-              <div className="w-14 h-14 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-lg shrink-0">
-                {article.author?.full_name?.substring(0, 2).toUpperCase() || 'DC'}
+          {author && (
+            <div
+              className="mt-8 p-5 rounded-xl flex gap-4"
+              style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
+            >
+              {author.avatar_url ? (
+                <Image
+                  src={author.avatar_url}
+                  alt={author.full_name ?? 'Author'}
+                  width={56}
+                  height={56}
+                  className="w-14 h-14 rounded-full object-cover shrink-0"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-lg shrink-0">
+                  {(author.full_name ?? 'DC').substring(0, 2).toUpperCase()}
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="font-bold" style={{ color: 'var(--dc-text)' }}>{author.full_name}</p>
+                <p className="text-sm capitalize" style={{ color: 'var(--dc-text-muted)' }}>{author.role ?? 'Staff Reporter'}</p>
+                {author.bio && (
+                  <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
+                    {author.bio}
+                  </p>
+                )}
               </div>
-            )}
-            <div>
-              <p className="text-white font-bold">{article.author?.full_name || 'Dhaka Chronicles'}</p>
-              <p className="text-dc-text-muted text-sm mt-0.5">{article.author?.role || 'Staff Reporter'}</p>
-              <p className="text-dc-text-muted text-sm mt-2">{article.author?.bio || "Reporting for Dhaka Chronicles."}</p>
             </div>
-          </div>
+          )}
 
           {/* Comments */}
-          <CommentsSection articleId={article.id} allowComments={true} />
+          <div className="mt-10">
+            <CommentsSection articleId={article.id} allowComments={(article as any).allow_comments ?? true} />
+          </div>
         </article>
 
-        {/* Sidebar */}
-        <aside className="space-y-8 lg:sticky lg:top-24 lg:self-start">
-          <WeatherWidget />
-          
-          <div className="glass p-6 rounded-xl">
-            <h3 className="font-headline font-bold text-white mb-5">Related Stories</h3>
-            <div className="space-y-5">
-              {RELATED.map((r) => (
-                <Link key={r.id} href={`/news/${r.slug}`} className="group flex gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={r.image} alt={r.title} className="w-20 h-16 object-cover rounded-lg shrink-0" />
-                  <div>
-                    <span className="text-xs font-bold text-dc-green uppercase">{r.category}</span>
-                    <p className="text-white text-sm font-medium leading-snug mt-0.5 group-hover:text-dc-green transition-colors line-clamp-2">{r.title}</p>
-                    <p className="text-dc-text-muted text-xs mt-1">{r.date}</p>
-                  </div>
-                </Link>
-              ))}
+        {/* ── Sidebar ── */}
+        <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
+
+          {/* Related stories */}
+          {related.length > 0 && (
+            <div
+              className="p-5 rounded-xl"
+              style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
+            >
+              <h3 className="font-headline font-bold text-base mb-4" style={{ color: 'var(--dc-text)' }}>
+                Related Stories
+              </h3>
+              <div className="space-y-4">
+                {related.map(r => {
+                  const rColor = r.category?.color ?? '#00A651'
+                  return (
+                    <Link key={r.id} href={`/news/${r.slug}`} className="group flex gap-3">
+                      <div className="w-20 h-16 rounded-lg overflow-hidden shrink-0" style={{ background: `${rColor}15` }}>
+                        {r.featured_image_url ? (
+                          <Image
+                            src={r.featured_image_url}
+                            alt={r.title}
+                            width={80}
+                            height={64}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : null}
+                      </div>
+                      <div className="min-w-0">
+                        {r.category && (
+                          <span className="text-xs font-bold uppercase" style={{ color: rColor }}>
+                            {r.category.name}
+                          </span>
+                        )}
+                        <p
+                          className="text-sm font-semibold leading-snug mt-0.5 line-clamp-2 group-hover:text-dc-green transition-colors"
+                          style={{ color: 'var(--dc-text)' }}
+                        >
+                          {r.title}
+                        </p>
+                        {r.published_at && (
+                          <p className="text-xs mt-1" style={{ color: 'var(--dc-text-muted)' }}>
+                            {timeAgo(r.published_at)}
+                          </p>
+                        )}
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
-          <AdBanner size="sidebar-tall" />
-
-          <div className="glass p-6 rounded-xl">
-            <h3 className="font-headline font-bold text-white mb-2">Morning Briefing</h3>
-            <p className="text-dc-text-muted text-sm mb-4">Top stories delivered at 7 AM daily.</p>
-            <form className="space-y-3">
-              <input type="email" placeholder="your@email.com" className="form-input text-sm" />
-              <button type="button" className="btn-primary w-full py-2.5 text-sm">Subscribe Free</button>
+          {/* Newsletter */}
+          <div
+            className="p-5 rounded-xl"
+            style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
+          >
+            <h3 className="font-headline font-bold text-sm mb-1" style={{ color: 'var(--dc-text)' }}>
+              Morning Briefing
+            </h3>
+            <p className="text-sm mb-4" style={{ color: 'var(--dc-text-muted)' }}>
+              Top stories delivered at 7 AM daily.
+            </p>
+            <form action="/api/newsletter/subscribe" method="POST" className="space-y-2.5">
+              <input
+                type="email"
+                name="email"
+                placeholder="your@email.com"
+                required
+                className="form-input text-sm"
+              />
+              <button type="submit" className="btn-primary w-full py-2.5 text-sm">
+                Subscribe Free
+              </button>
             </form>
           </div>
         </aside>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { Send, CheckCircle, Loader2 } from 'lucide-react'
 
 export default function SubmitTipPage() {
   const [loading, setLoading] = useState(false)
@@ -42,122 +43,114 @@ export default function SubmitTipPage() {
 
   if (success) {
     return (
-      <main className="max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="w-20 h-20 bg-[#00A651]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-4xl text-[#00A651]">✓</span>
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 text-center">
+        <div className="w-20 h-20 bg-dc-green/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle className="w-10 h-10 text-dc-green" />
         </div>
-        <h1 className="text-3xl font-bold font-headline mb-4">Tip Received</h1>
-        <p className="text-gray-400 text-lg mb-8">
+        <h1 className="font-headline font-bold text-dc-text text-3xl mb-4">Tip Received</h1>
+        <p className="text-dc-text-muted text-lg mb-8">
           Thank you for sharing your information with our newsroom. Our investigative team will review your tip.
         </p>
-        <Link href="/" className="btn-primary inline-flex">
-          Return to Homepage
-        </Link>
-      </main>
+        <Link href="/" className="btn-primary inline-flex">Return to Homepage</Link>
+      </div>
     )
   }
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-16">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <div className="mb-10 text-center">
-        <h1 className="text-4xl font-bold font-headline mb-4">Send a News Tip</h1>
-        <p className="text-gray-400 text-lg">
+        <span className="text-xs font-bold uppercase tracking-widest text-dc-green">Newsroom</span>
+        <h1 className="font-headline font-black text-dc-text text-4xl mt-2 mb-4">Send a News Tip</h1>
+        <p className="text-dc-text-muted text-lg">
           Do you have a story that needs to be told? Share your tip with the Dhaka Chronicles investigative team.
           We take your privacy seriously.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white/[0.02] border border-white/10 rounded-2xl p-6 sm:p-8">
+      <form onSubmit={handleSubmit} className="glass p-8 rounded-2xl space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Subject <span className="text-red-500">*</span></label>
+          <label className="form-label" htmlFor="subject">Subject <span className="text-dc-red">*</span></label>
           <input
+            id="subject"
             required
             maxLength={200}
             value={form.subject}
             onChange={(e) => setForm({ ...form, subject: e.target.value })}
             placeholder="Brief summary of the tip"
-            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#00A651] focus:ring-1 focus:ring-[#00A651] outline-none"
+            className="form-input"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Description <span className="text-red-500">*</span></label>
+          <label className="form-label" htmlFor="description">Description <span className="text-dc-red">*</span></label>
           <textarea
+            id="description"
             required
             rows={6}
             maxLength={5000}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
             placeholder="Provide as much detail as possible. Who, what, when, where, and why?"
-            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#00A651] focus:ring-1 focus:ring-[#00A651] outline-none resize-y"
+            className="form-input resize-y"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Location (Optional)</label>
+          <label className="form-label" htmlFor="location">Location (Optional)</label>
           <input
+            id="location"
             value={form.location}
             onChange={(e) => setForm({ ...form, location: e.target.value })}
-            placeholder="City, neighborhood, or specific location"
-            className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#00A651] focus:ring-1 focus:ring-[#00A651] outline-none"
+            placeholder="City, neighbourhood, or specific location"
+            className="form-input"
           />
         </div>
 
-        <div className="border-t border-white/10 pt-6">
-          <div className="flex items-center gap-3 mb-6 bg-[#1a1a1a] p-4 rounded-lg border border-white/5">
+        <div className="border-t border-dc-border pt-5">
+          <label className="flex items-start gap-3 p-4 rounded-xl cursor-pointer select-none"
+            style={{ background: 'var(--dc-surface-2)' }}>
             <input
               type="checkbox"
               id="anonymous"
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.target.checked)}
-              className="w-5 h-5 accent-[#00A651] cursor-pointer"
+              className="mt-0.5 w-4 h-4 accent-[#00A651] cursor-pointer"
             />
-            <label htmlFor="anonymous" className="cursor-pointer text-gray-300 select-none">
-              <strong className="text-white block">Submit anonymously</strong>
-              <span className="text-sm text-gray-500">We will not collect or store your contact information.</span>
-            </label>
-          </div>
+            <span>
+              <strong className="block text-dc-text text-sm font-semibold">Submit anonymously</strong>
+              <span className="text-dc-text-muted text-sm">We will not collect or store your contact information.</span>
+            </span>
+          </label>
 
           {!isAnonymous && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Name</label>
-                <input
-                  value={form.tipsterName}
+                <label className="form-label" htmlFor="tipsterName">Name</label>
+                <input id="tipsterName" value={form.tipsterName}
                   onChange={(e) => setForm({ ...form, tipsterName: e.target.value })}
-                  className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#00A651] outline-none"
-                />
+                  className="form-input" placeholder="Your name" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
-                <input
-                  type="email"
-                  value={form.tipsterEmail}
+                <label className="form-label" htmlFor="tipsterEmail">Email</label>
+                <input id="tipsterEmail" type="email" value={form.tipsterEmail}
                   onChange={(e) => setForm({ ...form, tipsterEmail: e.target.value })}
-                  className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#00A651] outline-none"
-                />
+                  className="form-input" placeholder="your@email.com" />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
-                <input
-                  type="tel"
-                  value={form.tipsterPhone}
+                <label className="form-label" htmlFor="tipsterPhone">Phone Number</label>
+                <input id="tipsterPhone" type="tel" value={form.tipsterPhone}
                   onChange={(e) => setForm({ ...form, tipsterPhone: e.target.value })}
-                  className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#00A651] outline-none"
-                />
+                  className="form-input" placeholder="+880..." />
               </div>
             </div>
           )}
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-4 bg-[#00A651] hover:bg-[#009040] disabled:bg-[#00A651]/50 text-white font-bold rounded-lg transition-colors text-lg"
-        >
+        <button type="submit" disabled={loading} className="btn-primary w-full py-3 text-base flex items-center justify-center gap-2">
+          {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
           {loading ? 'Submitting securely...' : 'Submit News Tip'}
         </button>
       </form>
-    </main>
+    </div>
   )
 }

@@ -1,176 +1,346 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Clock, TrendingUp, ChevronRight, Flame } from 'lucide-react'
+import { TrendingUp, ChevronRight, Mail } from 'lucide-react'
+import { ArticleCard } from '@/components/article/ArticleCard'
+import { CityWidgets } from '@/components/widgets/CityWidgets'
+import { supabaseAdmin } from '@/lib/db/admin'
 
 export const metadata: Metadata = {
   title: 'Dhaka Chronicles – The Pulse of Bangladesh',
   description: 'Breaking news, in-depth analysis, and stories shaping Bangladesh.',
 }
 
-const HERO = {
-  id: '1', title: 'Bangladesh Achieves Record 8.2% GDP Growth in Q1 2026',
-  excerpt: 'The Bangladesh Bureau of Statistics confirmed the country\'s strongest quarterly growth on record, driven by garment exports and a booming digital services sector.',
-  category: 'Business', slug: 'bangladesh-gdp-growth-q1-2026',
-  image: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&auto=format&fit=crop',
-  author: 'Tahmid Ashfaque', date: 'April 29, 2026', readTime: '6 min read', is_breaking: true,
+export const revalidate = 60
+
+// ── Data types ──────────────────────────────────────────────────────────────
+
+interface ArticleRow {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  featured_image_url: string | null
+  published_at: string | null
+  reading_time: number | null
+  view_count: number
+  is_breaking: boolean
+  is_featured: boolean
+  category: { name: string; slug: string; color: string | null } | null
+  author: { full_name: string | null; avatar_url: string | null } | null
 }
 
-const FEATURED = [
-  { id: '2', title: 'Dhaka Metro Line 2 Construction Enters Final Phase, December Launch Confirmed', category: 'Infrastructure', slug: 'dhaka-metro-line-2-launch', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&auto=format&fit=crop', date: 'April 28, 2026', readTime: '4 min read' },
-  { id: '3', title: 'Bangladesh Cricket Board Names New Head Coach Ahead of World Cup', category: 'Sports', slug: 'bcb-new-head-coach', image: 'https://images.unsplash.com/photo-1540747913346-19212a4c1fe5?w=800&auto=format&fit=crop', date: 'April 27, 2026', readTime: '3 min read' },
-  { id: '4', title: 'Eid Celebrations Transform Dhaka Into a City of Light', category: 'Culture', slug: 'eid-celebrations-dhaka', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop', date: 'April 26, 2026', readTime: '5 min read' },
-]
-
-const LATEST = [
-  { id: '5', title: 'Parliament Approves New Digital Security Amendment Bill', category: 'Politics', slug: 'digital-security-amendment', date: 'Apr 29', readTime: '3 min' },
-  { id: '6', title: 'Dhaka Stock Exchange Hits All-Time High at 7,800 Points', category: 'Business', slug: 'dse-all-time-high', date: 'Apr 29', readTime: '2 min' },
-  { id: '7', title: 'PM Inaugurates 500-MW Solar Power Plant in Mymensingh', category: 'Energy', slug: 'solar-plant-mymensingh', date: 'Apr 28', readTime: '4 min' },
-  { id: '8', title: 'University Enrolment Hits Record High With 1.2M New Students', category: 'Education', slug: 'university-enrolment-record', date: 'Apr 28', readTime: '3 min' },
-  { id: '9', title: 'Startup Hub Launches Bangladesh\'s First AI Research Centre', category: 'Technology', slug: 'bangladesh-ai-research-centre', date: 'Apr 27', readTime: '5 min' },
-]
-
-const TRENDING = [
-  { rank: 1, title: 'Bangladesh vs India: Full Test Match Scorecard & Analysis', slug: 'bd-india-test', views: '42K' },
-  { rank: 2, title: 'New Visa Policy: Countries That Can Now Visit Bangladesh Visa-Free', slug: 'visa-free-policy', views: '38K' },
-  { rank: 3, title: 'Rohingya Crisis: Five Years On – What Has Changed?', slug: 'rohingya-five-years', views: '31K' },
-  { rank: 4, title: 'How Bangla is Becoming the Language of Tech Startups', slug: 'bangla-tech', views: '24K' },
-  { rank: 5, title: '10 Dhaka Restaurants You Must Try This Year', slug: 'dhaka-restaurants', views: '19K' },
-]
-
-const CAT_COLORS: Record<string, string> = {
-  Politics: '#F42A41', Business: '#00A651', Sports: '#F59E0B',
-  Culture: '#8B5CF6', Technology: '#06B6D4', Education: '#EC4899',
-  Infrastructure: '#3B82F6', Energy: '#10B981',
+interface CategoryRow {
+  id: string
+  name: string
+  slug: string
+  color: string | null
+  display_order: number
+  article_count: number
 }
 
-function Cat({ name }: { name: string }) {
-  return <span className="text-xs font-bold uppercase tracking-widest" style={{ color: CAT_COLORS[name] || '#00A651' }}>{name}</span>
+const ARTICLE_SELECT = `
+  id, title, slug, excerpt, featured_image_url, published_at,
+  reading_time, view_count, is_breaking, is_featured,
+  category:categories(name, slug, color),
+  author:users(full_name, avatar_url)
+`
+
+// ── Data fetching ────────────────────────────────────────────────────────────
+
+async function getHeroArticle(): Promise<ArticleRow | null> {
+  try {
+    // Prefer a featured article; fall back to the most-recent published one
+    const { data: featured } = await supabaseAdmin
+      .from('articles')
+      .select(ARTICLE_SELECT)
+      .eq('status', 'published')
+      .eq('is_featured', true)
+      .order('published_at', { ascending: false })
+      .limit(1)
+      .single()
+    if (featured) return featured as unknown as ArticleRow
+
+    const { data: latest } = await supabaseAdmin
+      .from('articles')
+      .select(ARTICLE_SELECT)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(1)
+      .single()
+    return (latest as unknown as ArticleRow) ?? null
+  } catch { return null }
 }
 
-export default function HomePage() {
+async function getFeaturedArticles(excludeId?: string): Promise<ArticleRow[]> {
+  try {
+    let query = supabaseAdmin
+      .from('articles')
+      .select(ARTICLE_SELECT)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(excludeId ? 4 : 3)
+    if (excludeId) query = query.neq('id', excludeId)
+    const { data } = await query
+    return ((data as unknown as ArticleRow[]) ?? []).slice(0, 3)
+  } catch { return [] }
+}
+
+async function getLatestArticles(excludeIds: string[]): Promise<ArticleRow[]> {
+  try {
+    let query = supabaseAdmin
+      .from('articles')
+      .select(ARTICLE_SELECT)
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(excludeIds.length > 0 ? 12 : 8)
+    const { data } = await query
+    const rows = (data as unknown as ArticleRow[]) ?? []
+    return rows.filter(a => !excludeIds.includes(a.id)).slice(0, 8)
+  } catch { return [] }
+}
+
+async function getTrendingArticles(excludeIds: string[]): Promise<ArticleRow[]> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('articles')
+      .select(ARTICLE_SELECT)
+      .eq('status', 'published')
+      .order('view_count', { ascending: false })
+      .limit(10)
+    const rows = (data as unknown as ArticleRow[]) ?? []
+    return rows.filter(a => !excludeIds.includes(a.id)).slice(0, 5)
+  } catch { return [] }
+}
+
+async function getCategories(): Promise<CategoryRow[]> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('categories')
+      .select('id, name, slug, color, display_order')
+      .order('display_order', { ascending: true })
+      .limit(8)
+    if (!data || data.length === 0) return []
+
+    // Get article counts per category
+    const ids = (data as CategoryRow[]).map(c => c.id)
+    const counts: Record<string, number> = {}
+    await Promise.all(
+      ids.map(async (catId) => {
+        const { count } = await supabaseAdmin
+          .from('articles')
+          .select('id', { count: 'exact', head: true })
+          .eq('category_id', catId)
+          .eq('status', 'published')
+        counts[catId] = count ?? 0
+      })
+    )
+
+    return (data as CategoryRow[]).map(c => ({ ...c, article_count: counts[c.id] ?? 0 }))
+  } catch { return [] }
+}
+
+// ── Fallback data (when DB is empty) ─────────────────────────────────────────
+
+const FALLBACK_CATEGORIES = [
+  { id: '1', name: 'Politics', slug: 'politics', color: '#F42A41', display_order: 0, article_count: 0 },
+  { id: '2', name: 'Business', slug: 'business', color: '#00A651', display_order: 1, article_count: 0 },
+  { id: '3', name: 'Sports', slug: 'sports', color: '#F59E0B', display_order: 2, article_count: 0 },
+  { id: '4', name: 'Culture', slug: 'culture', color: '#8B5CF6', display_order: 3, article_count: 0 },
+  { id: '5', name: 'Technology', slug: 'technology', color: '#06B6D4', display_order: 4, article_count: 0 },
+  { id: '6', name: 'Education', slug: 'education', color: '#EC4899', display_order: 5, article_count: 0 },
+]
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+export default async function HomePage() {
+  const hero = await getHeroArticle()
+  const featured = await getFeaturedArticles(hero?.id)
+  const excludedIds = [hero?.id, ...featured.map(a => a.id)].filter(Boolean) as string[]
+  const [latest, trending, categories] = await Promise.all([
+    getLatestArticles(excludedIds),
+    getTrendingArticles(excludedIds),
+    getCategories(),
+  ])
+
+  const displayCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
-      {/* Hero + Featured */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-        <Link href={`/news/${HERO.slug}`} className="lg:col-span-2 group relative overflow-hidden rounded-2xl block">
-          <div className="aspect-[16/9] relative">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={HERO.image} alt={HERO.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-            <div className="flex items-center gap-3 mb-3">
-              {HERO.is_breaking && <span className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-dc-red"><Flame className="w-3.5 h-3.5" />Breaking</span>}
-              <Cat name={HERO.category} />
-            </div>
-            <h1 className="font-headline font-bold text-white text-2xl sm:text-3xl leading-tight mb-3 group-hover:text-dc-green transition-colors">{HERO.title}</h1>
-            <p className="text-dc-text-muted text-sm sm:text-base line-clamp-2 mb-4 hidden sm:block">{HERO.excerpt}</p>
-            <div className="flex items-center gap-4 text-xs text-dc-text-muted">
-              <span className="font-medium text-white">{HERO.author}</span>
-              <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{HERO.readTime}</span>
-              <span>{HERO.date}</span>
-            </div>
-          </div>
-        </Link>
+      {/* ── City Widgets ── */}
+      <CityWidgets />
 
-        <div className="flex flex-col gap-4">
-          {FEATURED.map((a) => (
-            <Link key={a.id} href={`/news/${a.slug}`} className="group article-card flex gap-4 p-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={a.image} alt={a.title} className="w-24 h-20 object-cover rounded-lg shrink-0" />
-              <div className="flex-1 min-w-0 py-1">
-                <Cat name={a.category} />
-                <h3 className="font-headline font-bold text-white text-sm leading-tight mt-1 line-clamp-2 group-hover:text-dc-green transition-colors">{a.title}</h3>
-                <div className="flex items-center gap-2 mt-2 text-xs text-dc-text-muted">
-                  <span>{a.date}</span><span>·</span><span>{a.readTime}</span>
-                </div>
+      {/* ── Hero + Featured ── */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
+        {/* Hero */}
+        <div className="lg:col-span-2">
+          {hero ? (
+            <ArticleCard variant="hero" {...hero} />
+          ) : (
+            <div className="aspect-[16/9] sm:aspect-[2/1] rounded-2xl flex items-center justify-center" style={{ background: 'var(--dc-surface)' }}>
+              <div className="text-center px-6">
+                <p className="font-headline font-bold text-xl mb-2" style={{ color: 'var(--dc-text)' }}>Welcome to Dhaka Chronicles</p>
+                <p style={{ color: 'var(--dc-text-muted)' }} className="text-sm">Bangladesh&apos;s trusted news source. Articles will appear here once published.</p>
               </div>
-            </Link>
-          ))}
+            </div>
+          )}
+        </div>
+
+        {/* Featured sidebar */}
+        <div className="flex flex-col gap-3">
+          {featured.length > 0 ? (
+            featured.map(a => <ArticleCard key={a.id} variant="featured" {...a} />)
+          ) : (
+            <div className="flex-1 rounded-xl flex items-center justify-center p-6" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}>
+              <p className="text-sm text-center" style={{ color: 'var(--dc-text-muted)' }}>Featured stories will appear here</p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Latest + Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-14">
+      {/* ── Latest + Trending ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+
+        {/* Latest stories */}
         <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-headline font-bold text-white text-xl flex items-center gap-2">
-              <span className="w-1 h-6 bg-dc-green rounded-full inline-block" />Latest Stories
-            </h2>
-            <Link href="/news" className="text-dc-green text-sm font-medium hover:text-white transition-colors flex items-center gap-1">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="section-heading">Latest Stories</h2>
+            <Link
+              href="/news"
+              className="text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all text-dc-green"
+            >
               View all <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="divide-y divide-dc-border">
-            {LATEST.map((a) => (
-              <Link key={a.id} href={`/news/${a.slug}`} className="group flex items-start gap-4 py-5">
-                <div className="flex-1 min-w-0">
-                  <Cat name={a.category} />
-                  <h3 className="font-headline font-semibold text-white mt-1 text-base leading-snug group-hover:text-dc-green transition-colors">{a.title}</h3>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-dc-text-muted">
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{a.readTime}</span>
-                    <span>{a.date}</span>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-dc-text-muted group-hover:text-dc-green shrink-0 mt-1 transition-colors" />
-              </Link>
-            ))}
-          </div>
+
+          {latest.length > 0 ? (
+            <div>
+              {latest.map(a => (
+                <ArticleCard key={a.id} variant="list" {...a} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-16 text-center rounded-xl" style={{ border: '1px dashed var(--dc-border)' }}>
+              <p style={{ color: 'var(--dc-text-muted)' }}>No articles published yet.</p>
+            </div>
+          )}
         </div>
 
-        <aside className="space-y-8">
-          <div className="glass p-6 rounded-xl">
-            <h3 className="font-headline font-bold text-white mb-5 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-dc-green" />Trending Now
+        {/* Trending + Newsletter */}
+        <aside className="space-y-6">
+          {/* Trending */}
+          <div className="glass p-5 rounded-xl">
+            <h3 className="font-headline font-bold text-base flex items-center gap-2 mb-5" style={{ color: 'var(--dc-text)' }}>
+              <TrendingUp className="w-4 h-4 text-dc-green" />
+              Most Read
             </h3>
-            <ol className="space-y-4">
-              {TRENDING.map((item) => (
-                <li key={item.rank}>
-                  <Link href={`/news/${item.slug}`} className="group flex items-start gap-3">
-                    <span className="text-3xl font-headline font-black text-dc-surface-2 leading-none w-8 shrink-0 select-none">{String(item.rank).padStart(2, '0')}</span>
-                    <div>
-                      <p className="text-white text-sm font-medium leading-snug group-hover:text-dc-green transition-colors line-clamp-2">{item.title}</p>
-                      <p className="text-dc-text-muted text-xs mt-1">{item.views} views</p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ol>
+            {trending.length > 0 ? (
+              <ol className="space-y-4">
+                {trending.map((item, i) => (
+                  <li key={item.id}>
+                    <Link
+                      href={`/news/${item.slug}`}
+                      className="group flex items-start gap-3"
+                    >
+                      <span
+                        className="text-2xl font-headline font-black leading-none w-8 shrink-0 select-none"
+                        style={{ color: 'var(--dc-border)' }}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <div>
+                        <p
+                          className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-dc-green transition-colors"
+                          style={{ color: 'var(--dc-text)' }}
+                        >
+                          {item.title}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1 text-xs" style={{ color: 'var(--dc-text-muted)' }}>
+                          {item.category && <span>{item.category.name}</span>}
+                          {item.view_count > 0 && (
+                            <>
+                              <span>·</span>
+                              <span>{item.view_count.toLocaleString()} views</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-sm" style={{ color: 'var(--dc-text-muted)' }}>
+                Trending articles will appear here.
+              </p>
+            )}
           </div>
 
-          <div className="glass p-6 rounded-xl">
-            <h3 className="font-headline font-bold text-white mb-2">Morning Briefing</h3>
-            <p className="text-dc-text-muted text-sm mb-4">Top 5 stories in your inbox at 7 AM daily.</p>
-            <form className="space-y-3">
-              <input type="email" placeholder="your@email.com" className="form-input text-sm" />
-              <button type="button" className="btn-primary w-full py-2.5 text-sm">Subscribe Free</button>
+          {/* Newsletter */}
+          <div className="glass p-5 rounded-xl">
+            <div className="flex items-center gap-2 mb-2">
+              <Mail className="w-4 h-4 text-dc-green" />
+              <h3 className="font-headline font-bold text-sm" style={{ color: 'var(--dc-text)' }}>
+                Morning Briefing
+              </h3>
+            </div>
+            <p className="text-sm mb-4" style={{ color: 'var(--dc-text-muted)' }}>
+              Top 5 stories in your inbox at 7 AM daily.
+            </p>
+            <form action="/api/newsletter/subscribe" method="POST" className="space-y-2.5">
+              <input
+                type="email"
+                name="email"
+                placeholder="your@email.com"
+                required
+                className="form-input text-sm"
+              />
+              <button type="submit" className="btn-primary w-full py-2.5 text-sm">
+                Subscribe Free
+              </button>
             </form>
           </div>
         </aside>
       </div>
 
-      {/* Category Spotlights */}
-      <section className="mb-14">
-        <h2 className="font-headline font-bold text-white text-xl mb-6 flex items-center gap-2">
-          <span className="w-1 h-6 bg-dc-green rounded-full inline-block" />Explore by Section
-        </h2>
+      {/* ── Explore by Section ── */}
+      <section className="mb-10">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="section-heading">Explore by Section</h2>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {[
-            { name: 'Politics', slug: 'politics', color: '#F42A41', articles: 142 },
-            { name: 'Business', slug: 'business', color: '#00A651', articles: 98 },
-            { name: 'Sports', slug: 'sports', color: '#F59E0B', articles: 211 },
-            { name: 'Culture', slug: 'culture', color: '#8B5CF6', articles: 67 },
-            { name: 'Technology', slug: 'technology', color: '#06B6D4', articles: 33 },
-            { name: 'Education', slug: 'education', color: '#EC4899', articles: 44 },
-          ].map((cat) => (
-            <Link key={cat.slug} href={`/category/${cat.slug}`}
-              className="glass p-5 rounded-xl flex flex-col items-center gap-2 text-center hover:scale-105 transition-transform group">
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${cat.color}20` }}>
-                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: cat.color }} />
+          {displayCategories.slice(0, 6).map((cat) => (
+            <Link
+              key={cat.slug}
+              href={`/category/${cat.slug}`}
+              className="group flex flex-col items-center gap-2.5 p-4 rounded-xl text-center transition-all hover:shadow-md"
+              style={{
+                background: 'var(--dc-surface)',
+                border: '1px solid var(--dc-border)',
+              }}
+            >
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: `${cat.color ?? '#00A651'}15` }}
+              >
+                <span
+                  className="w-3.5 h-3.5 rounded-full"
+                  style={{ background: cat.color ?? '#00A651' }}
+                />
               </div>
-              <span className="font-bold text-sm text-white group-hover:text-dc-green transition-colors">{cat.name}</span>
-              <span className="text-xs text-dc-text-muted">{cat.articles} stories</span>
+              <div>
+                <p
+                  className="font-bold text-sm group-hover:text-dc-green transition-colors"
+                  style={{ color: 'var(--dc-text)' }}
+                >
+                  {cat.name}
+                </p>
+                {cat.article_count > 0 && (
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--dc-text-muted)' }}>
+                    {cat.article_count} {cat.article_count === 1 ? 'story' : 'stories'}
+                  </p>
+                )}
+              </div>
             </Link>
           ))}
         </div>

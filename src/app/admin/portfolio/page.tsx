@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Trash2, Edit2, CheckCircle2, XCircle } from 'lucide-react'
+import { Plus, Trash2, Edit2, CheckCircle2, XCircle, Loader2, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
 
 interface PortfolioItem {
   id: string
@@ -20,16 +19,21 @@ interface PortfolioItem {
   created_at: string
 }
 
+const CATEGORIES = ['Fashion', 'F&B', 'Tech', 'Lifestyle', 'Corporate', 'Media', 'NGO']
+
+const EMPTY_FORM = {
+  brand_name: '', project_name: '', category: 'Fashion', description: '', outcome: '',
+  logo_url: '', featured_image_url: '', external_link: '', is_published: true, display_order: 0,
+}
+
 export default function AdminPortfolioPage() {
   const [items, setItems] = useState<PortfolioItem[]>([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
-  
-  const [form, setForm] = useState({
-    brand_name: '', project_name: '', category: 'Fashion', description: '', outcome: '',
-    logo_url: '', featured_image_url: '', external_link: '', is_published: true, display_order: 0
-  })
+  const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [form, setForm] = useState(EMPTY_FORM)
 
   const fetchItems = useCallback(async () => {
     setLoading(true)
@@ -37,7 +41,7 @@ export default function AdminPortfolioPage() {
       const res = await fetch('/api/admin/portfolio')
       if (res.ok) {
         const data = await res.json()
-        setItems(data.items)
+        setItems(data.items ?? [])
       }
     } finally {
       setLoading(false)
@@ -47,10 +51,7 @@ export default function AdminPortfolioPage() {
   useEffect(() => { fetchItems() }, [fetchItems])
 
   function resetForm() {
-    setForm({
-      brand_name: '', project_name: '', category: 'Fashion', description: '', outcome: '',
-      logo_url: '', featured_image_url: '', external_link: '', is_published: true, display_order: 0
-    })
+    setForm(EMPTY_FORM)
     setEditingId(null)
     setShowAdd(false)
   }
@@ -61,12 +62,12 @@ export default function AdminPortfolioPage() {
       project_name: item.project_name,
       category: item.category,
       description: item.description,
-      outcome: item.outcome || '',
-      logo_url: item.logo_url || '',
-      featured_image_url: item.featured_image_url || '',
-      external_link: item.external_link || '',
+      outcome: item.outcome ?? '',
+      logo_url: item.logo_url ?? '',
+      featured_image_url: item.featured_image_url ?? '',
+      external_link: item.external_link ?? '',
       is_published: item.is_published,
-      display_order: item.display_order
+      display_order: item.display_order,
     })
     setEditingId(item.id)
     setShowAdd(true)
@@ -74,140 +75,154 @@ export default function AdminPortfolioPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    setSaving(true)
     try {
       const url = editingId ? `/api/admin/portfolio/${editingId}` : '/api/admin/portfolio'
       const method = editingId ? 'PATCH' : 'POST'
-      
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       })
-
-      if (res.ok) {
-        toast.success(editingId ? 'Item updated' : 'Item created')
-        resetForm()
-        fetchItems()
-      } else {
-        toast.error('Operation failed')
-      }
-    } catch {
-      toast.error('Network error')
+      if (!res.ok) throw new Error('Operation failed')
+      toast.success(editingId ? 'Item updated' : 'Item created')
+      resetForm()
+      fetchItems()
+    } catch (err: any) {
+      toast.error(err.message)
+    } finally {
+      setSaving(false)
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this item?')) return
+    if (!confirm('Delete this portfolio item?')) return
+    setDeletingId(id)
     try {
       const res = await fetch(`/api/admin/portfolio/${id}`, { method: 'DELETE' })
-      if (res.ok) {
-        toast.success('Item deleted')
-        setItems(items.filter(i => i.id !== id))
-      }
+      if (!res.ok) throw new Error()
+      toast.success('Item deleted')
+      setItems(prev => prev.filter(i => i.id !== id))
     } catch {
-      toast.error('Network error')
+      toast.error('Failed to delete item')
+    } finally {
+      setDeletingId(null)
     }
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Portfolio Management</h1>
-          <p className="text-gray-400 text-sm mt-1">Manage brand collaborations and case studies.</p>
+          <h1 className="text-2xl font-headline font-bold text-white">Portfolio</h1>
+          <p className="text-dc-muted text-sm mt-1">Manage brand collaborations and case studies.</p>
         </div>
         <button
           onClick={() => showAdd ? resetForm() : setShowAdd(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#00A651] hover:bg-[#009040] text-white text-sm font-semibold rounded-lg transition-colors"
+          className="btn-primary gap-2"
         >
-          {showAdd ? 'Cancel' : <><Plus className="w-4 h-4" /> Add Item</>}
+          {showAdd ? <><X className="w-4 h-4" /> Cancel</> : <><Plus className="w-4 h-4" /> Add Item</>}
         </button>
       </div>
 
       {showAdd && (
-        <form onSubmit={handleSubmit} className="bg-[#111] border border-white/10 rounded-xl p-6 mb-8 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={handleSubmit} className="glass rounded-xl p-6 space-y-5">
+          <h2 className="font-headline font-bold text-white border-b border-dc-border pb-3">
+            {editingId ? 'Edit Item' : 'New Portfolio Item'}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Brand Name *</label>
-              <input required value={form.brand_name} onChange={e => setForm({...form, brand_name: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white" />
+              <label className="form-label">Brand Name *</label>
+              <input required value={form.brand_name} onChange={e => setForm(f => ({ ...f, brand_name: e.target.value }))} className="form-input" />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Project Name *</label>
-              <input required value={form.project_name} onChange={e => setForm({...form, project_name: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white" />
+              <label className="form-label">Project Name *</label>
+              <input required value={form.project_name} onChange={e => setForm(f => ({ ...f, project_name: e.target.value }))} className="form-input" />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Category *</label>
-              <select value={form.category} onChange={e => setForm({...form, category: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white">
-                <option value="Fashion">Fashion</option>
-                <option value="F&B">F&B</option>
-                <option value="Tech">Tech</option>
-                <option value="Lifestyle">Lifestyle</option>
-                <option value="Corporate">Corporate</option>
+              <label className="form-label">Category *</label>
+              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="form-input">
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">External Link</label>
-              <input value={form.external_link} onChange={e => setForm({...form, external_link: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white" placeholder="https://..." />
+              <label className="form-label">External Link</label>
+              <input value={form.external_link} onChange={e => setForm(f => ({ ...f, external_link: e.target.value }))} className="form-input" placeholder="https://..." />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-gray-400 mb-1">Description *</label>
-              <textarea required rows={3} value={form.description} onChange={e => setForm({...form, description: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white resize-none" />
+              <label className="form-label">Description *</label>
+              <textarea required rows={3} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="form-input resize-none" />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-gray-400 mb-1">Outcome / Results</label>
-              <input value={form.outcome} onChange={e => setForm({...form, outcome: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white" placeholder="e.g. 50% increase in engagement" />
+              <label className="form-label">Outcome / Results</label>
+              <input value={form.outcome} onChange={e => setForm(f => ({ ...f, outcome: e.target.value }))} className="form-input" placeholder="e.g. 50% increase in engagement" />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Logo URL</label>
-              <input value={form.logo_url} onChange={e => setForm({...form, logo_url: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white" />
+              <label className="form-label">Logo URL</label>
+              <input value={form.logo_url} onChange={e => setForm(f => ({ ...f, logo_url: e.target.value }))} className="form-input" />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Featured Image URL</label>
-              <input value={form.featured_image_url} onChange={e => setForm({...form, featured_image_url: e.target.value})} className="w-full bg-black border border-white/10 rounded-lg px-3 py-2 text-white" />
+              <label className="form-label">Featured Image URL</label>
+              <input value={form.featured_image_url} onChange={e => setForm(f => ({ ...f, featured_image_url: e.target.value }))} className="form-input" />
             </div>
             <div className="flex items-center gap-6">
-              <label className="flex items-center gap-2 text-gray-300">
-                <input type="checkbox" checked={form.is_published} onChange={e => setForm({...form, is_published: e.target.checked})} className="accent-[#00A651]" />
-                Published
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.is_published} onChange={e => setForm(f => ({ ...f, is_published: e.target.checked }))} className="w-4 h-4 accent-dc-green" />
+                <span className="text-sm text-dc-text">Published</span>
               </label>
-              <label className="flex items-center gap-2 text-gray-300">
-                Order: <input type="number" value={form.display_order} onChange={e => setForm({...form, display_order: Number(e.target.value)})} className="w-16 bg-black border border-white/10 rounded px-2 py-1 text-white" />
-              </label>
+              <div className="flex items-center gap-2">
+                <span className="form-label mb-0">Display Order</span>
+                <input type="number" value={form.display_order} onChange={e => setForm(f => ({ ...f, display_order: Number(e.target.value) }))} className="form-input w-20 text-sm" />
+              </div>
             </div>
           </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-            <button type="button" onClick={resetForm} className="px-4 py-2 border border-white/10 text-gray-400 hover:text-white rounded-lg">Cancel</button>
-            <button type="submit" className="px-4 py-2 bg-[#00A651] hover:bg-[#009040] text-white font-semibold rounded-lg">
-              {editingId ? 'Update Item' : 'Create Item'}
+          <div className="flex justify-end gap-3 pt-3 border-t border-dc-border">
+            <button type="button" onClick={resetForm} className="btn-ghost">Cancel</button>
+            <button type="submit" disabled={saving} className="btn-primary gap-2">
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              {saving ? 'Saving…' : editingId ? 'Update Item' : 'Create Item'}
             </button>
           </div>
         </form>
       )}
 
       {loading ? (
-        <div className="text-gray-500">Loading...</div>
+        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-dc-green" /></div>
+      ) : items.length === 0 ? (
+        <div className="glass p-12 rounded-xl text-center">
+          <p className="text-dc-muted">No portfolio items yet. Add your first brand collaboration.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {items.map(item => (
-            <div key={item.id} className="bg-[#111] border border-white/10 rounded-xl overflow-hidden flex flex-col">
+            <div key={item.id} className="glass rounded-xl overflow-hidden flex flex-col group">
               {item.featured_image_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={item.featured_image_url} alt={item.project_name} className="w-full h-40 object-cover" />
               ) : (
-                <div className="w-full h-40 bg-black/50 flex items-center justify-center text-gray-600 font-medium">No Image</div>
+                <div className="w-full h-40 bg-dc-surface-2 flex items-center justify-center text-dc-muted text-sm">No Image</div>
               )}
               <div className="p-5 flex flex-col flex-1">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-xs font-bold text-[#00A651] uppercase">{item.category}</span>
-                  {item.is_published ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <XCircle className="w-4 h-4 text-gray-500" />}
+                <div className="flex items-start justify-between mb-2">
+                  <span className="text-xs font-bold text-dc-green uppercase">{item.category}</span>
+                  {item.is_published
+                    ? <CheckCircle2 className="w-4 h-4 text-dc-green" />
+                    : <XCircle className="w-4 h-4 text-dc-muted" />}
                 </div>
-                <h3 className="font-bold text-white text-lg">{item.project_name}</h3>
-                <p className="text-gray-400 text-sm mb-4">by {item.brand_name}</p>
-                <div className="mt-auto flex justify-between items-center border-t border-white/10 pt-4">
-                  <span className="text-xs text-gray-500">Order: {item.display_order}</span>
-                  <div className="flex gap-2">
-                    <button onClick={() => handleEdit(item)} className="p-1.5 text-gray-400 hover:text-white hover:bg-white/5 rounded"><Edit2 className="w-4 h-4" /></button>
-                    <button onClick={() => handleDelete(item.id)} className="p-1.5 text-red-500 hover:text-red-400 hover:bg-red-500/10 rounded"><Trash2 className="w-4 h-4" /></button>
+                <h3 className="font-headline font-bold text-white text-lg leading-snug">{item.project_name}</h3>
+                <p className="text-dc-muted text-sm mb-3">by {item.brand_name}</p>
+                {item.outcome && (
+                  <p className="text-xs text-dc-green bg-dc-green/10 rounded px-2 py-1 mb-3 inline-block">{item.outcome}</p>
+                )}
+                <div className="mt-auto flex justify-between items-center border-t border-dc-border pt-3">
+                  <span className="text-xs text-dc-muted">Order: {item.display_order}</span>
+                  <div className="flex gap-1">
+                    <button onClick={() => handleEdit(item)} className="p-1.5 text-dc-muted hover:text-dc-green hover:bg-dc-surface-2 rounded transition-colors">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDelete(item.id)} disabled={deletingId === item.id} className="p-1.5 text-dc-muted hover:text-dc-red hover:bg-dc-red/10 rounded transition-colors disabled:opacity-50">
+                      {deletingId === item.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
               </div>

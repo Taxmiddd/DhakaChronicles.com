@@ -1,21 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, BarChart2 } from 'lucide-react'
+import { Plus, Trash2, BarChart2, Loader2, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 
 interface PollOption {
   id?: string
   option_text: string
-  option_text_bn?: string
   vote_count?: number
 }
 
 interface Poll {
   id: string
   question: string
-  poll_type: string
   is_active: boolean
   total_votes: number
   created_at: string
@@ -26,15 +24,12 @@ export default function AdminPollsPage() {
   const [polls, setPolls] = useState<Poll[]>([])
   const [loading, setLoading] = useState(true)
   const [showAdd, setShowAdd] = useState(false)
-  
-  // Form State
   const [question, setQuestion] = useState('')
   const [options, setOptions] = useState<PollOption[]>([{ option_text: '' }, { option_text: '' }])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchPolls()
-  }, [])
+  useEffect(() => { fetchPolls() }, [])
 
   async function fetchPolls() {
     setLoading(true)
@@ -42,7 +37,7 @@ export default function AdminPollsPage() {
       const res = await fetch('/api/admin/polls')
       if (res.ok) {
         const data = await res.json()
-        setPolls(data.polls)
+        setPolls(data.polls ?? [])
       }
     } finally {
       setLoading(false)
@@ -51,111 +46,114 @@ export default function AdminPollsPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
-    const validOptions = options.filter(o => o.option_text.trim() !== '')
+    const validOptions = options.filter(o => o.option_text.trim())
     if (validOptions.length < 2) {
       toast.error('Please provide at least 2 options')
       return
     }
-
     setIsSubmitting(true)
     try {
       const res = await fetch('/api/admin/polls', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question,
-          options: validOptions,
-          is_active: true
-        })
+        body: JSON.stringify({ question, options: validOptions, is_active: true }),
       })
-
-      if (res.ok) {
-        toast.success('Poll created successfully')
-        setShowAdd(false)
-        setQuestion('')
-        setOptions([{ option_text: '' }, { option_text: '' }])
-        fetchPolls()
-      } else {
-        const data = await res.json()
-        toast.error(data.error || 'Failed to create poll')
-      }
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to create poll')
+      toast.success('Poll created')
+      setShowAdd(false)
+      setQuestion('')
+      setOptions([{ option_text: '' }, { option_text: '' }])
+      fetchPolls()
+    } catch (err: any) {
+      toast.error(err.message)
     } finally {
       setIsSubmitting(false)
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this poll?')) return
-    
+    if (!confirm('Delete this poll?')) return
+    setDeletingId(id)
     try {
       const res = await fetch(`/api/polls/${id}`, { method: 'DELETE' })
-      if (res.ok) {
-        toast.success('Poll deleted')
-        setPolls(polls.filter(p => p.id !== id))
-      } else {
-        toast.error('Failed to delete poll')
-      }
+      if (!res.ok) throw new Error()
+      toast.success('Poll deleted')
+      setPolls(prev => prev.filter(p => p.id !== id))
     } catch {
-      toast.error('Network error')
+      toast.error('Failed to delete poll')
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  async function handleToggleActive(poll: Poll) {
+    try {
+      const res = await fetch(`/api/polls/${poll.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: !poll.is_active }),
+      })
+      if (!res.ok) throw new Error()
+      setPolls(prev => prev.map(p => p.id === poll.id ? { ...p, is_active: !p.is_active } : p))
+      toast.success(poll.is_active ? 'Poll closed' : 'Poll activated')
+    } catch {
+      toast.error('Failed to update poll')
     }
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <BarChart2 className="w-6 h-6 text-[#00A651]" />
-            Polls
+          <h1 className="text-2xl font-headline font-bold text-white flex items-center gap-2">
+            <BarChart2 className="w-6 h-6 text-dc-green" /> Polls
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Manage interactive polls for your readers.</p>
+          <p className="text-dc-muted text-sm mt-1">Manage interactive polls for your readers.</p>
         </div>
-        <button
-          onClick={() => setShowAdd(!showAdd)}
-          className="flex items-center gap-2 px-4 py-2 bg-[#00A651] hover:bg-[#009040] text-white text-sm font-semibold rounded-lg transition-colors"
-        >
-          {showAdd ? 'Cancel' : <><Plus className="w-4 h-4" /> Create Poll</>}
+        <button onClick={() => setShowAdd(v => !v)} className="btn-primary gap-2">
+          {showAdd ? <><X className="w-4 h-4" /> Cancel</> : <><Plus className="w-4 h-4" /> Create Poll</>}
         </button>
       </div>
 
+      {/* Create Form */}
       {showAdd && (
-        <div className="bg-[#111] border border-white/10 rounded-xl p-6 mb-8">
-          <h2 className="text-xl font-bold text-white mb-4">Create New Poll</h2>
-          <form onSubmit={handleCreate} className="space-y-6 max-w-2xl">
+        <div className="glass rounded-xl p-6">
+          <h2 className="text-lg font-headline font-bold text-white mb-5">New Poll</h2>
+          <form onSubmit={handleCreate} className="space-y-5 max-w-2xl">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Question</label>
+              <label className="form-label">Question *</label>
               <input
                 required
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
+                className="form-input"
                 placeholder="What is your opinion on...?"
-                className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#00A651]"
               />
             </div>
-            
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Options</label>
-              <div className="space-y-3">
-                {options.map((opt, index) => (
-                  <div key={index} className="flex gap-3">
+              <label className="form-label">Options</label>
+              <div className="space-y-2">
+                {options.map((opt, i) => (
+                  <div key={i} className="flex gap-2">
                     <input
-                      required={index < 2}
+                      required={i < 2}
                       value={opt.option_text}
                       onChange={e => {
-                        const newOpts = [...options]
-                        newOpts[index].option_text = e.target.value
-                        setOptions(newOpts)
+                        const next = [...options]
+                        next[i].option_text = e.target.value
+                        setOptions(next)
                       }}
-                      placeholder={`Option ${index + 1}`}
-                      className="flex-1 bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#00A651]"
+                      placeholder={`Option ${i + 1}`}
+                      className="form-input flex-1"
                     />
                     {options.length > 2 && (
                       <button
                         type="button"
-                        onClick={() => setOptions(options.filter((_, i) => i !== index))}
-                        className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg"
+                        onClick={() => setOptions(options.filter((_, idx) => idx !== i))}
+                        className="p-2 text-dc-red hover:bg-dc-red/10 rounded-lg"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <X className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -164,67 +162,79 @@ export default function AdminPollsPage() {
               <button
                 type="button"
                 onClick={() => setOptions([...options, { option_text: '' }])}
-                className="mt-3 text-sm text-[#00A651] hover:underline flex items-center gap-1"
+                className="mt-2 text-sm text-dc-green hover:underline flex items-center gap-1"
               >
-                <Plus className="w-4 h-4" /> Add another option
+                <Plus className="w-4 h-4" /> Add option
               </button>
             </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-6 py-2 bg-[#00A651] hover:bg-[#009040] disabled:opacity-50 text-white font-semibold rounded-lg transition-colors"
-            >
-              {isSubmitting ? 'Creating...' : 'Create Poll'}
+            <button type="submit" disabled={isSubmitting} className="btn-primary gap-2">
+              {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <BarChart2 className="w-4 h-4" />}
+              {isSubmitting ? 'Creating…' : 'Create Poll'}
             </button>
           </form>
         </div>
       )}
 
-      {/* List of Polls */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {loading ? (
-          <p className="text-gray-500">Loading polls...</p>
-        ) : polls.length === 0 ? (
-          <p className="text-gray-500">No polls created yet.</p>
-        ) : (
-          polls.map(poll => (
-            <div key={poll.id} className="bg-[#111] border border-white/10 rounded-xl p-5 flex flex-col">
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="font-bold text-lg text-white">{poll.question}</h3>
-                <span className={`px-2 py-0.5 rounded text-xs font-medium ${poll.is_active ? 'bg-green-500/10 text-green-500' : 'bg-gray-500/10 text-gray-500'}`}>
+      {/* Polls List */}
+      {loading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-dc-green" />
+        </div>
+      ) : polls.length === 0 ? (
+        <div className="glass p-12 rounded-xl text-center">
+          <BarChart2 className="w-12 h-12 mx-auto mb-3 opacity-20 text-dc-muted" />
+          <p className="text-dc-muted">No polls yet. Create your first one.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {polls.map(poll => (
+            <div key={poll.id} className="glass rounded-xl p-5 flex flex-col">
+              <div className="flex items-start justify-between mb-3 gap-3">
+                <h3 className="font-headline font-bold text-white leading-snug flex-1">{poll.question}</h3>
+                <button
+                  onClick={() => handleToggleActive(poll)}
+                  className={`shrink-0 px-2 py-0.5 rounded text-xs font-bold border transition-colors ${
+                    poll.is_active
+                      ? 'bg-dc-green/10 text-dc-green border-dc-green/20 hover:bg-dc-green/20'
+                      : 'bg-dc-surface-2 text-dc-muted border-dc-border hover:bg-dc-surface'
+                  }`}
+                >
                   {poll.is_active ? 'Active' : 'Closed'}
-                </span>
+                </button>
               </div>
-              
+
               <div className="space-y-2 mb-4 flex-1">
                 {poll.options?.map(opt => {
-                  const percentage = poll.total_votes > 0 ? Math.round(((opt.vote_count || 0) / poll.total_votes) * 100) : 0
+                  const pct = poll.total_votes > 0 ? Math.round(((opt.vote_count ?? 0) / poll.total_votes) * 100) : 0
                   return (
-                    <div key={opt.id} className="relative bg-black/40 rounded overflow-hidden">
-                      <div className="absolute top-0 left-0 bottom-0 bg-[#00A651]/20" style={{ width: `${percentage}%` }}></div>
-                      <div className="relative p-2 flex justify-between text-sm">
-                        <span className="text-gray-300">{opt.option_text}</span>
-                        <span className="text-gray-400">{percentage}% ({opt.vote_count || 0})</span>
+                    <div key={opt.id} className="relative bg-dc-surface-2 rounded overflow-hidden">
+                      <div className="absolute inset-0 bg-dc-green/20 rounded" style={{ width: `${pct}%` }} />
+                      <div className="relative flex justify-between p-2 text-sm">
+                        <span className="text-dc-text">{opt.option_text}</span>
+                        <span className="text-dc-muted font-mono">{pct}% ({opt.vote_count ?? 0})</span>
                       </div>
                     </div>
                   )
                 })}
               </div>
 
-              <div className="flex justify-between items-center text-xs text-gray-500 border-t border-white/10 pt-3 mt-auto">
+              <div className="flex justify-between items-center text-xs text-dc-muted border-t border-dc-border pt-3 mt-auto">
                 <span>{poll.total_votes} total votes</span>
                 <div className="flex items-center gap-3">
-                  <span>Created {format(new Date(poll.created_at), 'MMM d, yyyy')}</span>
-                  <button onClick={() => handleDelete(poll.id)} className="text-red-500 hover:text-red-400" title="Delete Poll">
-                    <Trash2 className="w-4 h-4" />
+                  <span>{format(new Date(poll.created_at), 'MMM d, yyyy')}</span>
+                  <button
+                    onClick={() => handleDelete(poll.id)}
+                    disabled={deletingId === poll.id}
+                    className="text-dc-muted hover:text-dc-red transition-colors disabled:opacity-50"
+                  >
+                    {deletingId === poll.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

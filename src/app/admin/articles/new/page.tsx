@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,10 +11,20 @@ import { Loader2, ArrowLeft, Save, Send, Clock, Image as ImageIcon } from 'lucid
 import Link from 'next/link'
 import { slugify } from '@/lib/utils'
 
+interface Category { id: string; name: string }
+
 export default function NewArticlePage() {
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'en' | 'bn'>('en')
+  const [categories, setCategories] = useState<Category[]>([])
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setCategories(d.categories ?? d.data ?? []) })
+      .catch(() => {})
+  }, [])
 
   const { register, handleSubmit, control, watch, setValue, formState: { errors } } =
     useForm<ArticleFormData>({
@@ -239,7 +249,17 @@ export default function NewArticlePage() {
 
           <div className="glass p-5 rounded-xl space-y-4">
             <h3 className="font-headline font-bold text-white border-b border-dc-border pb-2">Settings</h3>
-            
+
+            <div>
+              <label className="form-label" htmlFor="category_id">Category</label>
+              <select {...register('category_id')} id="category_id" className="form-input text-sm">
+                <option value="">— Select Category —</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
             <div>
               <label className="form-label" htmlFor="slug">URL Slug</label>
               <input {...register('slug')} id="slug" className="form-input text-sm font-mono" />

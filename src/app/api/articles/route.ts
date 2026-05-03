@@ -3,6 +3,39 @@ import { supabaseAdmin } from '@/lib/db/admin'
 import { getSession } from '@/lib/auth/session'
 import { ArticleSchema } from '@/lib/validations'
 
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const status = searchParams.get('status')
+    const search = searchParams.get('search')
+    const page = parseInt(searchParams.get('page') ?? '1')
+    const limit = parseInt(searchParams.get('limit') ?? '50')
+    const offset = (page - 1) * limit
+
+    let query = supabaseAdmin
+      .from('articles')
+      .select(`
+        id, title, slug, status, published_at, created_at,
+        author:users!author_id(full_name),
+        category:categories!category_id(name)
+      `)
+      .neq('status', 'deleted')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (status) query = query.eq('status', status)
+    if (search) query = query.ilike('title', `%${search}%`)
+
+    const { data, error, count } = await query
+
+    if (error) throw error
+
+    return NextResponse.json({ success: true, data, count })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const user = await getSession()

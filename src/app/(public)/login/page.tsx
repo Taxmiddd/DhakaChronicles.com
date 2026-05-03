@@ -49,8 +49,8 @@ export default function LoginPage() {
           <div className="w-12 h-12 bg-dc-green rounded-lg mx-auto flex items-center justify-center mb-4">
             <span className="text-white font-bold font-headline text-2xl">D</span>
           </div>
-          <h1 className="text-3xl font-headline font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-dc-muted">Sign in to your editorial account</p>
+          <h1 className="text-3xl font-headline font-bold mb-2" style={{ color: 'var(--dc-text)' }}>Welcome Back</h1>
+          <p style={{ color: 'var(--dc-text-muted)' }}>Sign in to your editorial account</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="glass rounded-2xl p-6 md:p-8 space-y-6">
@@ -92,12 +92,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-dc-muted mt-8">
-          Don't have an account?{' '}
-          <Link href="/register" className="text-dc-green hover:underline font-medium">
-            Request Access
-          </Link>
-        </p>
       </div>
     </div>
   )

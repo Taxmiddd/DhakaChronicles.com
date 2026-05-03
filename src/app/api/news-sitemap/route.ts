@@ -1,7 +1,6 @@
 import { supabaseAdmin } from '@/lib/db/admin'
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 1800 // 30 min
+export const revalidate = 1800
 
 const siteUrl = 'https://dhakachronicles.com'
 

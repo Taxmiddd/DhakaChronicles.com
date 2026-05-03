@@ -23,7 +23,7 @@ export default async function PodcastsPage() {
   const podcasts = await getPodcasts()
 
   return (
-    <div className="container-dc py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
       <div className="flex flex-col items-center text-center mb-16">
         <div className="w-16 h-16 bg-dc-green/10 rounded-full flex items-center justify-center mb-6">
           <Headphones className="w-8 h-8 text-dc-green" />
@@ -64,7 +64,7 @@ export default async function PodcastsPage() {
                 </div>
               </div>
               
-              <h3 className="text-xl font-headline font-bold text-white group-hover:text-dc-green transition-colors mb-2">
+              <h3 className="text-xl font-headline font-bold text-dc-text group-hover:text-dc-green transition-colors mb-2">
                 {series.title}
               </h3>
               <p className="text-dc-text-muted line-clamp-2">

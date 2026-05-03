@@ -22,36 +22,111 @@ export const metadata: Metadata = {
     template: '%s | Dhaka Chronicles',
     default: 'Dhaka Chronicles — News from the Heart of Bangladesh',
   },
-  description: 'Your trusted bilingual source for news, analysis, and stories from Dhaka and Bangladesh. আপনার বিশ্বস্ত দ্বিভাষিক সংবাদ উৎস।',
-  keywords: ['Bangladesh news', 'Dhaka news', 'বাংলাদেশ সংবাদ', 'ঢাকা ক্রনিকেলস'],
+  description: 'Your trusted bilingual source for breaking news, analysis, and stories from Dhaka and Bangladesh. আপনার বিশ্বস্ত দ্বিভাষিক সংবাদ উৎস।',
+  keywords: [
+    'Bangladesh news', 'Dhaka news', 'Bangladesh breaking news',
+    'Dhaka Chronicles', 'বাংলাদেশ সংবাদ', 'ঢাকা ক্রনিকেলস',
+    'Bangladesh politics', 'Bangladesh business', 'Dhaka today',
+  ],
   authors: [{ name: 'Dhaka Chronicles', url: 'https://dhakachronicles.com' }],
-  creator: 'Noetic Studio',
+  creator: 'NOÉTIC Studio',
+  publisher: 'Dhaka Chronicles',
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://dhakachronicles.com'),
+  alternates: {
+    canonical: 'https://dhakachronicles.com',
+    types: {
+      'application/rss+xml': 'https://dhakachronicles.com/api/rss',
+    },
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     alternateLocale: 'bn_BD',
     siteName: 'Dhaka Chronicles',
-    images: [{ url: '/og-default.png', width: 1200, height: 630 }],
+    url: 'https://dhakachronicles.com',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Dhaka Chronicles' }],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@DhakaChronicles',
+    creator: '@DhakaChronicles',
   },
   robots: {
     index: true,
     follow: true,
-    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
   },
+  verification: {
+    // Add your Google Search Console verification token here
+    // google: 'your-google-verification-token',
+  },
+  category: 'news',
 }
 
 import Script from 'next/script'
 
+const ORG_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsMediaOrganization',
+  name: 'Dhaka Chronicles',
+  url: 'https://dhakachronicles.com',
+  logo: {
+    '@type': 'ImageObject',
+    url: 'https://dhakachronicles.com/dc-logo-black.svg',
+    width: 300,
+    height: 60,
+  },
+  sameAs: [
+    'https://facebook.com/dhakachronicles',
+    'https://twitter.com/dhakachronicles',
+    'https://youtube.com/@dhakachronicles',
+    'https://instagram.com/dhakachronicles',
+  ],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    email: 'hello@dhakachronicles.com',
+    contactType: 'editorial',
+  },
+  foundingDate: '2025',
+  description: 'Bangladesh\'s leading independent digital news platform.',
+  publishingPrinciples: 'https://dhakachronicles.com/about',
+  masthead: 'https://dhakachronicles.com/about',
+}
+
+const WEBSITE_SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Dhaka Chronicles',
+  url: 'https://dhakachronicles.com',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://dhakachronicles.com/search?q={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
-      <body className="min-h-dvh flex flex-col bg-white dark:bg-[#050505] text-black dark:text-white transition-colors duration-300">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+      <body className="min-h-dvh flex flex-col" style={{ background: 'var(--background)', color: 'var(--dc-text)' }}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(WEBSITE_SCHEMA) }}
+        />
         {/* Google Analytics 4 */}
         <Script
           strategy="afterInteractive"
@@ -113,15 +188,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <CookieConsent />
         <Toaster
-          theme="dark"
+          richColors
           position="bottom-right"
-          toastOptions={{
-            style: {
-              background: '#1a1a1a',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#f0f0f0',
-            },
-          }}
         />
         </ThemeProvider>
       </body>

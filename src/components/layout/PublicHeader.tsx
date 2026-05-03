@@ -1,95 +1,214 @@
 import Link from 'next/link'
-import Image from 'next/image'
-import { Search, Menu, X, ChevronDown } from 'lucide-react'
+import { Search, Lightbulb } from 'lucide-react'
+import { ThemeToggle } from '@/components/common/ThemeToggle'
+import { MobileMenuButton } from '@/components/layout/MobileMenu'
+import { supabaseAdmin } from '@/lib/db/admin'
 
-const NAV_ITEMS = [
-  { label: 'Politics', href: '/category/politics' },
-  { label: 'Business', href: '/category/business' },
-  { label: 'Sports', href: '/category/sports' },
-  { label: 'Culture', href: '/category/culture' },
-  { label: 'Technology', href: '/category/technology' },
-  { label: 'Education', href: '/category/education' },
-]
+interface Category {
+  name: string
+  slug: string
+  color: string | null
+}
 
-export function PublicHeader() {
-  const now = new Date().toLocaleDateString('en-BD', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+interface Banner {
+  id: string
+  title: string
+  link: string | null
+}
+
+async function getNavCategories(): Promise<Category[]> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('categories')
+      .select('name, slug, color')
+      .order('display_order', { ascending: true })
+      .limit(8)
+    return (data as Category[]) ?? []
+  } catch {
+    return []
+  }
+}
+
+async function getActiveBreakingBanners(): Promise<Banner[]> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('breaking_news_banners')
+      .select('id, title, link')
+      .eq('is_active', true)
+      .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString())
+      .order('priority', { ascending: true })
+      .limit(5)
+    return (data as Banner[]) ?? []
+  } catch {
+    return []
+  }
+}
+
+export async function PublicHeader() {
+  const [categories, banners] = await Promise.all([
+    getNavCategories(),
+    getActiveBreakingBanners(),
+  ])
+
+  const navCats: Category[] = categories.length > 0 ? categories : [
+    { name: 'Politics',   slug: 'politics',   color: '#F42A41' },
+    { name: 'Business',   slug: 'business',   color: '#00A651' },
+    { name: 'Sports',     slug: 'sports',     color: '#F59E0B' },
+    { name: 'Culture',    slug: 'culture',    color: '#8B5CF6' },
+    { name: 'Technology', slug: 'technology', color: '#06B6D4' },
+    { name: 'Education',  slug: 'education',  color: '#EC4899' },
+  ]
+
+  const dateStr = new Date().toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 
   return (
     <header className="sticky top-0 z-50">
-      {/* Top bar */}
-      <div className="bg-dc-surface border-b border-dc-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-9 flex items-center justify-between">
-          <p className="text-xs text-dc-text-muted hidden sm:block">{now}</p>
-          <div className="flex items-center gap-4 text-xs text-dc-text-muted">
-            <Link href="/login" className="hover:text-white transition-colors">Admin Login</Link>
-            <span className="text-dc-border">|</span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-dc-green animate-pulse" />
-              Live Updates
-            </span>
-          </div>
-        </div>
-      </div>
 
-      {/* Main header */}
-      <div className="glass border-b border-dc-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-6">
+      {/* ── Main header row ── */}
+      <div
+        className="border-b"
+        style={{ background: 'var(--background)', borderColor: 'var(--dc-border)' }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[64px] flex items-center justify-between gap-4">
+
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-dc-green flex items-center justify-center font-headline font-black text-white text-lg">
-              ঢ
-            </div>
-            <div className="leading-tight">
-              <span className="font-headline font-black text-white text-xl tracking-tight">Dhaka</span>
-              <span className="font-headline font-black text-dc-green text-xl tracking-tight"> Chronicles</span>
-            </div>
+          <Link
+            href="/"
+            className="shrink-0 flex items-center group"
+            aria-label="Dhaka Chronicles — Home"
+          >
+            <img
+              src="/dc-logo-black.svg"
+              alt="Dhaka Chronicles"
+              className="h-12 w-auto"
+            />
           </Link>
 
-          {/* Nav (desktop) */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => (
+          {/* Right actions */}
+          <div className="flex items-center gap-1">
+
+            {/* Date — desktop only */}
+            <time
+              className="hidden lg:block text-xs mr-3 tabular-nums"
+              style={{ color: 'var(--dc-text-muted)' }}
+            >
+              {dateStr}
+            </time>
+
+            <Link
+              href="/search"
+              className="p-2.5 rounded-lg transition-colors hover:bg-dc-surface-2"
+              style={{ color: 'var(--dc-text-muted)' }}
+              aria-label="Search"
+            >
+              <Search className="w-[18px] h-[18px]" />
+            </Link>
+
+            <div className="hidden sm:block">
+              <ThemeToggle />
+            </div>
+
+            <Link
+              href="/tips"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border ml-1 transition-colors hover:border-dc-green hover:text-dc-green"
+              style={{ color: 'var(--dc-text-muted)', borderColor: 'var(--dc-border)' }}
+            >
+              <Lightbulb className="w-3.5 h-3.5" />
+              Tip Us
+            </Link>
+
+            <Link
+              href="#newsletter"
+              className="hidden sm:inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 ml-1"
+              style={{ background: 'var(--dc-green)' }}
+            >
+              Subscribe
+            </Link>
+
+            <MobileMenuButton categories={navCats} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Category navigation strip ── */}
+      <nav
+        className="hidden lg:block border-b"
+        style={{ background: 'var(--background)', borderColor: 'var(--dc-border)' }}
+        aria-label="Section navigation"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center h-10 gap-0.5 overflow-x-auto scrollbar-none">
+            <Link
+              href="/"
+              className="shrink-0 px-3 h-full flex items-center text-sm font-bold relative group transition-colors"
+              style={{ color: 'var(--dc-text)' }}
+            >
+              Latest
+              <span
+                className="absolute bottom-0 left-3 right-3 h-[2px] rounded-t-full"
+                style={{ background: 'var(--dc-green)' }}
+              />
+            </Link>
+            {navCats.map((cat) => (
               <Link
-                key={item.href}
-                href={item.href}
-                className="px-3 py-2 rounded-lg text-sm font-medium text-dc-text-muted hover:text-white hover:bg-dc-surface-2 transition-all"
+                key={cat.slug}
+                href={`/category/${cat.slug}`}
+                className="shrink-0 px-3 h-full flex items-center text-sm font-medium relative group transition-colors"
+                style={{ color: 'var(--dc-text-muted)' }}
               >
-                {item.label}
+                <span className="group-hover:opacity-100 transition-colors" style={{ color: 'inherit' }}>
+                  {cat.name}
+                </span>
+                <span
+                  className="absolute bottom-0 left-3 right-3 h-[2px] rounded-t-full scale-x-0 group-hover:scale-x-100 transition-transform origin-left"
+                  style={{ background: cat.color ?? 'var(--dc-green)' }}
+                />
               </Link>
             ))}
-          </nav>
-
-          {/* Actions */}
-          <div className="flex items-center gap-3">
-            <Link href="/search" className="p-2 rounded-lg hover:bg-dc-surface-2 text-dc-text-muted hover:text-white transition-colors">
-              <Search className="w-5 h-5" />
-            </Link>
-            {/* Language toggle */}
-            <button className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-dc-surface-2 text-sm font-medium text-dc-text-muted hover:text-white transition-colors">
-              EN <ChevronDown className="w-3 h-3" />
-            </button>
-            {/* Mobile menu button */}
-            <button className="lg:hidden p-2 rounded-lg hover:bg-dc-surface-2 text-dc-text-muted">
-              <Menu className="w-5 h-5" />
-            </button>
+            <div className="ml-auto shrink-0 flex items-center gap-0.5 pl-4 border-l border-dc-border">
+              <Link
+                href="/search"
+                className="px-3 h-full flex items-center text-sm font-medium text-dc-muted hover:text-dc-green transition-colors"
+              >
+                All Sections
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </nav>
 
-      {/* Category nav (desktop) */}
-      <div className="bg-dc-surface border-b border-dc-border hidden lg:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-10 flex items-center gap-6 overflow-x-auto scrollbar-none">
-          <span className="text-dc-red text-xs font-bold uppercase tracking-widest shrink-0">● Breaking</span>
-          <div className="flex-1 overflow-hidden relative">
-            <p className="ticker-animate whitespace-nowrap text-sm text-dc-text-muted">
-              Bangladesh registers record GDP growth of 8.2% in Q1 2026 &nbsp;•&nbsp; 
-              Dhaka Metro Line 2 to open by December 2026 &nbsp;•&nbsp; 
-              Bangladesh cricket team wins Asia Cup final &nbsp;•&nbsp;
-              PM inaugurates new Padma Bridge connecting highway &nbsp;•&nbsp;
-              Dhaka Stock Exchange reaches all-time high
-            </p>
+      {/* ── Breaking news ticker ── */}
+      {banners.length > 0 && (
+        <div style={{ background: '#F42A41', borderTop: '1px solid rgba(255,255,255,0.15)' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-9 flex items-center gap-4 overflow-hidden">
+            <div className="shrink-0 flex items-center gap-2 bg-black/20 px-2.5 py-1 rounded-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-white">Breaking</span>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <div className="ticker-animate inline-flex items-center gap-8 text-sm font-medium text-white">
+                {[...banners, ...banners].map((b, i) => (
+                  <span key={i} className="flex items-center gap-8 shrink-0">
+                    {b.link ? (
+                      <Link href={b.link} className="hover:underline underline-offset-2 whitespace-nowrap">
+                        {b.title}
+                      </Link>
+                    ) : (
+                      <span className="whitespace-nowrap">{b.title}</span>
+                    )}
+                    <span className="opacity-40 text-base">◆</span>
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </header>
   )
 }

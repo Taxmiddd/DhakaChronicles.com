@@ -1,42 +1,49 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { decrypt } from '@/lib/auth/session'
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
-// Paths that require authentication
 const ADMIN_PATHS = ['/admin']
-
-// Paths accessible only when NOT logged in
-const AUTH_ONLY_PATHS = ['/login', '/register', '/forgot-password', '/reset-password']
+const AUTH_ONLY_PATHS = ['/login', '/forgot-password', '/reset-password']
 
 export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Refresh session and update cookies — must not be removed
+  const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
+  const isAuthenticated = !!user
 
-  const sessionToken = request.cookies.get('dc_session')?.value
-  const session = await decrypt(sessionToken)
-  const isAuthenticated = !!session
-
-  // Redirect authenticated users away from auth pages
-  if (AUTH_ONLY_PATHS.some((p) => pathname.startsWith(p)) && isAuthenticated) {
+  if (AUTH_ONLY_PATHS.some(p => pathname.startsWith(p)) && isAuthenticated) {
     return NextResponse.redirect(new URL('/admin/dashboard', request.url))
   }
 
-  // Protect admin routes
-  if (ADMIN_PATHS.some((p) => pathname.startsWith(p))) {
-    if (!isAuthenticated) {
-      const loginUrl = new URL('/login', request.url)
-      loginUrl.searchParams.set('callbackUrl', pathname)
-      return NextResponse.redirect(loginUrl)
-    }
+  if (ADMIN_PATHS.some(p => pathname.startsWith(p)) && !isAuthenticated) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('callbackUrl', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
-  // Refresh session on each request
-  const response = NextResponse.next()
-
-  return response
+  return supabaseResponse
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|public|api/auth).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|public|api/auth).*)'],
 }

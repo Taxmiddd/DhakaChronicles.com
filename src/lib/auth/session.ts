@@ -1,85 +1,48 @@
 import 'server-only'
-import { SignJWT, jwtVerify } from 'jose'
-import { cookies } from 'next/headers'
+import { createSupabaseServerClient } from '@/lib/db/server'
+import { supabaseAdmin } from '@/lib/db/admin'
 import type { SessionUser } from '@/types'
 
-const SECRET_KEY = process.env.AUTH_SECRET!
-const encodedKey = new TextEncoder().encode(SECRET_KEY)
-const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
-
-// ---- Encrypt / Decrypt ----
-
-export async function encrypt(payload: SessionUser & { expiresAt: Date }) {
-  return new SignJWT({ ...payload })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(encodedKey)
-}
-
-export async function decrypt(
-  token: string | undefined
-): Promise<(SessionUser & { expiresAt: Date }) | null> {
-  if (!token) return null
+export async function getSession(): Promise<SessionUser | null> {
   try {
-    const { payload } = await jwtVerify(token, encodedKey, {
-      algorithms: ['HS256'],
-    })
-    return payload as unknown as SessionUser & { expiresAt: Date }
+    const supabase = await createSupabaseServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    // Role is in app_metadata when created via our API.
+    // Fall back to the users table for accounts created via the Supabase dashboard.
+    let role = user.app_metadata?.role as SessionUser['role'] | undefined
+    let name = (user.user_metadata?.full_name as string) ?? ''
+    let avatar_url = (user.user_metadata?.avatar_url as string) ?? undefined
+
+    if (!role) {
+      const { data: profile } = await supabaseAdmin
+        .from('users')
+        .select('role, full_name, avatar_url')
+        .eq('id', user.id)
+        .single()
+
+      if (profile) {
+        role = profile.role as SessionUser['role']
+        if (!name) name = profile.full_name ?? ''
+        if (!avatar_url) avatar_url = profile.avatar_url ?? undefined
+
+        // Back-fill app_metadata so this extra query doesn't happen next time
+        await supabaseAdmin.auth.admin.updateUserById(user.id, {
+          app_metadata: { role },
+        })
+      }
+    }
+
+    if (!role) return null
+
+    return { id: user.id, email: user.email!, name, role, avatar_url }
   } catch {
     return null
   }
 }
 
-// ---- Session CRUD ----
-
-export async function createSession(user: SessionUser) {
-  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
-  const token = await encrypt({ ...user, expiresAt })
-  const cookieStore = await cookies()
-
-  cookieStore.set('dc_session', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    expires: expiresAt,
-    sameSite: 'lax',
-    path: '/',
-  })
-}
-
-export async function getSession(): Promise<SessionUser | null> {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('dc_session')?.value
-  const payload = await decrypt(token)
-  if (!payload) return null
-  const { expiresAt, ...user } = payload
-  if (new Date(expiresAt) < new Date()) {
-    await deleteSession()
-    return null
-  }
-  return user
-}
-
-export async function updateSession() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('dc_session')?.value
-  const payload = await decrypt(token)
-  if (!payload) return null
-
-  const { expiresAt: _old, ...user } = payload
-  const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
-  const newToken = await encrypt({ ...user, expiresAt })
-
-  cookieStore.set('dc_session', newToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    expires: expiresAt,
-    sameSite: 'lax',
-    path: '/',
-  })
-}
-
 export async function deleteSession() {
-  const cookieStore = await cookies()
-  cookieStore.delete('dc_session')
+  const supabase = await createSupabaseServerClient()
+  await supabase.auth.signOut()
 }
