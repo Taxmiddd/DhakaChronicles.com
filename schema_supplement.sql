@@ -23,8 +23,57 @@ ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS reading_time  INTEGER;
 ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS version       INTEGER DEFAULT 1;
 -- scheduled_at (workflow: article scheduled for future publish)
 ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS scheduled_at   TIMESTAMPTZ;
--- allow_comments (toggle per-article comment section)
-ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS allow_comments BOOLEAN DEFAULT true;
+-- allow_comments & editorial flags
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS allow_comments         BOOLEAN DEFAULT true;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS is_editors_pick        BOOLEAN DEFAULT false;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS is_trending            BOOLEAN DEFAULT false;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS is_sponsored           BOOLEAN DEFAULT false;
+-- analytics
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS unique_view_count      INTEGER DEFAULT 0;
+-- Bangla multilingual fields
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS title_bn               TEXT;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS content_bn             JSONB;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS excerpt_bn             TEXT;
+-- subtitle
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS subtitle               TEXT;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS subtitle_bn            TEXT;
+-- featured image extras
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS featured_image_caption TEXT;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS featured_image_credit  TEXT;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS gallery_images         JSONB;
+-- SEO / Open Graph
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS meta_title             TEXT;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS meta_description       TEXT;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS meta_keywords          TEXT[];
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS og_image_url           TEXT;
+-- co-authors, corrections, notes
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS co_authors             TEXT[];
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS corrections            JSONB;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS last_updated_note      TEXT;
+-- scheduling alias used in types
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS scheduled_for          TIMESTAMPTZ;
+-- geo / location tagging
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS location_lat           DOUBLE PRECISION;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS location_lng           DOUBLE PRECISION;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS location_name          TEXT;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS district               TEXT;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS division               TEXT;
+-- source attribution
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS original_source_url    TEXT;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS source_name            TEXT;
+-- soft delete & edit tracking
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS deleted_at             TIMESTAMPTZ;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS last_edited_at         TIMESTAMPTZ;
+ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS updated_by             UUID REFERENCES public.users(id) ON DELETE SET NULL;
+
+-- ── Categories: missing columns from types ────────────────────────────────────
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS name_bn           TEXT;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS description_bn    TEXT;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS parent_id         UUID REFERENCES public.categories(id) ON DELETE SET NULL;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS icon              TEXT;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS is_featured       BOOLEAN DEFAULT false;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS meta_title        TEXT;
+ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS meta_description  TEXT;
 
 -- ── Categories: ordering and timestamps ──────────────────────────────────────
 ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;
@@ -512,6 +561,55 @@ DO $$ BEGIN
       FOR EACH ROW EXECUTE PROCEDURE update_modified_column();
   END IF;
 END $$;
+
+-- ── Tags ─────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.tags (
+  id          UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name        TEXT    NOT NULL UNIQUE,
+  name_bn     TEXT,
+  slug        TEXT    NOT NULL UNIQUE,
+  usage_count INTEGER DEFAULT 0,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.tags ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'tags' AND policyname = 'Public can view tags') THEN
+    CREATE POLICY "Public can view tags"
+      ON public.tags FOR SELECT USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'tags' AND policyname = 'Admins can manage tags') THEN
+    CREATE POLICY "Admins can manage tags"
+      ON public.tags FOR ALL
+      USING (auth.uid() IN (SELECT id FROM public.users WHERE role IN ('founder', 'admin', 'publisher')));
+  END IF;
+END $$;
+
+-- ── Article ↔ Tag junction ────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.article_tags (
+  article_id UUID REFERENCES public.articles(id) ON DELETE CASCADE,
+  tag_id     UUID REFERENCES public.tags(id)     ON DELETE CASCADE,
+  PRIMARY KEY (article_id, tag_id)
+);
+
+ALTER TABLE public.article_tags ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'article_tags' AND policyname = 'Public can view article tags') THEN
+    CREATE POLICY "Public can view article tags"
+      ON public.article_tags FOR SELECT USING (true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'article_tags' AND policyname = 'Staff can manage article tags') THEN
+    CREATE POLICY "Staff can manage article tags"
+      ON public.article_tags FOR ALL
+      USING (auth.uid() IN (SELECT id FROM public.users WHERE role IN ('founder', 'admin', 'publisher')));
+  END IF;
+END $$;
+
+-- ── Comments: missing columns from types ──────────────────────────────────────
+ALTER TABLE public.comments ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT false;
+ALTER TABLE public.comments ADD COLUMN IF NOT EXISTS is_edited BOOLEAN DEFAULT false;
 
 -- ── RPCs ──────────────────────────────────────────────────────────────────────
 
