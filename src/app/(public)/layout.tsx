@@ -1,11 +1,13 @@
 import { PublicHeader } from '@/components/layout/PublicHeader'
 import { PublicFooter } from '@/components/layout/PublicFooter'
 import AdBanner from '@/components/ui/AdBanner'
+import BreakingNewsTicker from '@/components/ui/BreakingNewsTicker'
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
       <PublicHeader />
+      <BreakingNewsTicker />
       <main className="flex-1 w-full">
         {children}
       </main>

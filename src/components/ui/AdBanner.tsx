@@ -11,6 +11,8 @@ export type AdPosition =
   | 'feed_native'
   | 'sticky_mobile'
   | 'before_footer'
+  | 'widget_mid'
+  | 'widget_right'
 
 export type AdVariant = 'banner' | 'native' | 'bite' | 'sticky'
 
