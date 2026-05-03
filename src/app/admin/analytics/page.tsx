@@ -107,7 +107,7 @@ function normalizeArticles(payload: unknown): TopArticle[] {
         slug: typeof row.slug === 'string' ? row.slug : undefined,
         views: toSafeNumber(row.views ?? row.view_count),
         published_at: typeof row.published_at === 'string' ? row.published_at : undefined,
-      }
+      } as TopArticle
     })
     .filter((item): item is TopArticle => item !== null)
 }
