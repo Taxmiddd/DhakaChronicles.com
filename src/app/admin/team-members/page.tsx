@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { UserPlus, Mail, Loader2, X, Save, Edit2, Trash2, GripVertical } from 'lucide-react'
+import { UserPlus, Loader2, X, Save, Edit2, Trash2, GripVertical } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 
@@ -121,8 +121,8 @@ export default function AdminTeamMembersPage() {
       toast.success(editingId ? 'Team member updated' : 'Team member created')
       handleCloseModal()
       fetchMembers()
-    } catch (err: any) {
-      toast.error(err.message)
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save')
     } finally {
       setSaving(false)
     }

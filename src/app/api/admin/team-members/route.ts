@@ -1,16 +1,8 @@
 import { supabaseAdmin } from '@/lib/db/admin'
+import { getSession } from '@/lib/auth/session'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
-
-async function getUserRole(userId: string) {
-  const { data } = await supabaseAdmin
-    .from('users')
-    .select('role')
-    .eq('id', userId)
-    .single()
-  return data?.role
-}
 
 export async function GET() {
   const { data: members, error } = await supabaseAdmin
@@ -27,13 +19,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const userId = req.headers.get('x-user-id')
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const role = await getUserRole(userId)
-  if (role !== 'founder' && role !== 'admin') {
+  const user = await getSession()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.role !== 'founder' && user.role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -58,18 +46,16 @@ export async function POST(req: NextRequest) {
 
   const { data: member, error } = await supabaseAdmin
     .from('team_members')
-    .insert([
-      {
-        full_name,
-        role: member_role,
-        bio: bio || null,
-        avatar_url: avatar_url || null,
-        twitter_url: twitter_url || null,
-        linkedin_url: linkedin_url || null,
-        facebook_url: facebook_url || null,
-        is_active,
-      },
-    ])
+    .insert([{
+      full_name,
+      role: member_role,
+      bio: bio || null,
+      avatar_url: avatar_url || null,
+      twitter_url: twitter_url || null,
+      linkedin_url: linkedin_url || null,
+      facebook_url: facebook_url || null,
+      is_active,
+    }])
     .select()
     .single()
 
@@ -81,13 +67,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const userId = req.headers.get('x-user-id')
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const role = await getUserRole(userId)
-  if (role !== 'founder' && role !== 'admin') {
+  const user = await getSession()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.role !== 'founder' && user.role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -112,13 +94,9 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const userId = req.headers.get('x-user-id')
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const role = await getUserRole(userId)
-  if (role !== 'founder' && role !== 'admin') {
+  const user = await getSession()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.role !== 'founder' && user.role !== 'admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

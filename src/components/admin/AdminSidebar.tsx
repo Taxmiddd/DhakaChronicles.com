@@ -7,6 +7,7 @@ import {
   FileText,
   Image as ImageIcon,
   Users,
+  UserCheck,
   Settings,
   BarChart3,
   MessageSquare,
@@ -61,7 +62,7 @@ const navGroups = [
     items: [
       { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
       { name: 'Admin Users', href: '/admin/users', icon: Users },
-      { name: 'Team Members', href: '/admin/team-members-page', icon: Users },
+      { name: 'Team Members', href: '/admin/team-members', icon: UserCheck },
       { name: 'Settings', href: '/admin/settings', icon: Settings },
       { name: 'My Profile', href: '/admin/profile', icon: User },
     ],
