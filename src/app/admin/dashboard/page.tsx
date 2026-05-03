@@ -71,7 +71,7 @@ function normalizeStats(payload: unknown): Stats {
 function normalizeTopArticles(payload: unknown): TopArticle[] {
   if (!Array.isArray(payload)) return []
   return payload
-    .map((item) => {
+    .map((item): TopArticle | null => {
       if (!item || typeof item !== 'object') return null
       const row = item as Record<string, unknown>
       if (typeof row.id !== 'string' || typeof row.title !== 'string') return null
@@ -79,7 +79,6 @@ function normalizeTopArticles(payload: unknown): TopArticle[] {
         id: row.id,
         title: row.title,
         views: toSafeNumber(row.views ?? row.view_count),
-        view_count: toSafeNumber(row.view_count),
         published_at: typeof row.published_at === 'string' ? row.published_at : undefined,
       }
     })
@@ -157,7 +156,7 @@ export default function AdminDashboardPage() {
             Updated {formatDistanceToNow(lastRefresh, { addSuffix: true })}
           </span>
           <button
-            onClick={fetchData}
+            onClick={() => fetchData()}
             disabled={loading}
             className="btn-ghost px-3 py-2 text-sm flex items-center gap-2"
           >

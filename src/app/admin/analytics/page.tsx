@@ -97,7 +97,7 @@ function normalizeTraffic(payload: unknown): TrafficSource[] {
 function normalizeArticles(payload: unknown): TopArticle[] {
   if (!Array.isArray(payload)) return []
   return payload
-    .map((item) => {
+    .map((item): TopArticle | null => {
       if (!item || typeof item !== 'object') return null
       const row = item as Record<string, unknown>
       if (typeof row.id !== 'string' || typeof row.title !== 'string') return null
@@ -107,7 +107,7 @@ function normalizeArticles(payload: unknown): TopArticle[] {
         slug: typeof row.slug === 'string' ? row.slug : undefined,
         views: toSafeNumber(row.views ?? row.view_count),
         published_at: typeof row.published_at === 'string' ? row.published_at : undefined,
-      } as TopArticle
+      }
     })
     .filter((item): item is TopArticle => item !== null)
 }
