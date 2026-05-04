@@ -79,52 +79,19 @@ export function PublicFooter() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
-          {/* ── Mobile layout ── */}
-          <div className="sm:hidden">
-            {/* Logo + socials row */}
-            <div className="flex items-center justify-between mb-6">
-              <Link href="/" aria-label="Dhaka Chronicles — Home">
-                <img src="/dc-logo-black.svg" alt="Dhaka Chronicles" className="h-8 w-auto" />
-              </Link>
-              <FooterSocials />
-            </div>
-
-            {/* 2-col link grid */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-6">
-              {FOOTER_SECTIONS.map((section) => (
-                <div key={section.title}>
-                  <h4
-                    className="font-bold text-[10px] uppercase tracking-widest mb-2.5"
-                    style={{ color: 'var(--dc-text)' }}
-                  >
-                    {section.title}
-                  </h4>
-                  <ul className="space-y-1.5">
-                    {section.links.map((link) => (
-                      <li key={link.href}>
-                        <Link
-                          href={link.href}
-                          className="text-xs transition-colors hover:text-dc-green"
-                          style={{ color: 'var(--dc-text-muted)' }}
-                        >
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-
-            {/* Tip link */}
-            <Link
-              href="/tips"
-              className="mt-5 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg border transition-colors hover:border-dc-green hover:text-dc-green"
-              style={{ color: 'var(--dc-text-muted)', borderColor: 'var(--dc-border)' }}
-            >
-              <Lightbulb className="w-3 h-3" />
-              Submit a news tip
+          {/* ── Mobile layout — minimal (tab bar handles navigation) ── */}
+          <div className="sm:hidden space-y-4">
+            <Link href="/" aria-label="Dhaka Chronicles — Home" className="inline-block">
+              <img src="/dc-logo-black.svg" alt="Dhaka Chronicles" className="h-8 w-auto" />
             </Link>
+            <FooterSocials />
+            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
+              © {new Date().getFullYear()} Dhaka Chronicles — Bangladesh&apos;s leading independent digital news platform.{' '}
+              Built by{' '}
+              <a href="https://noeticstudio.net" target="_blank" rel="noopener noreferrer" className="text-dc-green hover:underline">
+                NOÉTIC Studio
+              </a>.
+            </p>
           </div>
 
           {/* ── Desktop layout ── */}

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Menu, X, Search, ChevronRight, Lightbulb, Rss } from 'lucide-react'
 import { ThemeToggle } from '@/components/common/ThemeToggle'
-import { Facebook, Twitter, Youtube, Instagram } from '@/components/ui/BrandIcons'
+import { Facebook, Linkedin, Instagram } from '@/components/ui/BrandIcons'
+import { useMobileNav } from './MobileNavContext'
 
 interface Category {
   name: string
@@ -13,14 +14,13 @@ interface Category {
 }
 
 const SOCIALS = [
-  { icon: Facebook,  href: 'https://facebook.com/dhakachronicles',  label: 'Facebook' },
-  { icon: Twitter,   href: 'https://twitter.com/dhakachronicles',   label: 'Twitter / X' },
-  { icon: Youtube,   href: 'https://youtube.com/@dhakachronicles',  label: 'YouTube' },
-  { icon: Instagram, href: 'https://instagram.com/dhakachronicles', label: 'Instagram' },
+  { icon: Facebook,  href: 'https://facebook.com/dhakachronicles',         label: 'Facebook'  },
+  { icon: Linkedin,  href: 'https://linkedin.com/company/dhakachronicles', label: 'LinkedIn'  },
+  { icon: Instagram, href: 'https://instagram.com/dhakachronicles',        label: 'Instagram' },
 ]
 
 export function MobileMenuButton({ categories }: { categories: Category[] }) {
-  const [open, setOpen] = useState(false)
+  const { open, setOpen } = useMobileNav()
   const [query, setQuery] = useState('')
   const searchRef = useRef<HTMLInputElement>(null)
 
@@ -30,11 +30,8 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
   }, [open])
 
   useEffect(() => {
-    if (open) {
-      setTimeout(() => searchRef.current?.focus(), 150)
-    } else {
-      setQuery('')
-    }
+    if (open) setTimeout(() => searchRef.current?.focus(), 150)
+    else setQuery('')
   }, [open])
 
   function close() { setOpen(false) }
@@ -45,9 +42,10 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
 
   return (
     <>
+      {/* Hamburger — tablet only (sm–lg); tab bar handles mobile */}
       <button
         onClick={() => setOpen(true)}
-        className="lg:hidden p-2 rounded-lg hover:bg-dc-surface-2 transition-colors"
+        className="hidden sm:block lg:hidden p-2 rounded-lg hover:bg-dc-surface-2 transition-colors"
         style={{ color: 'var(--dc-text-muted)' }}
         aria-label="Open menu"
       >
@@ -69,18 +67,13 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
         }`}
         style={{ background: 'var(--background)', borderLeft: '1px solid var(--dc-border)' }}
       >
-
         {/* Header */}
         <div
           className="flex items-center justify-between px-5 h-14 shrink-0"
           style={{ borderBottom: '1px solid var(--dc-border)' }}
         >
           <Link href="/" onClick={close} aria-label="Home">
-            <img
-              src="/dc-logo-black.svg"
-              alt="Dhaka Chronicles"
-              className="h-6 w-auto"
-            />
+            <img src="/dc-logo-black.svg" alt="Dhaka Chronicles" className="h-6 w-auto" />
           </Link>
           <button
             onClick={close}
@@ -151,25 +144,16 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
             </span>
           </div>
 
-          {/* Latest link */}
           <Link
             href="/"
             onClick={close}
             className="flex items-center justify-between mx-3 px-3 py-3 rounded-lg transition-colors hover:bg-dc-surface-2 group"
           >
             <div className="flex items-center gap-3">
-              <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: 'var(--dc-green)' }}
-              />
-              <span className="text-sm font-semibold" style={{ color: 'var(--dc-text)' }}>
-                Latest
-              </span>
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: 'var(--dc-green)' }} />
+              <span className="text-sm font-semibold" style={{ color: 'var(--dc-text)' }}>Latest</span>
             </div>
-            <ChevronRight
-              className="w-4 h-4 transition-colors group-hover:text-dc-green"
-              style={{ color: 'var(--dc-text-muted)' }}
-            />
+            <ChevronRight className="w-4 h-4 transition-colors group-hover:text-dc-green" style={{ color: 'var(--dc-text-muted)' }} />
           </Link>
 
           {filtered.length > 0 ? filtered.map((cat) => (
@@ -180,36 +164,25 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
               className="flex items-center justify-between mx-3 px-3 py-3 rounded-lg transition-colors hover:bg-dc-surface-2 group"
             >
               <div className="flex items-center gap-3">
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: cat.color ?? 'var(--dc-text-muted)' }}
-                />
-                <span className="text-sm font-medium" style={{ color: 'var(--dc-text)' }}>
-                  {cat.name}
-                </span>
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color ?? 'var(--dc-text-muted)' }} />
+                <span className="text-sm font-medium" style={{ color: 'var(--dc-text)' }}>{cat.name}</span>
               </div>
-              <ChevronRight
-                className="w-4 h-4 transition-colors group-hover:text-dc-green"
-                style={{ color: 'var(--dc-text-muted)' }}
-              />
+              <ChevronRight className="w-4 h-4 transition-colors group-hover:text-dc-green" style={{ color: 'var(--dc-text-muted)' }} />
             </Link>
           )) : (
-            <p className="px-7 py-4 text-sm" style={{ color: 'var(--dc-text-muted)' }}>
-              No sections found
-            </p>
+            <p className="px-7 py-4 text-sm" style={{ color: 'var(--dc-text-muted)' }}>No sections found</p>
           )}
 
-          {/* Extra links */}
           <div className="px-4 pt-4 pb-1 mt-2" style={{ borderTop: '1px solid var(--dc-border)' }}>
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--dc-text-muted)' }}>
               More
             </span>
           </div>
           {[
-            { label: 'Podcasts',  href: '/podcasts' },
-            { label: 'Our Team',  href: '/team' },
-            { label: 'About Us',  href: '/about' },
-            { label: 'Contact',   href: '/contact' },
+            { label: 'Podcasts',  href: '/podcasts'  },
+            { label: 'Our Team',  href: '/team'      },
+            { label: 'About Us',  href: '/about'     },
+            { label: 'Contact',   href: '/contact'   },
             { label: 'Advertise', href: '/advertise' },
           ].map(({ label, href }) => (
             <Link
@@ -219,20 +192,13 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
               className="flex items-center justify-between mx-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-dc-surface-2 group"
             >
               <span className="text-sm" style={{ color: 'var(--dc-text-muted)' }}>{label}</span>
-              <ChevronRight
-                className="w-4 h-4 transition-colors group-hover:text-dc-green"
-                style={{ color: 'var(--dc-text-muted)' }}
-              />
+              <ChevronRight className="w-4 h-4 transition-colors group-hover:text-dc-green" style={{ color: 'var(--dc-text-muted)' }} />
             </Link>
           ))}
         </nav>
 
-        {/* Footer */}
-        <div
-          className="shrink-0 px-5 py-4 space-y-4"
-          style={{ borderTop: '1px solid var(--dc-border)' }}
-        >
-          {/* Social icons */}
+        {/* Drawer footer */}
+        <div className="shrink-0 px-5 py-4 space-y-4" style={{ borderTop: '1px solid var(--dc-border)' }}>
           <div className="flex items-center gap-2">
             {SOCIALS.map(({ icon: Icon, href, label }) => (
               <a
@@ -256,8 +222,6 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
               <Rss className="w-3.5 h-3.5" />
             </a>
           </div>
-
-          {/* Theme toggle row */}
           <div className="flex items-center justify-between">
             <span className="text-xs" style={{ color: 'var(--dc-text-muted)' }}>Appearance</span>
             <ThemeToggle />

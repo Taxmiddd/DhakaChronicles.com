@@ -109,9 +109,7 @@ export async function PublicHeader() {
               <Search className="w-[18px] h-[18px]" />
             </Link>
 
-            <div className="hidden sm:block">
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
 
             <Link
               href="/tips"
@@ -135,7 +133,37 @@ export async function PublicHeader() {
         </div>
       </div>
 
-      {/* ── Category navigation strip ── */}
+      {/* ── Mobile category pill scroll — phone only ── */}
+      <div
+        className="sm:hidden overflow-x-auto scrollbar-none border-b"
+        style={{ background: 'var(--background)', borderColor: 'var(--dc-border)' }}
+      >
+        <div className="flex items-center gap-2 px-4 py-2 min-w-max">
+          <Link
+            href="/"
+            className="shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold text-white"
+            style={{ background: 'var(--dc-green)' }}
+          >
+            Latest
+          </Link>
+          {navCats.map(cat => (
+            <Link
+              key={cat.slug}
+              href={`/category/${cat.slug}`}
+              className="shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border"
+              style={{
+                color: cat.color ?? 'var(--dc-text-muted)',
+                borderColor: `${cat.color ?? 'var(--dc-border)'}50`,
+                background: `${cat.color ?? 'var(--dc-surface-2)'}14`,
+              }}
+            >
+              {cat.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Desktop category navigation strip ── */}
       <nav
         className="hidden lg:block border-b"
         style={{ background: 'var(--background)', borderColor: 'var(--dc-border)' }}

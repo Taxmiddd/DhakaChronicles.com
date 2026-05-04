@@ -52,7 +52,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
   if (variant === 'sticky') {
     return (
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 sm:hidden"
+        className="fixed bottom-14 left-0 right-0 z-50 sm:hidden"
         style={{
           background: 'var(--background)',
           borderTop: '1px solid var(--dc-border)',
