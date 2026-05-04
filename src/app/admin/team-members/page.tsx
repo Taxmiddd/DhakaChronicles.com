@@ -38,7 +38,7 @@ export default function AdminTeamMembersPage() {
 
   const [formData, setFormData] = useState({
     full_name: '',
-    role: 'publisher',
+    role: '',
     bio: '',
     avatar_url: '',
     twitter_url: '',
@@ -82,7 +82,7 @@ export default function AdminTeamMembersPage() {
     } else {
       setFormData({
         full_name: '',
-        role: 'publisher',
+        role: '',
         bio: '',
         avatar_url: '',
         twitter_url: '',
@@ -219,7 +219,7 @@ export default function AdminTeamMembersPage() {
                       <p className="text-white font-medium">{member.full_name}</p>
                     </div>
                   </td>
-                  <td className="text-dc-muted text-sm">{ROLE_LABELS[member.role] || member.role}</td>
+                  <td className="text-dc-muted text-sm">{member.role}</td>
                   <td>
                     <span
                       className={`text-[10px] uppercase tracking-widest px-2 py-1 rounded-full font-bold cursor-pointer ${
@@ -295,19 +295,13 @@ export default function AdminTeamMembersPage() {
                 </div>
                 <div>
                   <label className="form-label">Role *</label>
-                  <select
+                  <input
                     required
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                     className="form-input"
-                  >
-                    <option value="founder">Founder & Editor-in-Chief</option>
-                    <option value="admin">Editor</option>
-                    <option value="publisher">Staff Reporter</option>
-                    <option value="photographer">Photographer</option>
-                    <option value="videographer">Videographer</option>
-                    <option value="designer">Designer</option>
-                  </select>
+                    placeholder="e.g. Senior Reporter"
+                  />
                 </div>
               </div>
 
