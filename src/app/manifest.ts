@@ -3,7 +3,7 @@ import { MetadataRoute } from 'next'
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Dhaka Chronicles',
-    short_name: 'DhakaChron',
+    short_name: 'DhakaChronicles',
     description: 'Breaking news, in-depth analysis, and stories from Bangladesh.',
     start_url: '/',
     display: 'standalone',

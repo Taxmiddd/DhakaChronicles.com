@@ -220,6 +220,12 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── Mobile square ad pair — phone only, renders nothing when no ads ── */}
+      <div className="sm:hidden flex gap-3 mb-6">
+        <AdBanner position="mobile_square_1" className="flex-1 aspect-square rounded-xl" />
+        <AdBanner position="mobile_square_2" className="flex-1 aspect-square rounded-xl" />
+      </div>
+
       {/* ── Homepage banner ad ── */}
       <AdBanner position="homepage_banner" className="w-full h-[60px] sm:h-[90px] mb-8" />
 

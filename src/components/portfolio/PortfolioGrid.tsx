@@ -29,6 +29,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export function PortfolioGrid({ items, categories }: { items: PortfolioItem[]; categories: string[] }) {
   const [active, setActive] = useState('All')
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   const filtered = active === 'All' ? items : items.filter(i => i.category === active)
 
@@ -36,22 +37,27 @@ export function PortfolioGrid({ items, categories }: { items: PortfolioItem[]; c
     <>
       {/* Filter chips */}
       {categories.length > 1 && (
-        <div className="flex flex-wrap gap-2 mb-10">
-          {['All', ...categories].map(cat => {
+        <div className="flex flex-wrap gap-3 mb-12 justify-center">
+          {['All', ...categories].map((cat, index) => {
             const isActive = active === cat
             const color = cat === 'All' ? 'var(--dc-green)' : (CATEGORY_COLORS[cat] ?? '#888')
             return (
               <button
                 key={cat}
                 onClick={() => setActive(cat)}
-                className="px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all duration-200"
-                style={
-                  isActive
-                    ? { background: color, borderColor: color, color: '#fff' }
-                    : { color: color, borderColor: `${color}40`, background: `${color}12` }
-                }
+                className="relative px-4 py-2.5 rounded-full text-sm font-semibold border transition-all duration-300 hover:scale-105 animate-fade-in-up"
+                style={{
+                  animationDelay: `${index * 100}ms`,
+                  background: isActive ? color : `${color}08`,
+                  borderColor: isActive ? color : `${color}30`,
+                  color: isActive ? '#fff' : color,
+                  boxShadow: isActive ? `0 4px 20px ${color}30` : 'none'
+                }}
               >
                 {cat}
+                {isActive && (
+                  <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: `${color}20` }}></div>
+                )}
               </button>
             )
           })}
@@ -59,22 +65,25 @@ export function PortfolioGrid({ items, categories }: { items: PortfolioItem[]; c
       )}
 
       {/* Grid */}
-      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <AnimatePresence mode="popLayout">
-          {filtered.map(item => (
+          {filtered.map((item, index) => (
             <motion.article
               key={item.id}
               layout
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.25 }}
-              className="group rounded-2xl overflow-hidden flex flex-col"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="group relative rounded-3xl overflow-hidden flex flex-col animate-fade-in-up"
               style={{
+                animationDelay: `${index * 150}ms`,
                 background: 'var(--dc-surface)',
                 border: '1px solid var(--dc-border)',
                 boxShadow: 'var(--card-shadow)',
               }}
+              onMouseEnter={() => setHoveredId(item.id)}
+              onMouseLeave={() => setHoveredId(null)}
             >
               {/* Image */}
               <div className="relative h-52 overflow-hidden" style={{ background: 'var(--dc-surface-2)' }}>
@@ -143,41 +152,41 @@ export function PortfolioGrid({ items, categories }: { items: PortfolioItem[]; c
               </div>
 
               {/* Body */}
-              <div className="p-5 flex flex-col flex-1">
+              <div className="p-6 flex flex-col flex-1">
                 {/* Brand name */}
                 {!item.logo_url && (
-                  <span className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: 'var(--dc-text-muted)' }}>
+                  <span className="text-xs font-semibold uppercase tracking-wide mb-3 transition-colors group-hover:text-dc-green" style={{ color: 'var(--dc-text-muted)' }}>
                     {item.brand_name}
                   </span>
                 )}
                 {item.logo_url && !item.featured_image_url && (
-                  <div className="flex items-center gap-2.5 mb-3">
-                    <Image src={item.logo_url} alt={item.brand_name} width={24} height={24} className="object-contain" />
-                    <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--dc-text-muted)' }}>
+                  <div className="flex items-center gap-3 mb-4">
+                    <Image src={item.logo_url} alt={item.brand_name} width={28} height={28} className="object-contain transition-transform group-hover:scale-110" />
+                    <span className="text-xs font-semibold uppercase tracking-wide transition-colors group-hover:text-dc-green" style={{ color: 'var(--dc-text-muted)' }}>
                       {item.brand_name}
                     </span>
                   </div>
                 )}
 
                 <h3
-                  className="font-headline font-bold text-lg leading-snug mb-2 group-hover:text-dc-green transition-colors"
+                  className="font-headline font-bold text-xl leading-snug mb-3 transition-all duration-300 group-hover:text-dc-green group-hover:translate-x-1"
                   style={{ color: 'var(--dc-text)' }}
                 >
                   {item.project_name}
                 </h3>
 
-                <p className="text-sm leading-relaxed flex-1" style={{ color: 'var(--dc-text-muted)' }}>
+                <p className="text-sm leading-relaxed flex-1 mb-4 transition-colors group-hover:text-opacity-80" style={{ color: 'var(--dc-text-muted)' }}>
                   {item.description}
                 </p>
 
                 {/* Outcome */}
                 {item.outcome && (
                   <div
-                    className="mt-4 flex items-start gap-2 px-3 py-2 rounded-lg text-xs font-semibold"
+                    className="mt-auto flex items-start gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group-hover:scale-105 group-hover:shadow-md"
                     style={{ background: 'rgba(0,166,81,0.08)', color: 'var(--dc-green)', border: '1px solid rgba(0,166,81,0.15)' }}
                   >
-                    <TrendingUp className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                    {item.outcome}
+                    <TrendingUp className="w-4 h-4 shrink-0 mt-0.5 animate-pulse" />
+                    <span>{item.outcome}</span>
                   </div>
                 )}
 
@@ -187,10 +196,10 @@ export function PortfolioGrid({ items, categories }: { items: PortfolioItem[]; c
                     href={item.external_link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold hover:underline"
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold transition-all duration-300 hover:translate-x-1 group-hover:text-dc-green"
                     style={{ color: 'var(--dc-green)' }}
                   >
-                    View campaign <ExternalLink className="w-3 h-3" />
+                    View campaign <ExternalLink className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                   </a>
                 )}
               </div>

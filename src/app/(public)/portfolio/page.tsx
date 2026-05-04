@@ -1,15 +1,23 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Users, BarChart2, TrendingUp, Award, ChevronRight, Mail } from 'lucide-react'
+import Image from 'next/image'
+import {
+  Users, BarChart2, TrendingUp, Award, ChevronRight, Mail,
+  FileText, Monitor, Trophy, Mic, Share2, Layers,
+  ArrowRight, ExternalLink, Sparkles, Target, Zap,
+  Star, Clock, Globe, Heart,
+} from 'lucide-react'
 import { supabaseAdmin } from '@/lib/db/admin'
 import { PortfolioGrid } from '@/components/portfolio/PortfolioGrid'
 
-export const revalidate = 3600
+export const revalidate = 300
 
 export const metadata: Metadata = {
   title: 'Brand Collaborations – Dhaka Chronicles',
   description: 'See how leading brands partner with Dhaka Chronicles to reach Bangladesh\'s most engaged digital audience.',
 }
+
+// ── Types ────────────────────────────────────────────────────────────────────
 
 interface PortfolioItem {
   id: string
@@ -24,70 +32,117 @@ interface PortfolioItem {
   display_order: number
 }
 
+interface PartnerBrand {
+  id: string
+  name: string
+  category: string
+  logo_url: string | null
+  color: string
+  initial: string
+  website_url: string | null
+}
+
+interface PortfolioService {
+  id: string
+  icon_name: string
+  title: string
+  description: string
+}
+
+// ── Static fallbacks ─────────────────────────────────────────────────────────
+
+const FALLBACK_PARTNERS: PartnerBrand[] = [
+  { id: '1',  name: 'bKash',              category: 'Fintech',       logo_url: null, color: '#E2136E', initial: 'bK', website_url: null },
+  { id: '2',  name: 'PRAN',               category: 'Food & Bev.',   logo_url: null, color: '#D62828', initial: 'PR', website_url: null },
+  { id: '3',  name: 'Hyundai',            category: 'Automotive',    logo_url: null, color: '#003087', initial: 'HY', website_url: null },
+  { id: '4',  name: 'Philip Morris Intl', category: 'FMCG',          logo_url: null, color: '#1A1A2E', initial: 'PM', website_url: null },
+  { id: '5',  name: 'JTI',                category: 'FMCG',          logo_url: null, color: '#004B87', initial: 'JT', website_url: null },
+  { id: '6',  name: "Le d'Or",            category: 'Hospitality',   logo_url: null, color: '#8B6914', initial: 'LD', website_url: null },
+  { id: '7',  name: 'United Group',       category: 'Conglomerate',  logo_url: null, color: '#F97316', initial: 'UG', website_url: null },
+  { id: '8',  name: 'Gold Kinen',         category: 'Lifestyle',     logo_url: null, color: '#B8860B', initial: 'GK', website_url: null },
+  { id: '9',  name: 'Clubhouse DHK',      category: 'Entertainment', logo_url: null, color: '#7C3AED', initial: 'CH', website_url: null },
+  { id: '10', name: 'Fair Electronics',   category: 'Electronics',   logo_url: null, color: '#0EA5E9', initial: 'FE', website_url: null },
+  { id: '11', name: 'Hisense',            category: 'Electronics',   logo_url: null, color: '#E63946', initial: 'HI', website_url: null },
+  { id: '12', name: 'Footsteps',          category: 'Fashion',       logo_url: null, color: '#16A34A', initial: 'FS', website_url: null },
+]
+
+const FALLBACK_SERVICES: PortfolioService[] = [
+  { id: '1', icon_name: 'FileText',  title: 'Native Content',          description: 'Long-form sponsored stories that blend seamlessly with our editorial voice.' },
+  { id: '2', icon_name: 'Monitor',   title: 'Display Advertising',     description: 'Premium banner placements across homepage, article pages, and category sections.' },
+  { id: '3', icon_name: 'Mail',      title: 'Newsletter Sponsorship',  description: 'Exclusive placement in our Morning Briefing — reaching 30K+ engaged subscribers.' },
+  { id: '4', icon_name: 'Trophy',    title: 'Category Sponsorship',    description: 'Own a section. Get month-long prominent branding across an entire content vertical.' },
+  { id: '5', icon_name: 'Mic',       title: 'Event Partnership',       description: 'Co-brand live events, panel discussions, and community activations.' },
+  { id: '6', icon_name: 'Share2',    title: 'Social Amplification',    description: 'Extend campaign reach through our 100K+ social media following.' },
+]
+
 const STATS = [
-  { icon: Users,      value: '500K+', label: 'Monthly Readers',     color: '#00A651' },
-  { icon: BarChart2,  value: '4:30',  label: 'Avg. Time on Site',   color: '#06B6D4' },
-  { icon: TrendingUp, value: '12M+',  label: 'Annual Impressions',  color: '#8B5CF6' },
-  { icon: Award,      value: '40+',   label: 'Brand Partners',      color: '#F59E0B' },
+  { icon: Users,      value: '500K+', label: 'Monthly Readers',    color: '#00A651', trend: '+12%' },
+  { icon: BarChart2,  value: '4:30',  label: 'Avg. Time on Site',  color: '#06B6D4', trend: '+8%' },
+  { icon: TrendingUp, value: '12M+',  label: 'Annual Impressions', color: '#8B5CF6', trend: '+25%' },
+  { icon: Award,      value: '40+',   label: 'Brand Partners',     color: '#F59E0B', trend: '+15%' },
 ]
 
-const PAST_PARTNERS = [
-  { name: 'bKash',              category: 'Fintech',          initial: 'bK', color: '#E2136E' },
-  { name: 'PRAN',               category: 'Food & Beverage',  initial: 'PR', color: '#D62828' },
-  { name: 'Hyundai',            category: 'Automotive',       initial: 'HY', color: '#003087' },
-  { name: 'Philip Morris Intl', category: 'FMCG',             initial: 'PM', color: '#1A1A2E' },
-  { name: 'JTI',                category: 'FMCG',             initial: 'JT', color: '#004B87' },
-  { name: "Le d'Or",            category: 'Boulangerie',      initial: 'LD', color: '#8B6914' },
-  { name: 'United Group',       category: 'Conglomerate',     initial: 'UG', color: '#F97316' },
-  { name: 'Gold Kinen',         category: 'Lifestyle',        initial: 'GK', color: '#B8860B' },
-  { name: 'Clubhouse DHK',      category: 'Entertainment',    initial: 'CH', color: '#7C3AED' },
-  { name: 'Fair Electronics',   category: 'Electronics',      initial: 'FE', color: '#0EA5E9' },
-  { name: 'Hisense',            category: 'Electronics',      initial: 'HI', color: '#E63946' },
-  { name: 'Footsteps',          category: 'Fashion',          initial: 'FS', color: '#16A34A' },
-]
+const ICON_MAP: Record<string, React.ElementType> = {
+  FileText, Monitor, Mail, Trophy, Mic, Share2, Layers,
+  Users, BarChart2, TrendingUp, Award,
+}
 
-const SERVICES = [
-  {
-    title: 'Native Content',
-    description: 'Long-form sponsored stories and features that blend seamlessly with our editorial voice.',
-    icon: '✍️',
-  },
-  {
-    title: 'Display Advertising',
-    description: 'Premium banner placements across homepage, article pages, and category sections.',
-    icon: '📢',
-  },
-  {
-    title: 'Newsletter Sponsorship',
-    description: 'Exclusive placement in our Morning Briefing — reaching 20K+ engaged subscribers.',
-    icon: '📧',
-  },
-  {
-    title: 'Category Sponsorship',
-    description: 'Own a section. Get month-long prominent branding across an entire content vertical.',
-    icon: '🏆',
-  },
-  {
-    title: 'Event Partnership',
-    description: 'Co-brand live events, panel discussions, and community activations.',
-    icon: '🎤',
-  },
-  {
-    title: 'Social Amplification',
-    description: 'Extend campaign reach through our 100K+ social media following.',
-    icon: '📱',
-  },
-]
+// ── Data fetching ────────────────────────────────────────────────────────────
+
+async function getPortfolioItems(): Promise<PortfolioItem[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('portfolio_items')
+      .select('id, brand_name, project_name, category, description, outcome, logo_url, featured_image_url, external_link, display_order')
+      .eq('is_published', true)
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: false })
+    if (error || !data) return []
+    return data as PortfolioItem[]
+  } catch {
+    return []
+  }
+}
+
+async function getPartnerBrands(): Promise<PartnerBrand[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('portfolio_partners')
+      .select('id, name, category, logo_url, color, initial, website_url')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true })
+    if (error || !data || data.length === 0) return []
+    return data as PartnerBrand[]
+  } catch {
+    return []
+  }
+}
+
+async function getPortfolioServices(): Promise<PortfolioService[]> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('portfolio_services')
+      .select('id, icon_name, title, description')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true })
+    if (error || !data || data.length === 0) return []
+    return data as PortfolioService[]
+  } catch {
+    return []
+  }
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function PortfolioPage() {
-  const { data } = await supabaseAdmin
-    .from('portfolio_items')
-    .select('id, brand_name, project_name, category, description, outcome, logo_url, featured_image_url, external_link, display_order')
-    .eq('is_published', true)
-    .order('display_order', { ascending: true })
-    .order('created_at', { ascending: false })
+  const [items, dynamicPartners, dynamicServices] = await Promise.all([
+    getPortfolioItems(),
+    getPartnerBrands(),
+    getPortfolioServices(),
+  ])
 
-  const items = (data as PortfolioItem[]) ?? []
+  const partners = dynamicPartners.length > 0 ? dynamicPartners : FALLBACK_PARTNERS
+  const services = dynamicServices.length > 0 ? dynamicServices : FALLBACK_SERVICES
   const categories = Array.from(new Set(items.map(i => i.category)))
 
   return (
@@ -106,31 +161,35 @@ export default async function PortfolioPage() {
             backgroundSize: '28px 28px',
           }}
         />
-
         {/* Glow */}
         <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.06]"
-          style={{ background: 'radial-gradient(circle, #00A651, transparent 70%)' }}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(0,166,81,0.07) 0%, transparent 65%)' }}
         />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
           {/* Breadcrumb */}
-          <nav className="flex items-center justify-center gap-1.5 text-xs mb-6 text-white/40">
-            <Link href="/" className="hover:text-white/70 transition-colors">Home</Link>
+          <nav className="flex items-center justify-center gap-1.5 text-xs mb-8" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <Link href="/" className="hover:text-white/60 transition-colors">Home</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-white/70">Brand Collaborations</span>
+            <span style={{ color: 'rgba(255,255,255,0.6)' }}>Brand Collaborations</span>
           </nav>
 
-          <span className="inline-block text-xs font-bold uppercase tracking-widest text-dc-green mb-4 px-3 py-1.5 rounded-full border border-dc-green/30 bg-dc-green/10">
+          <span
+            className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] px-3 py-1.5 rounded-full mb-5"
+            style={{ color: '#00A651', background: 'rgba(0,166,81,0.12)', border: '1px solid rgba(0,166,81,0.25)' }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-dc-green animate-pulse" />
             Partner With Us
           </span>
 
-          <h1 className="font-headline font-black text-4xl sm:text-6xl text-white leading-tight mb-5">
-            Reach Bangladesh&apos;s Most{' '}
-            <span className="text-dc-green">Engaged</span> Audience
+          <h1 className="font-headline font-black text-4xl sm:text-6xl text-white leading-tight mt-3 mb-5">
+            Reach Bangladesh&apos;s{' '}
+            <span className="text-dc-green">Most Engaged</span>{' '}
+            Audience
           </h1>
 
-          <p className="text-base sm:text-lg text-white/60 max-w-2xl mx-auto leading-relaxed mb-10">
+          <p className="text-base sm:text-lg max-w-2xl mx-auto leading-relaxed mb-10" style={{ color: 'rgba(255,255,255,0.55)' }}>
             From native content to category sponsorships — we craft campaigns that resonate
             with our readers and deliver measurable results for your brand.
           </p>
@@ -138,15 +197,15 @@ export default async function PortfolioPage() {
           <div className="flex flex-wrap justify-center gap-3">
             <Link
               href="/advertise"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90 shadow-lg"
               style={{ background: 'var(--dc-green)' }}
             >
-              View Ad Packages
+              View Ad Packages <ArrowRight className="w-4 h-4" />
             </Link>
             <a
               href="mailto:partnerships@dhakachronicles.com"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold transition-colors"
-              style={{ color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.15)' }}
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg text-sm font-semibold transition-colors hover:bg-white/10"
+              style={{ color: 'rgba(255,255,255,0.75)', border: '1px solid rgba(255,255,255,0.15)' }}
             >
               <Mail className="w-4 h-4" />
               Email Partnerships
@@ -156,143 +215,320 @@ export default async function PortfolioPage() {
       </section>
 
       {/* ── Stats bar ── */}
-      <div style={{ background: '#0d1a12', borderBottom: '1px solid rgba(0,166,81,0.2)' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-            {STATS.map(({ icon: Icon, value, label, color }) => (
-              <div key={label} className="group">
-                <Icon className="w-5 h-5 mx-auto mb-2 transition-transform group-hover:scale-110" style={{ color }} />
-                <p className="text-2xl sm:text-3xl font-black font-headline text-white">{value}</p>
-                <p className="text-xs text-white/40 mt-1 uppercase tracking-wider">{label}</p>
+      <div style={{ background: '#0a1410', borderBottom: '1px solid rgba(0,166,81,0.18)' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            {STATS.map(({ icon: Icon, value, label, color, trend }) => (
+              <div key={label} className="group relative">
+                {/* Animated background */}
+                <div
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ background: `${color}08` }}
+                />
+                <div
+                  className="relative w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
+                  style={{ background: `${color}18` }}
+                >
+                  <Icon className="w-6 h-6 transition-transform group-hover:scale-110" style={{ color }} />
+                </div>
+                <p className="text-3xl sm:text-4xl font-black font-headline text-white mb-1 group-hover:scale-105 transition-transform">{value}</p>
+                <p className="text-xs uppercase tracking-wider mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>{label}</p>
+                <div className="flex items-center justify-center gap-1">
+                  <TrendingUp className="w-3 h-3" style={{ color }} />
+                  <span className="text-[10px] font-semibold" style={{ color }}>{trend}</span>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* ── Past Partners ── */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-18">
-        <div className="text-center mb-10">
-          <span className="text-xs font-bold uppercase tracking-widest text-dc-green">Trusted By</span>
-          <h2 className="font-headline font-black text-2xl sm:text-3xl mt-2" style={{ color: 'var(--dc-text)' }}>
-            Brands That Have Worked With Us
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {PAST_PARTNERS.map(partner => (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 space-y-18">
+
+        {/* ── Partner Brands ── */}
+        <section className="relative">
+          {/* Background decoration */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-16 bg-gradient-to-b from-transparent via-dc-green/20 to-transparent"></div>
+
+          <div className="text-center mb-12">
+            <span
+              className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] px-4 py-2 rounded-full mb-4"
+              style={{ color: '#00A651', background: 'rgba(0,166,81,0.08)', border: '1px solid rgba(0,166,81,0.15)' }}
+            >
+              <Heart className="w-3 h-3" />
+              Trusted By
+            </span>
+            <h2 className="font-headline font-black text-3xl sm:text-4xl mt-2 mb-4" style={{ color: 'var(--dc-text)' }}>
+              Brands That Have Worked With Us
+            </h2>
+            <p className="text-sm max-w-lg mx-auto leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
+              From fintech unicorns to legacy consumer brands — Bangladesh&apos;s top advertisers choose Dhaka Chronicles
+              for our proven track record of delivering exceptional results.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {partners.map((partner, index) => (
+              <div
+                key={partner.id}
+                className="group relative overflow-hidden animate-fade-in-up"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                {/* Hover glow effect */}
+                <div
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{ background: `radial-gradient(circle at center, ${partner.color}15 0%, transparent 70%)` }}
+                />
+
+                <div
+                  className="relative flex items-center gap-3 p-4 rounded-2xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl"
+                  style={{
+                    background: 'var(--dc-surface)',
+                    border: '1px solid var(--dc-border)',
+                    boxShadow: 'var(--card-shadow)',
+                  }}
+                >
+                  {partner.logo_url ? (
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-transform group-hover:scale-110"
+                      style={{ background: `${partner.color}12`, border: `1px solid ${partner.color}25` }}
+                    >
+                      <Image
+                        src={partner.logo_url}
+                        alt={partner.name}
+                        width={40}
+                        height={40}
+                        className="object-contain transition-transform group-hover:scale-105"
+                        unoptimized={partner.logo_url.startsWith('http')}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 transition-all group-hover:scale-110 group-hover:rotate-3"
+                      style={{ background: partner.color }}
+                    >
+                      {partner.initial}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className="font-headline font-bold text-sm leading-snug truncate transition-colors group-hover:text-dc-green"
+                      style={{ color: 'var(--dc-text)' }}
+                    >
+                      {partner.name}
+                    </p>
+                    <p className="text-[10px] uppercase tracking-wide mt-0.5 truncate opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--dc-text-muted)' }}>
+                      {partner.category}
+                    </p>
+                  </div>
+                  {partner.website_url && (
+                    <a
+                      href={partner.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                      style={{ color: 'var(--dc-text-muted)' }}
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Portfolio grid ── */}
+        <section>
+          {items.length === 0 ? (
             <div
-              key={partner.name}
-              className="flex flex-col items-center gap-3 p-5 rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-md"
+              className="py-24 text-center rounded-2xl"
               style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
             >
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0"
-                style={{ background: partner.color }}
-              >
-                {partner.initial}
-              </div>
-              <div className="text-center">
-                <p className="font-headline font-bold text-sm leading-snug" style={{ color: 'var(--dc-text)' }}>
-                  {partner.name}
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--dc-text-muted)' }}>
-                  {partner.category}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Portfolio grid ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
-        {items.length === 0 ? (
-          <div className="py-24 text-center">
-            <p className="text-xl font-headline font-bold mb-2" style={{ color: 'var(--dc-text)' }}>
-              Campaigns coming soon.
-            </p>
-            <p className="text-sm" style={{ color: 'var(--dc-text-muted)' }}>
-              In the meantime,{' '}
-              <a href="mailto:partnerships@dhakachronicles.com" className="text-dc-green hover:underline">
-                get in touch
-              </a>{' '}
-              to start a partnership.
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="mb-10">
-              <h2 className="font-headline font-black text-2xl sm:text-3xl mb-2" style={{ color: 'var(--dc-text)' }}>
-                Featured Work
-              </h2>
+              <p className="text-xl font-headline font-bold mb-2" style={{ color: 'var(--dc-text)' }}>
+                Campaign case studies coming soon.
+              </p>
               <p className="text-sm" style={{ color: 'var(--dc-text-muted)' }}>
-                A selection of campaigns we&apos;ve produced for brands across Bangladesh.
+                In the meantime,{' '}
+                <a href="mailto:partnerships@dhakachronicles.com" className="text-dc-green hover:underline">
+                  get in touch
+                </a>{' '}
+                to start a partnership.
               </p>
             </div>
-            <PortfolioGrid items={items} categories={categories} />
-          </>
-        )}
-      </div>
-
-      {/* ── Services grid ── */}
-      <div
-        className="py-16 sm:py-20"
-        style={{ background: 'var(--dc-surface)', borderTop: '1px solid var(--dc-border)', borderBottom: '1px solid var(--dc-border)' }}
-      >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="font-headline font-black text-2xl sm:text-3xl mb-3" style={{ color: 'var(--dc-text)' }}>
-              How We Can Work Together
-            </h2>
-            <p className="text-sm max-w-lg mx-auto" style={{ color: 'var(--dc-text-muted)' }}>
-              Flexible formats designed for every campaign goal and budget.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {SERVICES.map(service => (
-              <div
-                key={service.title}
-                className="p-5 rounded-xl transition-all hover:-translate-y-0.5"
-                style={{ background: 'var(--dc-surface-2)', border: '1px solid var(--dc-border)' }}
-              >
-                <span className="text-2xl mb-3 block">{service.icon}</span>
-                <h3 className="font-headline font-bold text-base mb-1.5" style={{ color: 'var(--dc-text)' }}>
-                  {service.title}
-                </h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
-                  {service.description}
+          ) : (
+            <>
+              <div className="mb-10">
+                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-dc-green">Our Work</span>
+                <h2 className="font-headline font-black text-2xl sm:text-3xl mt-2 mb-2" style={{ color: 'var(--dc-text)' }}>
+                  Featured Campaigns
+                </h2>
+                <p className="text-sm" style={{ color: 'var(--dc-text-muted)' }}>
+                  A selection of campaigns we&apos;ve produced for brands across Bangladesh.
                 </p>
               </div>
-            ))}
+              <PortfolioGrid items={items} categories={categories} />
+            </>
+          )}
+        </section>
+
+        {/* ── Services ── */}
+        <section className="relative">
+          {/* Background decoration */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-16 bg-gradient-to-b from-transparent via-dc-green/20 to-transparent"></div>
+
+          <div className="text-center mb-16">
+            <span
+              className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] px-4 py-2 rounded-full mb-4"
+              style={{ color: '#00A651', background: 'rgba(0,166,81,0.08)', border: '1px solid rgba(0,166,81,0.15)' }}
+            >
+              <Target className="w-3 h-3" />
+              What We Offer
+            </span>
+            <h2 className="font-headline font-black text-3xl sm:text-4xl mt-2 mb-4" style={{ color: 'var(--dc-text)' }}>
+              How We Can Work Together
+            </h2>
+            <p className="text-base max-w-2xl mx-auto leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
+              Flexible formats designed for every campaign goal and budget. From native content to category sponsorships,
+              we have the perfect solution for your brand's unique needs.
+            </p>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {services.map((service, i) => {
+              const Icon = ICON_MAP[service.icon_name] ?? Layers
+              const accent = ['#00A651', '#06B6D4', '#8B5CF6', '#F59E0B', '#F42A41', '#EC4899'][i % 6]
+              return (
+                <div
+                  key={service.id}
+                  className="group relative overflow-hidden animate-fade-in-up"
+                  style={{ animationDelay: `${i * 150}ms` }}
+                >
+                  {/* Animated background gradient */}
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: `linear-gradient(135deg, ${accent}08 0%, ${accent}05 100%)` }}
+                  />
+
+                  {/* Floating particles effect */}
+                  <div className="absolute top-4 right-4 w-2 h-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-ping" style={{ background: accent }}></div>
+                  <div className="absolute bottom-4 left-4 w-1 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 animate-ping" style={{ background: accent }}></div>
+
+                  <div
+                    className="relative p-8 rounded-2xl transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-2xl"
+                    style={{
+                      background: 'var(--dc-surface)',
+                      border: '1px solid var(--dc-border)',
+                      boxShadow: 'var(--card-shadow)',
+                    }}
+                  >
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
+                      style={{ background: `${accent}15`, border: `1px solid ${accent}25` }}
+                    >
+                      <Icon className="w-6 h-6 transition-transform group-hover:scale-110" style={{ color: accent }} />
+                    </div>
+                    <h3 className="font-headline font-bold text-lg mb-3 transition-colors group-hover:text-dc-green" style={{ color: 'var(--dc-text)' }}>
+                      {service.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
+                      {service.description}
+                    </p>
+
+                    {/* Subtle arrow indicator */}
+                    <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <ArrowRight className="w-4 h-4" style={{ color: accent }} />
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+
       </div>
 
       {/* ── CTA ── */}
-      <section className="py-20 px-4">
-        <div className="max-w-2xl mx-auto text-center">
-          <h2 className="font-headline font-black text-3xl sm:text-4xl mb-4" style={{ color: 'var(--dc-text)' }}>
-            Ready to work together?
-          </h2>
-          <p className="text-sm leading-relaxed mb-8 max-w-md mx-auto" style={{ color: 'var(--dc-text-muted)' }}>
-            Our partnerships team will design a campaign tailored to your goals and audience.
-            Response within 24 hours.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
+      <section
+        className="py-24 px-4 relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #060d09 0%, #0d1a12 60%, #060d09 100%)', borderTop: '1px solid rgba(0,166,81,0.15)' }}
+      >
+        {/* Enhanced background effects */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(0,166,81,0.1) 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full animate-pulse"
+          style={{ background: 'radial-gradient(circle, rgba(139,92,246,0.05) 0%, transparent 70%)' }}
+        />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-48 h-48 rounded-full animate-pulse delay-1000"
+          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.05) 0%, transparent 70%)' }}
+        />
+
+        {/* Floating elements */}
+        <div className="absolute top-16 left-16 w-3 h-3 rounded-full bg-dc-green/20 animate-bounce"></div>
+        <div className="absolute top-32 right-20 w-2 h-2 rounded-full bg-purple-400/20 animate-bounce delay-300"></div>
+        <div className="absolute bottom-20 left-20 w-4 h-4 rounded-full bg-cyan-400/20 animate-bounce delay-700"></div>
+
+        <div className="relative max-w-4xl mx-auto text-center">
+          <div className="mb-8">
+            <span
+              className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] px-4 py-2 rounded-full mb-6 animate-pulse"
+              style={{ color: '#00A651', background: 'rgba(0,166,81,0.12)', border: '1px solid rgba(0,166,81,0.25)' }}
+            >
+              <Sparkles className="w-3 h-3 animate-spin" />
+              Let&apos;s Talk
+            </span>
+            <h2 className="font-headline font-black text-4xl sm:text-5xl text-white mb-6 leading-tight">
+              Ready to{' '}
+              <span className="text-dc-green relative">
+                work together
+                <div className="absolute -bottom-3 left-0 right-0 h-1 bg-gradient-to-r from-dc-green via-purple-400 to-cyan-400 rounded-full animate-pulse"></div>
+              </span>
+              ?
+            </h2>
+            <p className="text-lg leading-relaxed mb-12 max-w-2xl mx-auto" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              Our partnerships team will design a campaign tailored to your goals.
+              From strategy to execution, we handle everything. Response within 24 hours.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
             <Link
               href="/advertise"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
+              className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 shadow-2xl hover:shadow-dc-green/25 transform hover:-translate-y-1"
               style={{ background: 'var(--dc-green)' }}
             >
+              <Target className="w-5 h-5 group-hover:animate-pulse" />
               See Ad Packages
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <a
               href="mailto:partnerships@dhakachronicles.com"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border transition-colors hover:border-dc-green hover:text-dc-green"
-              style={{ color: 'var(--dc-text-muted)', borderColor: 'var(--dc-border)' }}
+              className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl text-sm font-semibold transition-all hover:bg-white/10 hover:shadow-xl"
+              style={{ color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.2)' }}
             >
+              <Mail className="w-5 h-5 group-hover:animate-bounce" />
               Email Us Directly
             </a>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="flex flex-wrap justify-center items-center gap-8 text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-dc-green animate-pulse"></div>
+              <span>24hr Response Time</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse delay-300"></div>
+              <span>Custom Campaign Design</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse delay-700"></div>
+              <span>Proven Results</span>
+            </div>
           </div>
         </div>
       </section>

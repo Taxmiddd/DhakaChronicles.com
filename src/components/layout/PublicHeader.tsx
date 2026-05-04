@@ -72,20 +72,30 @@ export async function PublicHeader() {
       {/* ── Main header row ── */}
       <div
         className="border-b"
-        style={{ background: 'var(--background)', borderColor: 'var(--dc-border)' }}
+        style={{
+          background: 'var(--background)',
+          borderColor: 'var(--dc-header-border)',
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[64px] flex items-center justify-between gap-4">
 
-          {/* Logo */}
+          {/* Logo — swaps black ↔ white based on theme via CSS class */}
           <Link
             href="/"
-            className="shrink-0 flex items-center group"
+            className="shrink-0 flex items-center"
             aria-label="Dhaka Chronicles — Home"
           >
+            {/* Light mode logo */}
             <img
               src="/dc-logo-black.svg"
               alt="Dhaka Chronicles"
-              className="h-12 w-auto"
+              className="h-12 w-auto light-only-ib"
+            />
+            {/* Dark mode logo */}
+            <img
+              src="/dc-logo-white.svg"
+              alt="Dhaka Chronicles"
+              className="h-12 w-auto dark-only-ib"
             />
           </Link>
 
@@ -136,7 +146,10 @@ export async function PublicHeader() {
       {/* ── Mobile category pill scroll — phone only ── */}
       <div
         className="sm:hidden overflow-x-auto scrollbar-none border-b"
-        style={{ background: 'var(--background)', borderColor: 'var(--dc-border)' }}
+        style={{
+          background: 'var(--dc-nav-strip-bg)',
+          borderColor: 'var(--dc-nav-strip-border)',
+        }}
       >
         <div className="flex items-center gap-2 px-4 py-2 min-w-max">
           <Link
@@ -166,7 +179,10 @@ export async function PublicHeader() {
       {/* ── Desktop category navigation strip ── */}
       <nav
         className="hidden lg:block border-b"
-        style={{ background: 'var(--background)', borderColor: 'var(--dc-border)' }}
+        style={{
+          background: 'var(--dc-nav-strip-bg)',
+          borderColor: 'var(--dc-nav-strip-border)',
+        }}
         aria-label="Section navigation"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">

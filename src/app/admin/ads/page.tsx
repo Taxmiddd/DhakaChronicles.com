@@ -59,6 +59,8 @@ const POSITIONS: { value: AdPosition; label: string }[] = [
   { value: 'feed_native',      label: 'Feed Native'            },
   { value: 'sticky_mobile',    label: 'Sticky Mobile'          },
   { value: 'before_footer',    label: 'Before Footer'          },
+  { value: 'mobile_square_1',  label: 'Mobile Square (Left)'  },
+  { value: 'mobile_square_2',  label: 'Mobile Square (Right)' },
 ]
 
 const SIZES: { value: AdSize; label: string; note: string }[] = [
@@ -80,6 +82,8 @@ const POSITION_COLOR: Record<AdPosition, string> = {
   feed_native:      '#F42A41',
   sticky_mobile:    '#EC4899',
   before_footer:    '#0EA5E9',
+  mobile_square_1:  '#F97316',
+  mobile_square_2:  '#FB923C',
 }
 
 const EMPTY: Omit<Ad, 'id' | 'created_at' | 'click_count' | 'impression_count'> = {

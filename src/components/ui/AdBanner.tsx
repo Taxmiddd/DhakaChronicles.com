@@ -13,6 +13,8 @@ export type AdPosition =
   | 'before_footer'
   | 'widget_mid'
   | 'widget_right'
+  | 'mobile_square_1'
+  | 'mobile_square_2'
 
 export type AdVariant = 'banner' | 'native' | 'bite' | 'sticky'
 
