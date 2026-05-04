@@ -103,7 +103,7 @@ const ORG_SCHEMA = {
     email: 'hello@dhakachronicles.com',
     contactType: 'editorial',
   },
-  foundingDate: '2025',
+  foundingDate: '2024',
   description: 'Bangladesh\'s leading independent digital news platform.',
   publishingPrinciples: 'https://dhakachronicles.com/about',
   masthead: 'https://dhakachronicles.com/about',

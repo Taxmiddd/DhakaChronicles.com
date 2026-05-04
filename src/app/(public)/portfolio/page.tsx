@@ -31,6 +31,21 @@ const STATS = [
   { icon: Award,      value: '40+',   label: 'Brand Partners',      color: '#F59E0B' },
 ]
 
+const PAST_PARTNERS = [
+  { name: 'bKash',              category: 'Fintech',          initial: 'bK', color: '#E2136E' },
+  { name: 'PRAN',               category: 'Food & Beverage',  initial: 'PR', color: '#D62828' },
+  { name: 'Hyundai',            category: 'Automotive',       initial: 'HY', color: '#003087' },
+  { name: 'Philip Morris Intl', category: 'FMCG',             initial: 'PM', color: '#1A1A2E' },
+  { name: 'JTI',                category: 'FMCG',             initial: 'JT', color: '#004B87' },
+  { name: "Le d'Or",            category: 'Boulangerie',      initial: 'LD', color: '#8B6914' },
+  { name: 'United Group',       category: 'Conglomerate',     initial: 'UG', color: '#F97316' },
+  { name: 'Gold Kinen',         category: 'Lifestyle',        initial: 'GK', color: '#B8860B' },
+  { name: 'Clubhouse DHK',      category: 'Entertainment',    initial: 'CH', color: '#7C3AED' },
+  { name: 'Fair Electronics',   category: 'Electronics',      initial: 'FE', color: '#0EA5E9' },
+  { name: 'Hisense',            category: 'Electronics',      initial: 'HI', color: '#E63946' },
+  { name: 'Footsteps',          category: 'Fashion',          initial: 'FS', color: '#16A34A' },
+]
+
 const SERVICES = [
   {
     title: 'Native Content',
@@ -152,6 +167,40 @@ export default async function PortfolioPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* ── Past Partners ── */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-18">
+        <div className="text-center mb-10">
+          <span className="text-xs font-bold uppercase tracking-widest text-dc-green">Trusted By</span>
+          <h2 className="font-headline font-black text-2xl sm:text-3xl mt-2" style={{ color: 'var(--dc-text)' }}>
+            Brands That Have Worked With Us
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {PAST_PARTNERS.map(partner => (
+            <div
+              key={partner.name}
+              className="flex flex-col items-center gap-3 p-5 rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-md"
+              style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0"
+                style={{ background: partner.color }}
+              >
+                {partner.initial}
+              </div>
+              <div className="text-center">
+                <p className="font-headline font-bold text-sm leading-snug" style={{ color: 'var(--dc-text)' }}>
+                  {partner.name}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--dc-text-muted)' }}>
+                  {partner.category}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

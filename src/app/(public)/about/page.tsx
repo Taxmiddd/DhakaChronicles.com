@@ -4,7 +4,7 @@ import { Mail, MapPin, Shield, Zap, Globe, ChevronRight } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'About – Dhaka Chronicles',
-  description: 'Dhaka Chronicles is Bangladesh\'s leading independent digital news platform, delivering reliable journalism since 2025.',
+  description: 'Dhaka Chronicles is Bangladesh\'s leading independent digital news platform, delivering reliable journalism since July 2024.',
 }
 
 const VALUES = [
@@ -38,10 +38,16 @@ export default function AboutPage() {
           <h1 className="font-headline font-black text-5xl sm:text-6xl mt-3 mb-6 leading-tight" style={{ color: 'var(--dc-text)' }}>
             The Pulse of<br />Bangladesh.
           </h1>
-          <p className="text-xl leading-relaxed max-w-2xl" style={{ color: 'var(--dc-text-muted)' }}>
+          <p className="text-xl leading-relaxed max-w-2xl mb-8" style={{ color: 'var(--dc-text-muted)' }}>
             An independent digital news organisation dedicated to delivering accurate, timely,
             and deeply reported journalism from Bangladesh and beyond.
           </p>
+          <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--dc-text-muted)' }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-dc-green inline-block" />
+            Established <strong className="text-dc-green font-semibold ml-1">17 July 2024</strong>
+            <span className="mx-2 opacity-30">·</span>
+            Dhaka, Bangladesh
+          </div>
         </div>
       </section>
 
@@ -66,6 +72,31 @@ export default function AboutPage() {
               From breaking news and investigative reports to cultural features and data-driven analysis,
               Dhaka Chronicles covers the full spectrum of Bangladesh&apos;s dynamic story — in both
               English and Bangla.
+            </p>
+          </div>
+        </section>
+
+        {/* ── Our Story ── */}
+        <section>
+          <div className="flex items-center gap-2 mb-5">
+            <span className="w-1.5 h-5 rounded-full bg-dc-green shrink-0" />
+            <h2 className="font-headline font-bold text-2xl" style={{ color: 'var(--dc-text)' }}>Our Story</h2>
+          </div>
+          <div
+            className="rounded-2xl p-8 sm:p-10 relative overflow-hidden"
+            style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.04]"
+              style={{ background: 'radial-gradient(circle, #00A651, transparent 70%)' }} />
+            <p className="text-base leading-relaxed mb-4" style={{ color: 'var(--dc-text)' }}>
+              Dhaka Chronicles was established on <strong>17 July 2024</strong> with a single conviction:
+              Bangladesh deserves a news platform that is fast, bilingual, and fearlessly independent.
+            </p>
+            <p className="text-base leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
+              What began as a digital-first experiment on social media quickly grew into one of
+              Bangladesh&apos;s most-watched news brands — reaching tens of millions of views across
+              Facebook, Instagram, and YouTube. Today, the website is the next chapter: a permanent
+              home for journalism that goes deeper than a scroll.
             </p>
           </div>
         </section>
