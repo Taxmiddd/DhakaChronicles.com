@@ -83,14 +83,46 @@ export function PublicFooter() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
             {/* Mobile layout */}
-            <div className="sm:hidden space-y-4">
-              <Link href="/" aria-label="Dhaka Chronicles — Home" className="inline-block">
-                <img src="/dc-logo-black.svg" alt="Dhaka Chronicles" className="h-8 w-auto" />
-              </Link>
-              <FooterSocials />
-              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
-                © {year} Dhaka Chronicles — Bangladesh&apos;s leading independent digital news platform.{' '}
-                Built by{' '}
+            <div className="sm:hidden">
+              {/* Logo + socials */}
+              <div className="flex items-center justify-between mb-6">
+                <Link href="/" aria-label="Dhaka Chronicles — Home">
+                  <img src="/dc-logo-black.svg" alt="Dhaka Chronicles" className="h-8 w-auto" />
+                </Link>
+                <FooterSocials />
+              </div>
+
+              {/* Nav links — 2 col + Legal full-width */}
+              <div className="grid grid-cols-2 gap-x-6 gap-y-6 mb-6">
+                {FOOTER_SECTIONS.slice(0, 2).map((section) => (
+                  <div key={section.title}>
+                    <h4 className="font-bold text-[10px] uppercase tracking-widest mb-3" style={{ color: 'var(--dc-text)' }}>
+                      {section.title}
+                    </h4>
+                    <ul className="space-y-2">
+                      {section.links.map((link) => (
+                        <li key={link.href}>
+                          <Link href={link.href} className="text-sm transition-colors hover:text-dc-green" style={{ color: 'var(--dc-text-muted)' }}>
+                            {link.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              {/* Legal row */}
+              <div className="flex flex-wrap gap-x-5 gap-y-1.5 mb-6">
+                {FOOTER_SECTIONS[2].links.map((link) => (
+                  <Link key={link.href} href={link.href} className="text-xs transition-colors hover:text-dc-green" style={{ color: 'var(--dc-text-muted)' }}>
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Copyright */}
+              <p className="text-[11px]" style={{ color: 'var(--dc-text-muted)' }}>
+                © {year} Dhaka Chronicles. Built by{' '}
                 <a href="https://noeticstudio.net" target="_blank" rel="noopener noreferrer" className="text-dc-green hover:underline">
                   NOÉTIC Studio
                 </a>.
@@ -304,35 +336,41 @@ export function PublicFooter() {
           </div>
 
           {/* Mobile */}
-          <div className="sm:hidden space-y-5">
-            <Link href="/" aria-label="Dhaka Chronicles — Home" className="inline-block">
-              <img src="/dc-logo-white.svg" alt="Dhaka Chronicles" className="h-9 w-auto" />
-            </Link>
-            <FooterSocials />
-            {/* 2-col link grid on mobile */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-5 pt-1">
-              {FOOTER_SECTIONS.map((section) => (
+          <div className="sm:hidden">
+            {/* Logo + socials */}
+            <div className="flex items-center justify-between mb-6">
+              <Link href="/" aria-label="Dhaka Chronicles — Home">
+                <img src="/dc-logo-white.svg" alt="Dhaka Chronicles" className="h-9 w-auto" />
+              </Link>
+              <FooterSocials />
+            </div>
+
+            {/* Nav links — 2 col */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-6 mb-6">
+              {FOOTER_SECTIONS.slice(0, 2).map((section) => (
                 <div key={section.title}>
-                  <h4
-                    className="text-[10px] font-bold uppercase tracking-widest mb-3"
-                    style={{ color: 'rgba(255,255,255,0.25)' }}
-                  >
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.25)' }}>
                     {section.title}
                   </h4>
                   <ul className="space-y-2">
                     {section.links.map((link) => (
                       <li key={link.href}>
-                        <Link
-                          href={link.href}
-                          className="text-sm transition-colors hover:text-dc-green"
-                          style={{ color: 'rgba(255,255,255,0.45)' }}
-                        >
+                        <Link href={link.href} className="text-sm transition-colors hover:text-dc-green" style={{ color: 'rgba(255,255,255,0.45)' }}>
                           {link.label}
                         </Link>
                       </li>
                     ))}
                   </ul>
                 </div>
+              ))}
+            </div>
+
+            {/* Legal row */}
+            <div className="flex flex-wrap gap-x-5 gap-y-1.5 mb-6">
+              {FOOTER_SECTIONS[2].links.map((link) => (
+                <Link key={link.href} href={link.href} className="text-xs transition-colors hover:text-dc-green" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  {link.label}
+                </Link>
               ))}
             </div>
           </div>
