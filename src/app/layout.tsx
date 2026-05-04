@@ -179,6 +179,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               }}
             />
             <Script
+              src="https://t.contentsquare.net/uxa/2a2b8d46a08f9.js"
+              strategy="afterInteractive"
+            />
+            <Script
               src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"
               strategy="lazyOnload"
             />
