@@ -67,6 +67,15 @@ export const metadata: Metadata = {
     // google: 'your-google-verification-token',
   },
   category: 'news',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    shortcut: '/favicon.ico',
+  },
 }
 
 import Script from 'next/script'
@@ -79,9 +88,9 @@ const ORG_SCHEMA = {
   url: 'https://dhakachronicles.com',
   logo: {
     '@type': 'ImageObject',
-    url: 'https://dhakachronicles.com/dc-logo-black.svg',
-    width: 300,
-    height: 60,
+    url: 'https://dhakachronicles.com/icons/icon-192.png',
+    width: 192,
+    height: 192,
   },
   sameAs: [
     'https://facebook.com/dhakachronicles',
