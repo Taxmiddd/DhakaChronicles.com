@@ -70,6 +70,7 @@ export const metadata: Metadata = {
 }
 
 import Script from 'next/script'
+import { Analytics } from '@vercel/analytics/next'
 
 const ORG_SCHEMA = {
   '@context': 'https://schema.org',
@@ -191,6 +192,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           {children}
+          <Analytics />
           <CookieConsent />
           <Toaster
             richColors
