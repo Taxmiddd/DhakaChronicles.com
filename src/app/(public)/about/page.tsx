@@ -94,34 +94,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── Leadership ── */}
-        <section>
-          <h2 className="font-headline font-bold text-2xl mb-6" style={{ color: 'var(--dc-text)' }}>
-            Founding Team
-          </h2>
-          <div
-            className="rounded-2xl p-8 flex flex-col sm:flex-row items-start gap-6"
-            style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
-          >
-            <div
-              className="w-16 h-16 rounded-2xl bg-dc-green/15 border border-dc-green/25 flex items-center justify-center text-dc-green font-black text-xl font-headline shrink-0"
-            >
-              TA
-            </div>
-            <div>
-              <p className="font-headline font-bold text-xl" style={{ color: 'var(--dc-text)' }}>
-                Tahmid Ashfaque
-              </p>
-              <p className="text-dc-green text-sm font-semibold mt-0.5">Founder & Publisher</p>
-              <p className="text-sm leading-relaxed mt-3" style={{ color: 'var(--dc-text-muted)' }}>
-                Founder of Dhaka Chronicles and principal at NOÉTIC Studio. Tahmid brings together
-                technology, product design, and editorial vision to build the next generation of
-                Bangladeshi digital media.
-              </p>
-            </div>
-          </div>
-        </section>
-
         {/* ── Contact CTA ── */}
         <section
           className="rounded-2xl p-8 sm:p-10"
