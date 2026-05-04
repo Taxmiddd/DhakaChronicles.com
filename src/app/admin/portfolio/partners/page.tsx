@@ -95,7 +95,16 @@ export default function AdminPortfolioPartnersPage() {
   }
 
   const handleEdit = (partner: PortfolioPartner) => {
-    setForm(partner)
+    setForm({
+      name: partner.name,
+      category: partner.category,
+      logo_url: partner.logo_url ?? '',
+      color: partner.color,
+      initial: partner.initial,
+      website_url: partner.website_url ?? '',
+      is_active: partner.is_active,
+      display_order: partner.display_order,
+    })
     setEditingId(partner.id)
     setShowAdd(true)
   }
