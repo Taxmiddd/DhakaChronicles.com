@@ -30,8 +30,8 @@ import {
 
 type AdPosition =
   | 'homepage_banner' | 'article_sidebar' | 'article_inline' | 'category_banner'
-  | 'feed_native' | 'sticky_mobile' | 'before_footer'
-type AdSize = 'banner' | 'bite-sized' | 'sidebar-tall' | 'native' | 'auto'
+  | 'feed_native' | 'sticky_mobile' | 'before_footer' | 'widget_mid' | 'widget_right'
+type AdSize = 'banner' | 'bite-sized' | 'sidebar-tall' | 'native' | 'auto' | 'square-1000'
 
 interface Ad {
   id: string
@@ -50,17 +50,20 @@ interface Ad {
 }
 
 const POSITIONS: { value: AdPosition; label: string }[] = [
-  { value: 'homepage_banner',  label: 'Homepage Banner'   },
-  { value: 'article_sidebar',  label: 'Article Sidebar'   },
-  { value: 'article_inline',   label: 'Article Inline'    },
-  { value: 'category_banner',  label: 'Category Banner'   },
-  { value: 'feed_native',      label: 'Feed Native'       },
-  { value: 'sticky_mobile',    label: 'Sticky Mobile'     },
-  { value: 'before_footer',    label: 'Before Footer'     },
+  { value: 'homepage_banner',  label: 'Homepage Banner'        },
+  { value: 'widget_mid',       label: 'Homepage Widget (Mid)'  },
+  { value: 'widget_right',     label: 'Homepage Widget (Right)'},
+  { value: 'article_sidebar',  label: 'Article Sidebar'        },
+  { value: 'article_inline',   label: 'Article Inline'         },
+  { value: 'category_banner',  label: 'Category Banner'        },
+  { value: 'feed_native',      label: 'Feed Native'            },
+  { value: 'sticky_mobile',    label: 'Sticky Mobile'          },
+  { value: 'before_footer',    label: 'Before Footer'          },
 ]
 
 const SIZES: { value: AdSize; label: string; note: string }[] = [
   { value: 'auto',         label: 'Free / Auto',  note: 'Adapts to image dimensions' },
+  { value: 'square-1000',  label: 'Square',       note: '1000×1000'                  },
   { value: 'banner',       label: 'Leaderboard',  note: '728×90 / 320×50'            },
   { value: 'bite-sized',   label: 'Bite-Sized',   note: '320×50 compact'             },
   { value: 'sidebar-tall', label: 'Half Page',    note: '300×600'                    },
@@ -69,6 +72,8 @@ const SIZES: { value: AdSize; label: string; note: string }[] = [
 
 const POSITION_COLOR: Record<AdPosition, string> = {
   homepage_banner:  '#00A651',
+  widget_mid:       '#10B981',
+  widget_right:     '#34D399',
   article_sidebar:  '#06B6D4',
   article_inline:   '#8B5CF6',
   category_banner:  '#F59E0B',

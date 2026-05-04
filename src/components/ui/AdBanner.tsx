@@ -201,6 +201,36 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     )
   }
 
+  // ── Square 1000×1000 ────────────────────────────────────────────────────
+  if (ad.size === 'square-1000') {
+    return (
+      <a
+        href={ad.link_url}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        className="relative block rounded-xl overflow-hidden"
+        style={{ width: '100%', maxWidth: '1000px', aspectRatio: '1/1' }}
+        onClick={trackClick}
+        aria-label={`Advertisement: ${ad.title}`}
+      >
+        <Image
+          src={ad.image_url}
+          alt={ad.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 1000px) 100vw, 1000px"
+          unoptimized={ad.image_url.startsWith('http')}
+        />
+        <span
+          className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+          style={{ background: 'rgba(0,0,0,0.45)', color: 'rgba(255,255,255,0.65)' }}
+        >
+          Ad
+        </span>
+      </a>
+    )
+  }
+
   // ── Auto: natural image dimensions, no fixed height ─────────────────────
   if (ad.size === 'auto') {
     return (
