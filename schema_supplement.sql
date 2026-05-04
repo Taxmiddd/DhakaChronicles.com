@@ -773,6 +773,15 @@ CREATE TABLE IF NOT EXISTS public.contact_messages (
 );
 
 ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "admin_contact_messages" ON public.contact_messages
-  USING (auth.jwt() ->> 'role' IN ('admin', 'founder'));
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename  = 'contact_messages'
+      AND policyname = 'admin_contact_messages'
+  ) THEN
+    CREATE POLICY "admin_contact_messages" ON public.contact_messages
+      USING (auth.jwt() ->> 'role' IN ('admin', 'founder'));
+  END IF;
+END $$;
 GRANT INSERT ON public.contact_messages TO anon, authenticated;
