@@ -4,6 +4,7 @@ import { TrendingUp, ChevronRight, Mail } from 'lucide-react'
 import { ArticleCard } from '@/components/article/ArticleCard'
 import { CityWidgets } from '@/components/widgets/CityWidgets'
 import AdBanner from '@/components/ui/AdBanner'
+import { NewsletterForm } from '@/components/layout/NewsletterForm'
 import { supabaseAdmin } from '@/lib/db/admin'
 
 export const metadata: Metadata = {
@@ -318,18 +319,7 @@ export default async function HomePage() {
             <p className="text-sm mb-4" style={{ color: 'var(--dc-text-muted)' }}>
               Top 5 stories in your inbox at 7 AM daily.
             </p>
-            <form action="/api/newsletter/subscribe" method="POST" className="space-y-2.5">
-              <input
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                required
-                className="form-input text-sm"
-              />
-              <button type="submit" className="btn-primary w-full py-2.5 text-sm">
-                Subscribe Free
-              </button>
-            </form>
+            <NewsletterForm />
           </div>
         </aside>
       </div>

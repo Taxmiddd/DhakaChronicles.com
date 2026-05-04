@@ -27,15 +27,28 @@ export async function PATCH(req: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json().catch(() => ({}))
-  const { full_name, bio, phone, avatar_url, facebook_url, twitter_url, linkedin_url, new_password } = body
+  const { full_name, bio, phone, avatar_url, facebook_url, twitter_url, linkedin_url, new_password, current_password } = body
 
-  // If changing password, update via Supabase Auth
+  // If changing password, verify current password first
   if (new_password) {
+    if (!current_password) {
+      return NextResponse.json({ error: 'Current password is required to set a new password' }, { status: 400 })
+    }
     if (new_password.length < 8) {
       return NextResponse.json({ error: 'New password must be at least 8 characters' }, { status: 400 })
     }
+    // Fetch the user's email to re-authenticate
+    const { data: userRecord } = await supabaseAdmin.auth.admin.getUserById(session.id)
+    const email = userRecord?.user?.email
+    if (!email) {
+      return NextResponse.json({ error: 'Unable to verify identity' }, { status: 400 })
+    }
     const supabase = await createSupabaseServerClient()
-    const { error: pwError } = await supabase.auth.updateUser({ password: new_password })
+    const { error: verifyError } = await supabase.auth.signInWithPassword({ email, password: current_password })
+    if (verifyError) {
+      return NextResponse.json({ error: 'Current password is incorrect' }, { status: 400 })
+    }
+    const { error: pwError } = await supabaseAdmin.auth.admin.updateUserById(session.id, { password: new_password })
     if (pwError) {
       return NextResponse.json({ error: 'Failed to update password' }, { status: 400 })
     }

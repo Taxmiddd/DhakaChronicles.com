@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   const user = await getSession()
-  if (!user || !['admin', 'founder'].includes(user.role)) {
+  if (!user || !['admin', 'founder', 'publisher'].includes(user.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

@@ -89,7 +89,7 @@ export default function EditorialCalendarPage() {
     e.stopPropagation()
     setDeletingId(id)
     try {
-      const res = await fetch(`/api/admin/calendar/${id}`, { method: 'DELETE' })
+      const res = await fetch(`/api/admin/calendar?id=${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error()
       toast.success('Event removed')
       setEvents(prev => prev.filter(ev => ev.id !== id))

@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import { Mail, MessageSquare, Send, Loader2, CheckCircle } from 'lucide-react'
-import type { Metadata } from 'next'
+import { toast } from 'sonner'
 
-// Note: metadata export requires server component; keeping this client for form
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
@@ -13,10 +12,20 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    // TODO: Wire to /api/contact or email service (Resend)
-    await new Promise(r => setTimeout(r, 1000))
-    setSubmitted(true)
-    setLoading(false)
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to send message')
+      setSubmitted(true)
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send message')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

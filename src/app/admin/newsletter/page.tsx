@@ -18,6 +18,30 @@ export default function NewsletterAdminPage() {
   const [subject, setSubject] = useState('')
   const [content, setContent] = useState<Record<string, unknown>>({ type: 'doc', content: [] })
   const [isSending, setIsSending] = useState(false)
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('newsletter_draft')
+    if (saved) {
+      try {
+        const draft = JSON.parse(saved)
+        if (draft.subject) setSubject(draft.subject)
+        if (draft.content) setContent(draft.content)
+      } catch {}
+    }
+  }, [])
+
+  const handleSaveDraft = () => {
+    setIsSavingDraft(true)
+    try {
+      localStorage.setItem('newsletter_draft', JSON.stringify({ subject, content }))
+      toast.success('Draft saved')
+    } catch {
+      toast.error('Failed to save draft')
+    } finally {
+      setIsSavingDraft(false)
+    }
+  }
 
   useEffect(() => {
     const fetchSubscribers = async () => {
@@ -56,6 +80,7 @@ export default function NewsletterAdminPage() {
         toast.success(`Newsletter sent to ${subscribers.length} subscribers!`)
         setSubject('')
         setContent({ type: 'doc', content: [] })
+        localStorage.removeItem('newsletter_draft')
       } else {
         toast.error(data.error || 'Failed to send newsletter')
       }
@@ -110,8 +135,9 @@ export default function NewsletterAdminPage() {
             </div>
 
             <div className="pt-4 flex justify-end gap-3">
-              <button className="btn-ghost flex items-center gap-2">
-                <Save className="w-4 h-4" /> Save Draft
+              <button onClick={handleSaveDraft} disabled={isSavingDraft} className="btn-ghost flex items-center gap-2">
+                {isSavingDraft ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                Save Draft
               </button>
               <button 
                 onClick={handleSend}

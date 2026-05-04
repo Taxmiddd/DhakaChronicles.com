@@ -31,7 +31,38 @@ export async function GET(_req: Request, { params }: RouteParams) {
   return NextResponse.json({ poll })
 }
 
-/** DELETE /api/admin/polls/[id] — delete a poll (admin) */
+/** PATCH /api/polls/[id] — update poll (admin/founder/publisher) */
+export async function PATCH(req: Request, { params }: RouteParams) {
+  const user = await getSession()
+  if (!user || !['founder', 'admin', 'publisher'].includes(user.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const { id } = await params
+  const body = await req.json().catch(() => ({}))
+
+  const allowed = ['is_active', 'question', 'question_bn', 'ends_at', 'starts_at']
+  const update: Record<string, unknown> = {}
+  for (const key of allowed) {
+    if (key in body) update[key] = body[key]
+  }
+
+  if (Object.keys(update).length === 0) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from('polls')
+    .update(update)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ poll: data })
+}
+
+/** DELETE /api/polls/[id] — delete a poll (admin/founder) */
 export async function DELETE(_req: Request, { params }: RouteParams) {
   const user = await getSession()
   if (!user || !['founder', 'admin'].includes(user.role)) {

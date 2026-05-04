@@ -330,9 +330,10 @@ CREATE TABLE IF NOT EXISTS public.news_tips (
   tipster_phone  TEXT,
   location       TEXT,
   is_anonymous   BOOLEAN DEFAULT false,
-  status         TEXT    DEFAULT 'new'    CHECK (status   IN ('new','reviewed','used','dismissed')),
+  status         TEXT    DEFAULT 'new'    CHECK (status   IN ('new','reviewing','investigating','published','spam')),
   priority       TEXT    DEFAULT 'medium' CHECK (priority IN ('low','medium','high')),
   internal_notes TEXT,
+  submitted_at   TIMESTAMPTZ DEFAULT NOW(),
   created_at     TIMESTAMPTZ DEFAULT NOW(),
   updated_at     TIMESTAMPTZ DEFAULT NOW()
 );
@@ -346,6 +347,18 @@ ALTER TABLE public.news_tips ADD COLUMN IF NOT EXISTS location       TEXT;
 ALTER TABLE public.news_tips ADD COLUMN IF NOT EXISTS priority       TEXT DEFAULT 'medium';
 ALTER TABLE public.news_tips ADD COLUMN IF NOT EXISTS internal_notes TEXT;
 ALTER TABLE public.news_tips ADD COLUMN IF NOT EXISTS updated_at     TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.news_tips ADD COLUMN IF NOT EXISTS submitted_at   TIMESTAMPTZ DEFAULT NOW();
+
+-- Fix status constraint to match the admin UI values
+DO $$ DECLARE con_name text; BEGIN
+  SELECT conname INTO con_name FROM pg_constraint
+  WHERE conrelid = 'public.news_tips'::regclass AND contype = 'c' AND conname LIKE '%status%';
+  IF con_name IS NOT NULL THEN
+    EXECUTE format('ALTER TABLE public.news_tips DROP CONSTRAINT %I', con_name);
+  END IF;
+END $$;
+ALTER TABLE public.news_tips ADD CONSTRAINT news_tips_status_check
+  CHECK (status IN ('new','reviewing','investigating','published','spam'));
 
 -- Drop NOT NULL from old "message" column so old rows don't break
 DO $$ BEGIN
@@ -611,6 +624,106 @@ END $$;
 ALTER TABLE public.comments ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT false;
 ALTER TABLE public.comments ADD COLUMN IF NOT EXISTS is_edited BOOLEAN DEFAULT false;
 
+-- ── Site Settings (single-row config) ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.site_settings (
+  id                      INTEGER PRIMARY KEY DEFAULT 1,
+  site_name               TEXT    DEFAULT 'Dhaka Chronicles',
+  tagline                 TEXT    DEFAULT 'The Pulse of Bangladesh',
+  site_url                TEXT    DEFAULT 'https://dhakachronicles.com',
+  contact_email           TEXT    DEFAULT 'editor@dhakachronicles.com',
+  breaking_news_enabled   BOOLEAN DEFAULT true,
+  bangla_enabled          BOOLEAN DEFAULT true,
+  articles_per_page       INTEGER DEFAULT 30,
+  notify_on_review        BOOLEAN DEFAULT true,
+  notify_on_publish       BOOLEAN DEFAULT true,
+  notify_on_new_user      BOOLEAN DEFAULT true,
+  session_timeout_minutes INTEGER DEFAULT 60,
+  max_login_attempts      INTEGER DEFAULT 5,
+  cloudinary_cloud_name   TEXT,
+  fb_page_id              TEXT,
+  updated_at              TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT single_row CHECK (id = 1)
+);
+
+-- Seed default row if absent
+INSERT INTO public.site_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'site_settings' AND policyname = 'Staff can read settings') THEN
+    CREATE POLICY "Staff can read settings"
+      ON public.site_settings FOR SELECT
+      USING (auth.uid() IN (SELECT id FROM public.users WHERE role IN ('founder', 'admin', 'publisher')));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'site_settings' AND policyname = 'Admins can update settings') THEN
+    CREATE POLICY "Admins can update settings"
+      ON public.site_settings FOR ALL
+      USING (auth.uid() IN (SELECT id FROM public.users WHERE role IN ('founder', 'admin')));
+  END IF;
+END $$;
+
+-- ── Story Assignments ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.story_assignments (
+  id          UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title       TEXT    NOT NULL,
+  description TEXT,
+  notes       TEXT,
+  status      TEXT    NOT NULL DEFAULT 'proposed'
+                CHECK (status IN ('proposed','assigned','in_progress','completed','cancelled')),
+  priority    INTEGER NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 3),
+  deadline    TIMESTAMPTZ,
+  assignee_id UUID    REFERENCES public.users(id) ON DELETE SET NULL,
+  assigned_by UUID    REFERENCES public.users(id) ON DELETE SET NULL,
+  category_id UUID    REFERENCES public.categories(id) ON DELETE SET NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.story_assignments ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'story_assignments' AND policyname = 'Staff can manage assignments') THEN
+    CREATE POLICY "Staff can manage assignments"
+      ON public.story_assignments FOR ALL
+      USING (auth.uid() IN (SELECT id FROM public.users WHERE role IN ('founder', 'admin', 'publisher')));
+  END IF;
+END $$;
+
+-- ── Podcasts ──────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.podcasts (
+  id               UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title            TEXT    NOT NULL,
+  description      TEXT,
+  audio_url        TEXT,
+  cover_image_url  TEXT,
+  episode_number   INTEGER,
+  season           INTEGER DEFAULT 1,
+  duration_seconds INTEGER,
+  status           TEXT    NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','published','archived')),
+  published_at     TIMESTAMPTZ,
+  spotify_url      TEXT,
+  apple_url        TEXT,
+  youtube_url      TEXT,
+  author_id        UUID    REFERENCES public.users(id) ON DELETE SET NULL,
+  created_at       TIMESTAMPTZ DEFAULT NOW(),
+  updated_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.podcasts ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'podcasts' AND policyname = 'Public can view published podcasts') THEN
+    CREATE POLICY "Public can view published podcasts"
+      ON public.podcasts FOR SELECT USING (status = 'published');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'podcasts' AND policyname = 'Staff can manage podcasts') THEN
+    CREATE POLICY "Staff can manage podcasts"
+      ON public.podcasts FOR ALL
+      USING (auth.uid() IN (SELECT id FROM public.users WHERE role IN ('founder', 'admin', 'publisher')));
+  END IF;
+END $$;
+
 -- ── RPCs ──────────────────────────────────────────────────────────────────────
 
 -- Atomically increment article view_count or comment_count
@@ -635,3 +748,31 @@ BEGIN
   UPDATE public.polls         SET total_votes = total_votes + 1 WHERE id = p_poll_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Atomically increment comment upvotes or downvotes
+CREATE OR REPLACE FUNCTION increment_comment_vote(p_comment_id UUID, p_field TEXT)
+RETURNS void AS $$
+BEGIN
+  IF p_field = 'upvotes' THEN
+    UPDATE public.comments SET upvotes = upvotes + 1 WHERE id = p_comment_id;
+  ELSIF p_field = 'downvotes' THEN
+    UPDATE public.comments SET downvotes = downvotes + 1 WHERE id = p_comment_id;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ── Contact messages ─────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        TEXT NOT NULL,
+  email       TEXT NOT NULL,
+  subject     TEXT NOT NULL,
+  message     TEXT NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'read', 'archived')),
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "admin_contact_messages" ON public.contact_messages
+  USING (auth.jwt() ->> 'role' IN ('admin', 'founder'));
+GRANT INSERT ON public.contact_messages TO anon, authenticated;

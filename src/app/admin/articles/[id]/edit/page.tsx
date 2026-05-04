@@ -453,7 +453,7 @@ export default function EditArticlePage({ params }: Props) {
                 versions.map((v) => (
                   <div key={v.id} className="flex items-center justify-between text-sm bg-black/20 p-2 rounded border border-white/5">
                     <div>
-                      <p className="text-gray-300 font-medium">v{v.version_number}</p>
+                      <p className="text-gray-300 font-medium">v{v.version}</p>
                       <p className="text-gray-500 text-xs">{format(new Date(v.created_at), 'MMM d, h:mm a')}</p>
                     </div>
                     <button 

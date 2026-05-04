@@ -21,6 +21,7 @@ export async function GET(_req: Request, { params }: RouteParams) {
       id,
       version,
       title,
+      content,
       change_summary,
       created_at,
       editor:users(full_name, role)

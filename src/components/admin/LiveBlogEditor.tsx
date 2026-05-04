@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Send, Clock, Pin, Trash2, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -19,6 +19,7 @@ export function LiveBlogEditor({ articleId }: { articleId: string }) {
   const [isPinned, setIsPinned] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const fetchUpdates = async () => {
     try {
@@ -37,6 +38,25 @@ export function LiveBlogEditor({ articleId }: { articleId: string }) {
   useEffect(() => {
     if (articleId) fetchUpdates()
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [articleId])
+
+  const handleDelete = useCallback(async (updateId: string) => {
+    if (!confirm('Delete this live update?')) return
+    setDeletingId(updateId)
+    try {
+      const res = await fetch(`/api/live-blogs/${articleId}?updateId=${updateId}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (data.success) {
+        setUpdates(prev => prev.filter(u => u.id !== updateId))
+        toast.success('Update deleted')
+      } else {
+        toast.error(data.error || 'Failed to delete')
+      }
+    } catch {
+      toast.error('Error deleting update')
+    } finally {
+      setDeletingId(null)
+    }
   }, [articleId])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,8 +167,14 @@ export function LiveBlogEditor({ articleId }: { articleId: string }) {
                     <span className="text-xs text-dc-text-muted flex items-center gap-1 font-mono">
                       <Clock className="w-3 h-3" /> {format(new Date(update.created_at), 'h:mm a')}
                     </span>
-                    <button className="text-dc-muted hover:text-dc-red opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Trash2 className="w-3 h-3" />
+                    <button
+                      onClick={() => handleDelete(update.id)}
+                      disabled={deletingId === update.id}
+                      className="text-dc-muted hover:text-dc-red opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                    >
+                      {deletingId === update.id
+                        ? <Loader2 className="w-3 h-3 animate-spin" />
+                        : <Trash2 className="w-3 h-3" />}
                     </button>
                   </div>
                   <p className="text-sm text-white whitespace-pre-wrap">{textContent}</p>

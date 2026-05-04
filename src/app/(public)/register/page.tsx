@@ -90,15 +90,13 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="form-label" htmlFor="role">Requested Role</label>
+            <label className="form-label" htmlFor="role">Role</label>
             <select
               {...register('role')}
               id="role"
               className="form-input appearance-none bg-dc-surface-2"
             >
-              <option value="publisher">Publisher (Default)</option>
-              <option value="admin">Admin</option>
-              <option value="founder">Founder</option>
+              <option value="publisher">Publisher</option>
             </select>
           </div>
 

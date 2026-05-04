@@ -29,18 +29,17 @@ export async function POST(req: Request, { params }: RouteParams) {
   }
 
   const field = vote === 'up' ? 'upvotes' : 'downvotes'
-  const current = vote === 'up' ? (comment.upvotes ?? 0) : (comment.downvotes ?? 0)
 
-  const { error: updateErr } = await supabaseAdmin
-    .from('comments')
-    .update({ [field]: current + 1 })
-    .eq('id', id)
+  const { error: rpcErr } = await supabaseAdmin.rpc('increment_comment_vote', {
+    p_comment_id: id,
+    p_field: field,
+  })
 
-  if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
+  if (rpcErr) return NextResponse.json({ error: rpcErr.message }, { status: 500 })
 
   return NextResponse.json({
     success: true,
-    upvotes: vote === 'up' ? current + 1 : (comment.upvotes ?? 0),
-    downvotes: vote === 'down' ? current + 1 : (comment.downvotes ?? 0),
+    upvotes: (comment.upvotes ?? 0) + (vote === 'up' ? 1 : 0),
+    downvotes: (comment.downvotes ?? 0) + (vote === 'down' ? 1 : 0),
   })
 }

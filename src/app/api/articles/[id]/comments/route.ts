@@ -109,28 +109,10 @@ export async function POST(request: Request, { params }: Params) {
 
   // Increment comment count on article if approved
   if (autoApprove) {
-    const { error: rpcError } = await supabaseAdmin.rpc('increment_article_stat', {
+    await supabaseAdmin.rpc('increment_article_stat', {
       article_id: id,
       field: 'comment_count',
     })
-    
-    if (rpcError) {
-      // If RPC doesn't exist, do manual increment
-      supabaseAdmin
-        .from('articles')
-        .select('comment_count')
-        .eq('id', id)
-        .single()
-        .then(({ data: art }) => {
-          if (art) {
-            supabaseAdmin
-              .from('articles')
-              .update({ comment_count: (art.comment_count || 0) + 1 })
-              .eq('id', id)
-              .then()
-          }
-        })
-    }
   }
 
   return NextResponse.json({

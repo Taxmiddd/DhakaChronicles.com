@@ -31,6 +31,19 @@ export async function PATCH(request: Request, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
+
+  // Non-admin roles may only edit their own articles
+  if (!['admin', 'founder'].includes(user.role)) {
+    const { data: existing } = await supabaseAdmin
+      .from('articles')
+      .select('author_id')
+      .eq('id', id)
+      .single()
+    if (!existing || existing.author_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+  }
+
   const body = await request.json()
 
   // Partial parse — allow partial updates
