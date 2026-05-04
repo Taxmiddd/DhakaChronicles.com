@@ -69,13 +69,30 @@ const navGroups = [
   },
 ]
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  isMobile?: boolean
+  onClose?: () => void
+}
+
+export function AdminSidebar({ isMobile = false, onClose }: AdminSidebarProps) {
   const pathname = usePathname()
 
+  const sidebarClasses = isMobile
+    ? "w-full bg-dc-surface border-r border-dc-border flex flex-col h-full"
+    : "fixed inset-y-0 left-0 z-50 w-64 bg-dc-surface border-r border-dc-border flex flex-col"
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-dc-surface border-r border-dc-border flex flex-col">
+    <aside className={sidebarClasses}>
       <div className="flex h-16 shrink-0 items-center px-6 border-b border-dc-border">
-        <Link href="/admin/dashboard" className="flex items-center gap-2">
+        {isMobile && onClose && (
+          <button
+            onClick={onClose}
+            className="mr-4 p-2 rounded-lg hover:bg-dc-border transition-colors"
+          >
+            <span className="text-white text-xl">×</span>
+          </button>
+        )}
+        <Link href="/admin/dashboard" className="flex items-center gap-2" onClick={onClose}>
           <div className="w-8 h-8 bg-dc-green rounded-md flex items-center justify-center">
             <span className="text-white font-bold font-headline text-lg">D</span>
           </div>
@@ -97,6 +114,7 @@ export function AdminSidebar() {
                   <Link
                     key={item.name}
                     href={item.href}
+                    onClick={isMobile ? onClose : undefined}
                     className={cn('admin-sidebar-link group', isActive && 'active')}
                   >
                     <Icon className={cn('w-4 h-4', isActive ? 'text-dc-green' : 'text-dc-muted group-hover:text-dc-text')} />

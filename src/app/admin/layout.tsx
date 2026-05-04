@@ -1,5 +1,9 @@
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { AdminHeader } from '@/components/admin/AdminHeader'
+import { MobileAdminHeader } from '@/components/admin/MobileAdminHeader'
+import { MobileBottomNav } from '@/components/admin/MobileBottomNav'
+import { useIsMobile } from '@/lib/utils/mobile'
+import { ClientLayout } from './ClientLayout'
 
 export default function AdminLayout({
   children,
@@ -7,14 +11,8 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="dark min-h-screen" style={{ background: '#0a0a0a', color: '#f0f0f0' }}>
-      <AdminSidebar />
-      <div className="pl-64 flex flex-col min-h-screen">
-        <AdminHeader />
-        <main className="flex-1 p-8">
-          {children}
-        </main>
-      </div>
-    </div>
+    <ClientLayout>
+      {children}
+    </ClientLayout>
   )
 }
