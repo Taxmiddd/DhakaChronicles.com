@@ -22,6 +22,7 @@ interface Ad {
   link_url: string
   title: string
   client_name: string
+  size?: string
 }
 
 interface AdBannerProps {
@@ -193,6 +194,36 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
         <span
           className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
           style={{ background: 'var(--dc-surface-2)', color: 'var(--dc-text-muted)' }}
+        >
+          Ad
+        </span>
+      </a>
+    )
+  }
+
+  // ── Auto: natural image dimensions, no fixed height ─────────────────────
+  if (ad.size === 'auto') {
+    return (
+      <a
+        href={ad.link_url}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        className="relative block rounded-xl overflow-hidden"
+        onClick={trackClick}
+        aria-label={`Advertisement: ${ad.title}`}
+      >
+        <Image
+          src={ad.image_url}
+          alt={ad.title}
+          width={0}
+          height={0}
+          sizes="100vw"
+          className="w-full h-auto"
+          unoptimized={ad.image_url.startsWith('http')}
+        />
+        <span
+          className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+          style={{ background: 'rgba(0,0,0,0.45)', color: 'rgba(255,255,255,0.65)' }}
         >
           Ad
         </span>

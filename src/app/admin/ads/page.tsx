@@ -31,7 +31,7 @@ import {
 type AdPosition =
   | 'homepage_banner' | 'article_sidebar' | 'article_inline' | 'category_banner'
   | 'feed_native' | 'sticky_mobile' | 'before_footer'
-type AdSize = 'banner' | 'bite-sized' | 'sidebar-tall' | 'native'
+type AdSize = 'banner' | 'bite-sized' | 'sidebar-tall' | 'native' | 'auto'
 
 interface Ad {
   id: string
@@ -60,10 +60,11 @@ const POSITIONS: { value: AdPosition; label: string }[] = [
 ]
 
 const SIZES: { value: AdSize; label: string; note: string }[] = [
-  { value: 'banner',       label: 'Leaderboard',  note: '728×90 / 320×50'   },
-  { value: 'bite-sized',   label: 'Bite-Sized',   note: '320×50 compact'    },
-  { value: 'sidebar-tall', label: 'Half Page',    note: '300×600'            },
-  { value: 'native',       label: 'Native Card',  note: 'Blends with feed'  },
+  { value: 'auto',         label: 'Free / Auto',  note: 'Adapts to image dimensions' },
+  { value: 'banner',       label: 'Leaderboard',  note: '728×90 / 320×50'            },
+  { value: 'bite-sized',   label: 'Bite-Sized',   note: '320×50 compact'             },
+  { value: 'sidebar-tall', label: 'Half Page',    note: '300×600'                    },
+  { value: 'native',       label: 'Native Card',  note: 'Blends with feed'           },
 ]
 
 const POSITION_COLOR: Record<AdPosition, string> = {

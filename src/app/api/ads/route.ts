@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
     const { data, error } = await supabaseAdmin
       .from('ads')
-      .select('id, image_url, link_url, title, client_name')
+      .select('id, image_url, link_url, title, client_name, size')
       .eq('is_active', true)
       .eq('position', position)
       .or(`starts_at.is.null,starts_at.lte.${now}`)
