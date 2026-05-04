@@ -100,6 +100,7 @@ export default function AdminAdsPage() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Ad | null>(null)
   const [form, setForm] = useState({ ...EMPTY })
+  const [formPositions, setFormPositions] = useState<AdPosition[]>(['article_sidebar'])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [filterPos, setFilterPos] = useState<AdPosition | 'all'>('all')
@@ -117,6 +118,7 @@ export default function AdminAdsPage() {
   function openCreate() {
     setEditing(null)
     setForm({ ...EMPTY })
+    setFormPositions(['article_sidebar'])
     setError('')
     setShowForm(true)
   }
@@ -134,6 +136,7 @@ export default function AdminAdsPage() {
       starts_at: ad.starts_at,
       ends_at: ad.ends_at,
     })
+    setFormPositions([ad.position])
     setError('')
     setShowForm(true)
   }
@@ -146,22 +149,33 @@ export default function AdminAdsPage() {
     setSaving(true)
     setError('')
 
-    const url = editing ? `/api/admin/ads/${editing.id}` : '/api/admin/ads'
-    const method = editing ? 'PATCH' : 'POST'
-
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-    const json = await res.json()
-
-    if (!res.ok) {
-      setError(json.error ?? 'Save failed')
+    if (editing) {
+      const res = await fetch(`/api/admin/ads/${editing.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const json = await res.json()
+      if (!res.ok) { setError(json.error ?? 'Save failed'); setSaving(false); return }
     } else {
-      setShowForm(false)
-      fetchAds()
+      if (formPositions.length === 0) {
+        setError('Select at least one placement.')
+        setSaving(false)
+        return
+      }
+      for (const pos of formPositions) {
+        const res = await fetch('/api/admin/ads', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...form, position: pos }),
+        })
+        const json = await res.json()
+        if (!res.ok) { setError(json.error ?? `Failed for ${pos}`); setSaving(false); return }
+      }
     }
+
+    setShowForm(false)
+    fetchAds()
     setSaving(false)
   }
 
@@ -402,18 +416,58 @@ export default function AdminAdsPage() {
                 />
               </Field>
 
-              {/* Position */}
-              <Field label="Position *">
-                <select
-                  className="form-input text-sm"
-                  value={form.position}
-                  onChange={e => setForm(f => ({ ...f, position: e.target.value as AdPosition }))}
-                >
-                  {POSITIONS.map(p => (
-                    <option key={p.value} value={p.value}>{p.label}</option>
-                  ))}
-                </select>
-              </Field>
+              {/* Position / Placements */}
+              {editing ? (
+                <Field label="Position *">
+                  <select
+                    className="form-input text-sm"
+                    value={form.position}
+                    onChange={e => setForm(f => ({ ...f, position: e.target.value as AdPosition }))}
+                  >
+                    {POSITIONS.map(p => (
+                      <option key={p.value} value={p.value}>{p.label}</option>
+                    ))}
+                  </select>
+                </Field>
+              ) : (
+                <Field label="Placements *" hint="Pick every position where this ad should appear — one row is created per placement">
+                  <div className="grid grid-cols-2 gap-2 mt-1">
+                    {POSITIONS.map(p => {
+                      const checked = formPositions.includes(p.value)
+                      return (
+                        <button
+                          key={p.value}
+                          type="button"
+                          onClick={() =>
+                            setFormPositions(prev =>
+                              checked ? prev.filter(v => v !== p.value) : [...prev, p.value]
+                            )
+                          }
+                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-left transition-all border"
+                          style={
+                            checked
+                              ? { background: `${POSITION_COLOR[p.value]}20`, borderColor: POSITION_COLOR[p.value], color: POSITION_COLOR[p.value] }
+                              : { background: 'transparent', borderColor: 'var(--dc-border)', color: 'var(--dc-text-muted)' }
+                          }
+                        >
+                          <span
+                            className="w-3.5 h-3.5 rounded shrink-0 flex items-center justify-center"
+                            style={checked ? { background: POSITION_COLOR[p.value] } : { border: '1px solid var(--dc-border)' }}
+                          >
+                            {checked && <Check className="w-2.5 h-2.5 text-white" />}
+                          </span>
+                          {p.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {formPositions.length > 1 && (
+                    <p className="text-[10px] text-dc-green mt-2">
+                      {formPositions.length} placements selected — {formPositions.length} ad rows will be created.
+                    </p>
+                  )}
+                </Field>
+              )}
 
               {/* Size */}
               <Field label="Ad Size *">
