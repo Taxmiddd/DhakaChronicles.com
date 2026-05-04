@@ -31,6 +31,7 @@ import {
 type AdPosition =
   | 'homepage_banner' | 'article_sidebar' | 'article_inline' | 'category_banner'
   | 'feed_native' | 'sticky_mobile' | 'before_footer' | 'widget_mid' | 'widget_right'
+  | 'mobile_square_1' | 'mobile_square_2'
 type AdSize = 'banner' | 'bite-sized' | 'sidebar-tall' | 'native' | 'auto' | 'square-1000'
 
 interface Ad {
