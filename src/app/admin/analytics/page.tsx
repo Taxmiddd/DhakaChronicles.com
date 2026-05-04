@@ -5,7 +5,7 @@ import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, Cell,
 } from 'recharts'
-import { TrendingUp, Eye, Users, FileText, Download, Loader2 } from 'lucide-react'
+import { TrendingUp, Eye, Users, FileText, Download, Loader2, ExternalLink, Activity } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface DashboardStats {
@@ -43,17 +43,9 @@ interface ViewsChartPoint {
   views: number
 }
 
-const MOCK_VIEWS_CHART = [
-  { date: 'Apr 27', views: 3200 },
-  { date: 'Apr 28', views: 4100 },
-  { date: 'Apr 29', views: 3800 },
-  { date: 'Apr 30', views: 5200 },
-  { date: 'May 1', views: 4700 },
-  { date: 'May 2', views: 6100 },
-  { date: 'May 3', views: 5400 },
-]
-
 const COLORS = ['#00A651', '#F42A41', '#F59E0B', '#8B5CF6', '#06B6D4']
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? ''
 
 const DEFAULT_STATS: DashboardStats = {
   total_articles: 0,
@@ -148,7 +140,7 @@ export default function AnalyticsPage() {
   const [traffic, setTraffic] = useState<TrafficSource[]>([])
   const [topArticles, setTopArticles] = useState<TopArticle[]>([])
   const [authors, setAuthors] = useState<AuthorStat[]>([])
-  const [viewsChart, setViewsChart] = useState<ViewsChartPoint[]>(MOCK_VIEWS_CHART)
+  const [viewsChart, setViewsChart] = useState<ViewsChartPoint[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -254,6 +246,34 @@ export default function AnalyticsPage() {
         </div>
       </div>
 
+      {/* Google Analytics Panel */}
+      <div className="glass rounded-xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-lg bg-[#E37400]/15 flex items-center justify-center shrink-0">
+            <Activity className="w-4 h-4 text-[#E37400]" />
+          </div>
+          <div>
+            <p className="text-white font-semibold text-sm">Google Analytics 4</p>
+            <p className="text-dc-muted text-xs mt-0.5">
+              Tracking active
+              {GA_ID && <> · Property <span className="font-mono text-dc-green">{GA_ID}</span></>}
+            </p>
+            <p className="text-dc-muted text-xs mt-1">
+              Page-view tracking fires on every public page. Internal views (article_views table) power the charts below.
+            </p>
+          </div>
+        </div>
+        <a
+          href="https://analytics.google.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-[#E37400] hover:bg-[#c96800] transition-colors shrink-0"
+        >
+          Open GA4 Dashboard
+          <ExternalLink className="w-3.5 h-3.5" />
+        </a>
+      </div>
+
       {loading ? (
         <div className="flex justify-center py-20">
           <Loader2 className="w-10 h-10 animate-spin text-dc-green" />
@@ -276,6 +296,11 @@ export default function AnalyticsPage() {
           {/* Views Chart */}
           <div className="glass rounded-xl p-6">
             <h2 className="text-lg font-headline font-bold text-white mb-6">Views — Last 7 Days</h2>
+            {viewsChart.length === 0 ? (
+              <div className="flex items-center justify-center h-[240px] text-dc-muted text-sm">
+                No view data yet — article views will appear here once readers visit.
+              </div>
+            ) : (
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={viewsChart} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -292,6 +317,7 @@ export default function AnalyticsPage() {
                 />
               </LineChart>
             </ResponsiveContainer>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

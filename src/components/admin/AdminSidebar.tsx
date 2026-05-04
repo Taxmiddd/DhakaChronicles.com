@@ -23,6 +23,10 @@ import {
   Briefcase,
   User,
   Megaphone,
+  GraduationCap,
+  Building2,
+  Store,
+  Wrench,
 } from 'lucide-react'
 import { Facebook } from '@/components/ui/BrandIcons'
 import { cn } from '@/lib/utils'
@@ -51,10 +55,14 @@ const navGroups = [
   {
     label: 'Content',
     items: [
-      { name: 'Podcasts',      href: '/admin/podcasts',       icon: Headphones },
-      { name: 'Portfolio',     href: '/admin/portfolio',      icon: Briefcase  },
-      { name: 'Ad Manager',    href: '/admin/ads',            icon: Megaphone  },
-      { name: 'Facebook Sync', href: '/admin/facebook-sync',  icon: Facebook   },
+      { name: 'Podcasts',      href: '/admin/podcasts',                   icon: Headphones },
+      { name: 'Portfolio',     href: '/admin/portfolio',                   icon: Briefcase  },
+      { name: '↳ Partners',   href: '/admin/portfolio/partners',          icon: Store      },
+      { name: '↳ Services',   href: '/admin/portfolio/services',          icon: Wrench     },
+      { name: 'Careers',       href: '/admin/careers',                    icon: GraduationCap },
+      { name: 'Advertise',     href: '/admin/advertise',                  icon: Building2  },
+      { name: 'Ad Manager',    href: '/admin/ads',                        icon: Megaphone  },
+      { name: 'Facebook Sync', href: '/admin/facebook-sync',              icon: Facebook   },
     ],
   },
   {
