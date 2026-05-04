@@ -137,7 +137,7 @@ export function PublicFooter() {
               </Link>
               <p className="text-sm leading-relaxed max-w-xs" style={{ color: 'var(--dc-text-muted)' }}>
                 Bangladesh&apos;s leading independent digital news platform — reliable journalism
-                since 2025.
+                since 17 July 2024.
               </p>
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'var(--dc-text-muted)' }}>

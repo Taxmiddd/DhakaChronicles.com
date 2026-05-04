@@ -48,8 +48,6 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@DhakaChronicles',
-    creator: '@DhakaChronicles',
   },
   robots: {
     index: true,
@@ -94,8 +92,7 @@ const ORG_SCHEMA = {
   },
   sameAs: [
     'https://facebook.com/dhakachronicles',
-    'https://twitter.com/dhakachronicles',
-    'https://youtube.com/@dhakachronicles',
+    'https://linkedin.com/company/dhakachronicles',
     'https://instagram.com/dhakachronicles',
   ],
   contactPoint: {

@@ -1,12 +1,11 @@
 'use client'
 
-import { Facebook, Twitter, Youtube, Instagram } from '@/components/ui/BrandIcons'
+import { Facebook, Linkedin, Instagram } from '@/components/ui/BrandIcons'
 
 const SOCIALS = [
-  { icon: Facebook,  href: 'https://facebook.com/dhakachronicles',  label: 'Facebook',    hoverBg: '#1877F2' },
-  { icon: Twitter,   href: 'https://twitter.com/dhakachronicles',   label: 'Twitter / X', hoverBg: '#000000' },
-  { icon: Youtube,   href: 'https://youtube.com/@dhakachronicles',  label: 'YouTube',     hoverBg: '#FF0000' },
-  { icon: Instagram, href: 'https://instagram.com/dhakachronicles', label: 'Instagram',   hoverBg: '#E1306C' },
+  { icon: Facebook,  href: 'https://facebook.com/dhakachronicles',          label: 'Facebook',  hoverBg: '#1877F2' },
+  { icon: Linkedin,  href: 'https://linkedin.com/company/dhakachronicles',  label: 'LinkedIn',  hoverBg: '#0A66C2' },
+  { icon: Instagram, href: 'https://instagram.com/dhakachronicles',         label: 'Instagram', hoverBg: '#E1306C' },
 ]
 
 export function FooterSocials() {

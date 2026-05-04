@@ -202,13 +202,12 @@ export function CityWidgets() {
           minHeight: '108px',
         }}
       >
-        <AdBanner position="widget_mid" className="absolute inset-0 w-full h-full rounded-xl" />
-        {/* Always-visible fallback label (ad covers it when loaded) */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none select-none">
           <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--dc-border)' }}>
             Advertisement
           </span>
         </div>
+        <AdBanner position="widget_mid" className="absolute inset-0 w-full h-full rounded-xl" />
       </div>
 
       {/* ── Ad slot right ── */}
@@ -220,12 +219,12 @@ export function CityWidgets() {
           minHeight: '108px',
         }}
       >
-        <AdBanner position="widget_right" className="absolute inset-0 w-full h-full rounded-xl" />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none select-none">
           <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--dc-border)' }}>
             Advertisement
           </span>
         </div>
+        <AdBanner position="widget_right" className="absolute inset-0 w-full h-full rounded-xl" />
       </div>
     </div>
   )
