@@ -267,74 +267,79 @@ export default async function PortfolioPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {partners.map((partner, index) => (
-              <div
-                key={partner.id}
-                className="group relative overflow-hidden animate-fade-in-up"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {/* Hover glow effect */}
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            {partners.map((partner, index) => {
+              const card = (
                 <div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{ background: `radial-gradient(circle at center, ${partner.color}15 0%, transparent 70%)` }}
-                />
-
-                <div
-                  className="relative flex items-center gap-3 p-4 rounded-2xl transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl"
+                  className="group relative overflow-hidden rounded-2xl p-4 flex flex-col items-center justify-center gap-3 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in-up"
                   style={{
                     background: 'var(--dc-surface)',
                     border: '1px solid var(--dc-border)',
                     boxShadow: 'var(--card-shadow)',
+                    animationDelay: `${index * 60}ms`,
+                    minHeight: '110px',
                   }}
                 >
+                  {/* Hover glow */}
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{ background: `radial-gradient(circle at center, ${partner.color}18 0%, transparent 70%)` }}
+                  />
+
+                  {/* Logo or initial */}
                   {partner.logo_url ? (
-                    <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-transform group-hover:scale-110"
-                      style={{ background: `${partner.color}12`, border: `1px solid ${partner.color}25` }}
-                    >
+                    <div className="relative w-14 h-10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
                       <Image
                         src={partner.logo_url}
                         alt={partner.name}
-                        width={40}
-                        height={40}
-                        className="object-contain transition-transform group-hover:scale-105"
+                        fill
+                        className="object-contain"
                         unoptimized={partner.logo_url.startsWith('http')}
+                        sizes="56px"
                       />
                     </div>
                   ) : (
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 transition-all group-hover:scale-110 group-hover:rotate-3"
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 transition-all duration-300 group-hover:scale-110"
                       style={{ background: partner.color }}
                     >
                       {partner.initial}
                     </div>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className="font-headline font-bold text-sm leading-snug truncate transition-colors group-hover:text-dc-green"
-                      style={{ color: 'var(--dc-text)' }}
-                    >
+
+                  {/* Name + category */}
+                  <div className="relative">
+                    <p className="font-headline font-bold text-xs leading-snug transition-colors group-hover:text-dc-green" style={{ color: 'var(--dc-text)' }}>
                       {partner.name}
                     </p>
-                    <p className="text-[10px] uppercase tracking-wide mt-0.5 truncate opacity-60 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--dc-text-muted)' }}>
+                    <p className="text-[9px] uppercase tracking-wider mt-0.5 opacity-50 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--dc-text-muted)' }}>
                       {partner.category}
                     </p>
                   </div>
+
                   {partner.website_url && (
-                    <a
-                      href={partner.website_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                    <ExternalLink
+                      className="absolute top-2 right-2 w-3 h-3 opacity-0 group-hover:opacity-40 transition-opacity"
                       style={{ color: 'var(--dc-text-muted)' }}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
+                    />
                   )}
                 </div>
-              </div>
-            ))}
+              )
+
+              return partner.website_url ? (
+                <a
+                  key={partner.id}
+                  href={partner.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block"
+                >
+                  {card}
+                </a>
+              ) : (
+                <div key={partner.id}>{card}</div>
+              )
+            })}
           </div>
         </section>
 
