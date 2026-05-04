@@ -6,7 +6,7 @@ import { Users, BookOpen } from 'lucide-react'
 import { supabaseAdmin } from '@/lib/db/admin'
 import { slugify } from '@/lib/utils'
 
-export const revalidate = 3600
+export const revalidate = 60
 
 const BASE = 'https://dhakachronicles.com'
 
@@ -69,10 +69,14 @@ export default async function TeamPage() {
 
   const members = ((data as TeamMember[] | null) ?? [])
     .filter(m => m.full_name)
-    .sort((a, b) => (ROLE_ORDER[a.role ?? ''] ?? 99) - (ROLE_ORDER[b.role ?? ''] ?? 99))
+    .sort((a, b) => {
+      const ra = (ROLE_ORDER[(a.role ?? '').toLowerCase()] ?? 99)
+      const rb = (ROLE_ORDER[(b.role ?? '').toLowerCase()] ?? 99)
+      return ra - rb
+    })
 
-  const founders = members.filter(m => m.role === 'founder')
-  const team = members.filter(m => m.role !== 'founder')
+  const founders = members.filter(m => m.role?.toLowerCase() === 'founder')
+  const team = members.filter(m => m.role?.toLowerCase() !== 'founder')
 
   const orgSchema = {
     '@context': 'https://schema.org',
@@ -82,7 +86,7 @@ export default async function TeamPage() {
     employee: members.map(m => ({
       '@type': 'Person',
       name: m.full_name,
-      jobTitle: ROLE_LABELS[m.role ?? ''] ?? 'Journalist',
+      jobTitle: ROLE_LABELS[(m.role ?? '').toLowerCase()] ?? m.role ?? 'Journalist',
       image: m.avatar_url ?? undefined,
       url: `${BASE}/author/${slugify(m.full_name ?? '')}`,
     })),
@@ -212,8 +216,9 @@ export default async function TeamPage() {
 
 function MemberCard({ member, featured = false }: { member: TeamMember; featured?: boolean }) {
   const slug = slugify(member.full_name ?? '')
-  const role = ROLE_LABELS[member.role ?? ''] ?? 'Journalist'
-  const roleColor = ROLE_COLOR[member.role ?? ''] ?? 'var(--dc-text-muted)'
+  const roleLower = (member.role ?? '').toLowerCase()
+  const role = ROLE_LABELS[roleLower] ?? member.role ?? 'Journalist'
+  const roleColor = ROLE_COLOR[roleLower] ?? 'var(--dc-green)'
 
   return (
     <Link
