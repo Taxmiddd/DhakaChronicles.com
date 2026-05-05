@@ -106,7 +106,7 @@ export default async function NewsPage() {
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
           {/* News banner ad */}
-          <AdBanner position="news_banner" className="w-full h-[250px]" />
+          <AdBanner position="category_banner" className="w-full h-[250px]" />
 
           {categories.length > 0 && (
             <div className="glass p-5 rounded-xl">
