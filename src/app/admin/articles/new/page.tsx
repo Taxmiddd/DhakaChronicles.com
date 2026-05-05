@@ -55,7 +55,9 @@ export default function NewArticlePage() {
     setIsSaving(true)
     try {
       let finalStatus = targetStatus || data.status
-      if (data.published_at && new Date(data.published_at) > new Date()) {
+      
+      // Only set to scheduled if explicitly requested and date is in future
+      if (targetStatus === 'published' && data.published_at && new Date(data.published_at) > new Date()) {
         finalStatus = 'scheduled'
       }
 

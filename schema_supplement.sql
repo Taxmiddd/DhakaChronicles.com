@@ -11,6 +11,29 @@ ALTER TABLE public.users ADD COLUMN IF NOT EXISTS facebook_url TEXT;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS twitter_url  TEXT;
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS linkedin_url TEXT;
 
+-- ── Fix article_status enum to support scheduled & archived ──────────────────
+-- PostgreSQL workaround: create new enum, cast data, drop old type
+DO $$ 
+BEGIN
+  -- Only run if the old enum still has just 3 values
+  IF (SELECT count(*) FROM pg_enum WHERE enumtypid = 'public.article_status'::regtype) = 3 THEN
+    -- Create new enum with all values
+    CREATE TYPE public.article_status_new AS ENUM ('draft', 'review', 'scheduled', 'published', 'archived');
+    
+    -- Alter articles table to use new enum
+    ALTER TABLE public.articles ALTER COLUMN status TYPE public.article_status_new USING status::text::public.article_status_new;
+    
+    -- Drop old enum
+    DROP TYPE public.article_status;
+    
+    -- Rename new enum to original name
+    ALTER TYPE public.article_status_new RENAME TO article_status;
+  END IF;
+EXCEPTION WHEN OTHERS THEN
+  -- If enum update fails, continue (it may already be updated)
+  NULL;
+END $$;
+
 -- ── Articles: missing analytics & workflow columns ────────────────────────────
 -- view_count  (schema.sql used "views_count"; code uses "view_count")
 ALTER TABLE public.articles ADD COLUMN IF NOT EXISTS view_count    INTEGER DEFAULT 0;

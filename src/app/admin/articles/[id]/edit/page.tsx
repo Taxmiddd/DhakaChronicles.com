@@ -137,6 +137,36 @@ export default function EditArticlePage({ params }: Props) {
          fetchVersions()
       }
       
+      // Reset form to clear isDirty state with proper formatting
+      const publishedAt = result.data.published_at 
+        ? new Date(result.data.published_at).toISOString().slice(0, 16) 
+        : undefined
+      
+      reset({
+        title: result.data.title || '',
+        title_bn: result.data.title_bn || '',
+        slug: result.data.slug || '',
+        subtitle: result.data.subtitle || '',
+        content: result.data.content || { type: 'doc', content: [] },
+        content_bn: result.data.content_bn || { type: 'doc', content: [] },
+        excerpt: result.data.excerpt || '',
+        excerpt_bn: result.data.excerpt_bn || '',
+        featured_image_url: result.data.featured_image_url || '',
+        featured_image_caption: result.data.featured_image_caption || '',
+        meta_title: result.data.meta_title || '',
+        meta_description: result.data.meta_description || '',
+        category_id: result.data.category_id || '',
+        article_type: result.data.article_type || 'news',
+        status: result.data.status || 'draft',
+        is_breaking: result.data.is_breaking || false,
+        is_featured: result.data.is_featured || false,
+        is_trending: result.data.is_trending || false,
+        is_editors_pick: result.data.is_editors_pick || false,
+        allow_comments: result.data.allow_comments ?? true,
+        is_sponsored: result.data.is_sponsored || false,
+        published_at: publishedAt,
+      })
+      
       router.refresh()
     } catch (err: any) {
       toast.error(err.message)
