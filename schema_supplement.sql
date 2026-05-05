@@ -784,6 +784,16 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+-- ── FIX RLS policies for articles to allow author/creator to view ──────────────
+-- Authors should be able to view their own articles regardless of status
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'articles' AND policyname = 'Authors can view own articles') THEN
+    CREATE POLICY "Authors can view own articles"
+      ON public.articles FOR SELECT
+      USING (author_id = auth.uid());
+  END IF;
+END $$;
+
 -- ── Contact messages ─────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS public.contact_messages (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
