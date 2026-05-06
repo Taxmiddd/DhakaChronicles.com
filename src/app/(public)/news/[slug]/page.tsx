@@ -361,7 +361,7 @@ export default async function ArticlePage({ params }: Props) {
                   {author.full_name}
                 </Link>
                 <p className="text-sm capitalize" style={{ color: 'var(--dc-text-muted)' }}>
-                  {author.role ?? 'Staff Reporter'}
+                  {authorTitle(author.role)}
                 </p>
                 {author.bio && (
                   <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
