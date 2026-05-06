@@ -108,6 +108,11 @@ export default function EditArticlePage({ params }: Props) {
     }
   }
 
+  const onError = (errs: any) => {
+    const first = Object.values(errs)[0] as any
+    toast.error(first?.message ?? 'Please fix form errors before saving.')
+  }
+
   const onSubmit = async (data: ArticleFormData, targetStatus?: string) => {
     if (!articleId) return
     setIsSaving(true)
@@ -263,7 +268,7 @@ export default function EditArticlePage({ params }: Props) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit((d) => onSubmit(d))} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form onSubmit={handleSubmit((d) => onSubmit(d), onError)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Editor */}
         <div className="lg:col-span-2 space-y-6">
           <div className="glass p-6 rounded-xl space-y-5">
@@ -405,7 +410,7 @@ export default function EditArticlePage({ params }: Props) {
               <button
                 type="button"
                 disabled={isSaving}
-                onClick={handleSubmit((d) => onSubmit(d, 'published'))}
+                onClick={handleSubmit((d) => onSubmit(d, 'published'), onError)}
                 className="btn-primary flex-1 py-2.5 text-sm"
               >
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : <><Send className="w-4 h-4" /> Publish</>}

@@ -51,6 +51,11 @@ export default function NewArticlePage() {
     }
   }
 
+  const onError = (errs: any) => {
+    const first = Object.values(errs)[0] as any
+    toast.error(first?.message ?? 'Please fix form errors before publishing.')
+  }
+
   const onSubmit = async (data: ArticleFormData, targetStatus?: string) => {
     setIsSaving(true)
     try {
@@ -109,7 +114,7 @@ export default function NewArticlePage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit((d) => onSubmit(d))} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <form onSubmit={handleSubmit((d) => onSubmit(d), onError)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <div className="glass p-6 rounded-xl space-y-5">
             {/* ENGLISH FIELDS */}
@@ -217,7 +222,7 @@ export default function NewArticlePage() {
               <button
                 type="button"
                 disabled={isSaving}
-                onClick={handleSubmit((d) => onSubmit(d, 'published'))}
+                onClick={handleSubmit((d) => onSubmit(d, 'published'), onError)}
                 className="btn-primary flex-1 py-2.5 text-sm"
               >
                 {isSaving ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : <><Send className="w-4 h-4" /> Publish</>}
@@ -265,6 +270,7 @@ export default function NewArticlePage() {
             <div>
               <label className="form-label" htmlFor="slug">URL Slug</label>
               <input {...register('slug')} id="slug" className="form-input text-sm font-mono" />
+              {errors.slug && <p className="text-dc-red text-sm mt-1">{errors.slug.message}</p>}
             </div>
 
             <div>
