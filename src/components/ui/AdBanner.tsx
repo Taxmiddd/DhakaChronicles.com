@@ -203,6 +203,69 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     )
   }
 
+  // ── Square 300×300 ──────────────────────────────────────────────────────
+  if (ad.size === 'square-300') {
+    return (
+      <a
+        href={ad.link_url}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        className="relative block rounded-xl overflow-hidden"
+        style={{ width: '300px', height: '300px' }}
+        onClick={trackClick}
+        aria-label={`Advertisement: ${ad.title}`}
+      >
+        <Image
+          src={ad.image_url}
+          alt={ad.title}
+          fill
+          className="object-cover"
+          sizes="300px"
+          unoptimized={ad.image_url.startsWith('http')}
+        />
+        <span
+          className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+          style={{ background: 'rgba(0,0,0,0.45)', color: 'rgba(255,255,255,0.65)' }}
+        >
+          Ad
+        </span>
+      </a>
+    )
+  }
+
+  // ── Custom dimensions (stored as custom-WxH) ─────────────────────────────
+  if (ad.size?.startsWith('custom-')) {
+    const [w, h] = ad.size.replace('custom-', '').split('x').map(Number)
+    if (w && h) {
+      return (
+        <a
+          href={ad.link_url}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          className="relative block rounded-xl overflow-hidden"
+          style={{ width: `${w}px`, height: `${h}px`, maxWidth: '100%' }}
+          onClick={trackClick}
+          aria-label={`Advertisement: ${ad.title}`}
+        >
+          <Image
+            src={ad.image_url}
+            alt={ad.title}
+            fill
+            className="object-cover"
+            sizes={`${w}px`}
+            unoptimized={ad.image_url.startsWith('http')}
+          />
+          <span
+            className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+            style={{ background: 'rgba(0,0,0,0.45)', color: 'rgba(255,255,255,0.65)' }}
+          >
+            Ad
+          </span>
+        </a>
+      )
+    }
+  }
+
   // ── Square 1000×1000 ────────────────────────────────────────────────────
   if (ad.size === 'square-1000') {
     return (

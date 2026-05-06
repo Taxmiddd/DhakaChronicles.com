@@ -32,7 +32,7 @@ type AdPosition =
   | 'homepage_banner' | 'article_sidebar' | 'article_inline' | 'category_banner'
   | 'feed_native' | 'sticky_mobile' | 'before_footer' | 'widget_mid' | 'widget_right'
   | 'mobile_square_1' | 'mobile_square_2'
-type AdSize = 'banner' | 'bite-sized' | 'sidebar-tall' | 'native' | 'auto' | 'square-1000'
+type AdSize = 'banner' | 'bite-sized' | 'sidebar-tall' | 'native' | 'auto' | 'square-1000' | 'square-300' | 'custom'
 
 interface Ad {
   id: string
@@ -66,11 +66,13 @@ const POSITIONS: { value: AdPosition; label: string }[] = [
 
 const SIZES: { value: AdSize; label: string; note: string }[] = [
   { value: 'auto',         label: 'Free / Auto',  note: 'Adapts to image dimensions' },
-  { value: 'square-1000',  label: 'Square',       note: '1000×1000'                  },
+  { value: 'square-300',   label: 'Square 300',   note: '300×300'                    },
+  { value: 'square-1000',  label: 'Square 1000',  note: '1000×1000'                  },
   { value: 'banner',       label: 'Leaderboard',  note: '728×90 / 320×50'            },
   { value: 'bite-sized',   label: 'Bite-Sized',   note: '320×50 compact'             },
   { value: 'sidebar-tall', label: 'Half Page',    note: '300×600'                    },
   { value: 'native',       label: 'Native Card',  note: 'Blends with feed'           },
+  { value: 'custom',       label: 'Custom Size',  note: 'Enter your own dimensions'  },
 ]
 
 const POSITION_COLOR: Record<AdPosition, string> = {
@@ -109,6 +111,8 @@ export default function AdminAdsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [filterPos, setFilterPos] = useState<AdPosition | 'all'>('all')
+  const [customW, setCustomW] = useState('600')
+  const [customH, setCustomH] = useState('400')
 
   useEffect(() => { fetchAds() }, [])
 
@@ -130,13 +134,20 @@ export default function AdminAdsPage() {
 
   function openEdit(ad: Ad) {
     setEditing(ad)
+    let sizeVal: AdSize = ad.size
+    if (ad.size.startsWith('custom-')) {
+      const [w, h] = ad.size.replace('custom-', '').split('x')
+      sizeVal = 'custom'
+      setCustomW(w ?? '600')
+      setCustomH(h ?? '400')
+    }
     setForm({
       client_name: ad.client_name,
       title: ad.title,
       image_url: ad.image_url,
       link_url: ad.link_url,
       position: ad.position,
-      size: ad.size,
+      size: sizeVal,
       is_active: ad.is_active,
       starts_at: ad.starts_at,
       ends_at: ad.ends_at,
@@ -154,11 +165,16 @@ export default function AdminAdsPage() {
     setSaving(true)
     setError('')
 
+    const finalSize = form.size === 'custom'
+      ? `custom-${customW || '600'}x${customH || '400'}`
+      : form.size
+    const payload = { ...form, size: finalSize }
+
     if (editing) {
       const res = await fetch(`/api/admin/ads/${editing.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       })
       const json = await res.json()
       if (!res.ok) { setError(json.error ?? 'Save failed'); setSaving(false); return }
@@ -172,7 +188,7 @@ export default function AdminAdsPage() {
         const res = await fetch('/api/admin/ads', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...form, position: pos }),
+          body: JSON.stringify({ ...payload, position: pos }),
         })
         const json = await res.json()
         if (!res.ok) { setError(json.error ?? `Failed for ${pos}`); setSaving(false); return }
@@ -485,6 +501,33 @@ export default function AdminAdsPage() {
                     <option key={s.value} value={s.value}>{s.label} ({s.note})</option>
                   ))}
                 </select>
+                {form.size === 'custom' && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex-1">
+                      <label className="block text-[10px] text-dc-muted mb-1">Width (px)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        className="form-input text-sm"
+                        value={customW}
+                        onChange={e => setCustomW(e.target.value)}
+                        placeholder="600"
+                      />
+                    </div>
+                    <span className="text-dc-muted mt-5">×</span>
+                    <div className="flex-1">
+                      <label className="block text-[10px] text-dc-muted mb-1">Height (px)</label>
+                      <input
+                        type="number"
+                        min="1"
+                        className="form-input text-sm"
+                        value={customH}
+                        onChange={e => setCustomH(e.target.value)}
+                        placeholder="400"
+                      />
+                    </div>
+                  </div>
+                )}
               </Field>
 
               {/* Date range */}
