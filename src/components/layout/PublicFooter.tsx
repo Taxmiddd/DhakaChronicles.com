@@ -24,6 +24,7 @@ const FOOTER_SECTIONS = [
       { label: 'Our Team',  href: '/team' },
       { label: 'Contact',   href: '/contact' },
       { label: 'Advertise', href: '/advertise' },
+      { label: 'Portfolio', href: '/portfolio' },
       { label: 'Careers',   href: '/careers' },
       { label: 'Podcasts',  href: '/podcasts' },
     ],

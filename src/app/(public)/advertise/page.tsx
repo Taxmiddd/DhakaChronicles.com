@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Mail, BarChart2, Users, Globe, Zap, CheckCircle2, ChevronRight, TrendingUp, Eye } from 'lucide-react'
+import { AdvertiseForm } from '@/components/advertise/AdvertiseForm'
 import { supabaseAdmin } from '@/lib/db/admin'
 
 export const revalidate = 300
@@ -382,6 +383,11 @@ export default async function AdvertisePage() {
               </a>
             </div>
           </div>
+        </section>
+
+        {/* ── Inquiry Form ── */}
+        <section>
+          <AdvertiseForm />
         </section>
 
       </div>
