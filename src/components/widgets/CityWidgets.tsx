@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Wind, Droplets, Navigation, ExternalLink } from 'lucide-react'
+import { Wind, Droplets } from 'lucide-react'
 import AdBanner from '@/components/ui/AdBanner'
 
 interface WeatherData {
@@ -104,8 +104,6 @@ export function CityWidgets() {
 
   if (!data) return null
 
-  const mapsUrl = `https://www.google.com/maps/@${data.lat ?? coords.lat},${data.lon ?? coords.lon},13z/data=!5m1!1e1`
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
 
@@ -141,90 +139,50 @@ export function CityWidgets() {
 
         <div style={{ borderTop: '1px solid var(--dc-border)' }} />
 
-        {/* AQI + Traffic in one row */}
-        <div className="flex items-center justify-between gap-3">
-          {/* AQI */}
-          <div className="flex items-center gap-1.5">
-            <div
-              className="w-6 h-6 rounded-md shrink-0 flex items-center justify-center text-[10px] font-black"
-              style={{ background: `${data.aqi_color}18`, color: data.aqi_color }}
-            >
-              {data.aqi}
-            </div>
-            <div>
-              <span
-                className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                style={{ background: `${data.aqi_color}20`, color: data.aqi_color }}
-              >
-                {data.aqi_label}
-              </span>
-              <p className="text-[9px] mt-0.5" style={{ color: 'var(--dc-text-muted)' }}>
-                PM2.5: {data.aqi_pm25} µg/m³
-              </p>
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="w-px self-stretch" style={{ background: 'var(--dc-border)' }} />
-
-          {/* Traffic */}
-          <a
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 group flex-1 justify-end"
+        {/* AQI */}
+        <div className="flex items-center gap-1.5">
+          <div
+            className="w-6 h-6 rounded-md shrink-0 flex items-center justify-center text-[10px] font-black"
+            style={{ background: `${data.aqi_color}18`, color: data.aqi_color }}
           >
-            <Navigation className="w-3.5 h-3.5 shrink-0 group-hover:text-dc-green transition-colors" style={{ color: 'var(--dc-text-muted)' }} />
-            <div className="text-right">
-              {data.live_traffic_available ? (
-                <p className="text-[10px] font-medium" style={{ color: data.traffic_color || 'var(--dc-text-muted)' }}>
-                  {data.traffic_level} · {data.traffic_speed_kmh ?? '—'} km/h
-                </p>
-              ) : (
-                <p className="text-[10px]" style={{ color: 'var(--dc-text-muted)' }}>
-                  {locationAllowed ? 'Your area' : 'Dhaka'}
-                </p>
-              )}
-              <p className="text-[10px] text-dc-green font-medium group-hover:underline flex items-center gap-0.5 justify-end">
-                Maps <ExternalLink className="w-2.5 h-2.5" />
-              </p>
-            </div>
-          </a>
+            {data.aqi}
+          </div>
+          <div>
+            <span
+              className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+              style={{ background: `${data.aqi_color}20`, color: data.aqi_color }}
+            >
+              {data.aqi_label}
+            </span>
+            <p className="text-[9px] mt-0.5" style={{ color: 'var(--dc-text-muted)' }}>
+              PM2.5: {data.aqi_pm25} µg/m³
+            </p>
+          </div>
         </div>
       </div>
 
       {/* ── Ad slot mid ── */}
       <div
-        className="hidden sm:block rounded-xl overflow-hidden relative"
+        className="hidden sm:flex rounded-xl overflow-hidden relative items-center justify-center"
         style={{
           background: 'var(--dc-surface)',
           border: '1px solid var(--dc-border)',
-          minHeight: '108px',
+          height: '500px',
         }}
       >
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none select-none">
-          <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--dc-border)' }}>
-            Advertisement
-          </span>
-        </div>
-        <AdBanner position="widget_mid" className="absolute inset-0 w-full h-full rounded-xl" />
+        <AdBanner position="widget_mid" className="w-[500px] h-[500px] rounded-xl object-contain" />
       </div>
 
       {/* ── Ad slot right ── */}
       <div
-        className="hidden sm:block rounded-xl overflow-hidden relative"
+        className="hidden sm:flex rounded-xl overflow-hidden relative items-center justify-center"
         style={{
           background: 'var(--dc-surface)',
           border: '1px solid var(--dc-border)',
-          minHeight: '108px',
+          height: '500px',
         }}
       >
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none select-none">
-          <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: 'var(--dc-border)' }}>
-            Advertisement
-          </span>
-        </div>
-        <AdBanner position="widget_right" className="absolute inset-0 w-full h-full rounded-xl" />
+        <AdBanner position="widget_right" className="w-[500px] h-[500px] rounded-xl object-contain" />
       </div>
     </div>
   )
