@@ -37,6 +37,7 @@ async function getCategoryArticles(categoryId: string, page = 1, perPage = 12) {
       .select(ARTICLE_SELECT, { count: 'exact' })
       .eq('category_id', categoryId)
       .eq('status', 'published')
+      .is('deleted_at', null)
       .order('published_at', { ascending: false })
       .range(from, to)
     return { articles: data ?? [], total: count ?? 0 }
