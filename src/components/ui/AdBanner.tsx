@@ -31,9 +31,10 @@ interface AdBannerProps {
   position: AdPosition
   variant?: AdVariant
   className?: string
+  forceFill?: boolean
 }
 
-export default function AdBanner({ position, variant = 'banner', className = 'w-full h-[90px]' }: AdBannerProps) {
+export default function AdBanner({ position, variant = 'banner', className = 'w-full h-[90px]', forceFill = false }: AdBannerProps) {
   const [ad, setAd] = useState<Ad | null | undefined>(undefined)
   const [dismissed, setDismissed] = useState(false)
 
@@ -49,6 +50,35 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
   }, [ad])
 
   if (ad === undefined || ad === null || dismissed) return null
+
+  // ── Fill mode: image stretches to fill parent (used in widget slots) ─────
+  if (forceFill) {
+    return (
+      <a
+        href={ad.link_url}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        onClick={trackClick}
+        className="absolute inset-0 block overflow-hidden rounded-xl"
+        aria-label={`Advertisement: ${ad.title}`}
+      >
+        <Image
+          src={ad.image_url}
+          alt={ad.title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 1200px) 33vw, 400px"
+          unoptimized={ad.image_url.startsWith('http')}
+        />
+        <span
+          className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+          style={{ background: 'rgba(0,0,0,0.45)', color: 'rgba(255,255,255,0.65)' }}
+        >
+          Ad
+        </span>
+      </a>
+    )
+  }
 
   // ── Sticky bottom bar (mobile only, dismissible) ──────────────────────────
   if (variant === 'sticky') {

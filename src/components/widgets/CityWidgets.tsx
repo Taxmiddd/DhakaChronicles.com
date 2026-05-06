@@ -95,9 +95,9 @@ export function CityWidgets() {
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
-        <div className="h-[108px] rounded-xl animate-pulse" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }} />
-        <div className="hidden sm:block h-[108px] rounded-xl animate-pulse" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }} />
-        <div className="hidden sm:block h-[108px] rounded-xl animate-pulse" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }} />
+        <div className="h-[108px] sm:aspect-square sm:h-auto rounded-xl animate-pulse" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }} />
+        <div className="hidden sm:block aspect-square rounded-xl animate-pulse" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }} />
+        <div className="hidden sm:block aspect-square rounded-xl animate-pulse" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }} />
       </div>
     )
   }
@@ -109,7 +109,7 @@ export function CityWidgets() {
 
       {/* ── Compact unified info card ── */}
       <div
-        className="rounded-xl px-4 py-3 flex flex-col gap-2"
+        className="rounded-xl px-4 py-3 flex flex-col gap-2 sm:aspect-square sm:justify-center"
         style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
       >
         {/* Weather */}
@@ -163,26 +163,18 @@ export function CityWidgets() {
 
       {/* ── Ad slot mid ── */}
       <div
-        className="hidden sm:flex rounded-xl overflow-hidden relative items-center justify-center"
-        style={{
-          background: 'var(--dc-surface)',
-          border: '1px solid var(--dc-border)',
-          height: '500px',
-        }}
+        className="hidden sm:block rounded-xl overflow-hidden relative aspect-square"
+        style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
       >
-        <AdBanner position="widget_mid" className="w-[500px] h-[500px] rounded-xl object-contain" />
+        <AdBanner position="widget_mid" forceFill />
       </div>
 
       {/* ── Ad slot right ── */}
       <div
-        className="hidden sm:flex rounded-xl overflow-hidden relative items-center justify-center"
-        style={{
-          background: 'var(--dc-surface)',
-          border: '1px solid var(--dc-border)',
-          height: '500px',
-        }}
+        className="hidden sm:block rounded-xl overflow-hidden relative aspect-square"
+        style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
       >
-        <AdBanner position="widget_right" className="w-[500px] h-[500px] rounded-xl object-contain" />
+        <AdBanner position="widget_right" forceFill />
       </div>
     </div>
   )
