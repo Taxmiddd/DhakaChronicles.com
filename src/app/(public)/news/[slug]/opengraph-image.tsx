@@ -13,7 +13,7 @@ export default async function ArticleOGImage({ params }: Props) {
 
   const { data: article } = await supabaseAdmin
     .from('articles')
-    .select('title, excerpt, featured_image_url, published_at, category:categories(name, color), author:users(full_name)')
+    .select('title, excerpt, featured_image_url, published_at, category:categories(name, color), author:users!author_id(full_name)')
     .eq('slug', slug)
     .eq('status', 'published')
     .single()

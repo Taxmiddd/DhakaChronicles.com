@@ -44,7 +44,7 @@ const ARTICLE_SELECT = `
   id, title, slug, excerpt, featured_image_url, published_at,
   reading_time, view_count, is_breaking, is_featured,
   category:categories(name, slug, color),
-  author:users(full_name, avatar_url)
+  author:users!author_id(full_name, avatar_url)
 `
 
 // ── Data fetching ────────────────────────────────────────────────────────────

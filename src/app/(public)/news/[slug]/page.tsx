@@ -23,7 +23,7 @@ const ARTICLE_SELECT = `
   reading_time, view_count, is_breaking, is_featured, article_type,
   allow_comments, category_id,
   category:categories(name, slug, color),
-  author:users(full_name, role, avatar_url, bio, twitter_url, linkedin_url, facebook_url)
+  author:users!author_id(full_name, role, avatar_url, bio, twitter_url, linkedin_url, facebook_url)
 `
 
 type Props = { params: Promise<{ slug: string }> }
