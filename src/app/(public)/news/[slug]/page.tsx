@@ -104,6 +104,11 @@ export default async function ArticlePage({ params }: Props) {
   const author = (article as any).author
   const contentHtml = renderTipTap((article as any).content)
 
+  const authorTitle = (role?: string) => {
+    if (!role || role === 'founder' || role === 'admin') return 'Staff Reporter'
+    return 'Staff Reporter'
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <JsonLd article={article as any} />
@@ -190,7 +195,7 @@ export default async function ArticlePage({ params }: Props) {
                     {author.full_name}
                   </p>
                   <p className="text-xs capitalize" style={{ color: 'var(--dc-text-muted)' }}>
-                    {author.role ?? 'Staff Reporter'}
+                    {authorTitle(author.role)}
                   </p>
                 </div>
               </Link>
