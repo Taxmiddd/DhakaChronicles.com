@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArticleSchema, type ArticleFormData } from '@/lib/validations'
 import { TipTapEditor } from '@/components/admin/TipTapEditor'
 import { toast } from 'sonner'
-import { Loader2, ArrowLeft, Save, Send, Clock, Image as ImageIcon } from 'lucide-react'
+import { Loader2, ArrowLeft, Save, Send, Clock } from 'lucide-react'
+import { ImageDropZone } from '@/components/admin/ImageDropZone'
 import Link from 'next/link'
 import { slugify } from '@/lib/utils'
 
@@ -239,18 +240,16 @@ export default function NewArticlePage() {
 
           <div className="glass p-5 rounded-xl space-y-4">
             <h3 className="font-headline font-bold text-white border-b border-dc-border pb-2">Media & SEO</h3>
-            
             <div>
-              <label className="form-label flex items-center gap-2" htmlFor="featured_image_url">
-                <ImageIcon className="w-4 h-4" /> Featured / OG Image URL
-              </label>
-              <input 
-                {...register('featured_image_url')} 
-                id="featured_image_url" 
-                className="form-input text-sm" 
-                placeholder="https://res.cloudinary.com/..." 
+              <label className="form-label mb-2 block">Featured / OG Image</label>
+              <Controller
+                name="featured_image_url"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <ImageDropZone value={field.value ?? ''} onChange={field.onChange} />
+                )}
               />
-              <p className="text-xs text-gray-500 mt-1">Used for OpenGraph SEO and Article Header</p>
             </div>
           </div>
 

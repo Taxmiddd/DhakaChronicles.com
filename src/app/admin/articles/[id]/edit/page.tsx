@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArticleSchema, type ArticleFormData } from '@/lib/validations'
 import { TipTapEditor } from '@/components/admin/TipTapEditor'
 import { toast } from 'sonner'
-import { Loader2, ArrowLeft, Save, Send, Eye, Clock, Image as ImageIcon, RotateCcw } from 'lucide-react'
+import { Loader2, ArrowLeft, Save, Send, Eye, Clock, RotateCcw } from 'lucide-react'
+import { ImageDropZone } from '@/components/admin/ImageDropZone'
 import Link from 'next/link'
 import { slugify } from '@/lib/utils'
 import { LiveBlogEditor } from '@/components/admin/LiveBlogEditor'
@@ -446,10 +447,14 @@ export default function EditArticlePage({ params }: Props) {
             </div>
 
             <div>
-              <label className="form-label flex items-center gap-2" htmlFor="featured_image_url">
-                <ImageIcon className="w-4 h-4" /> Featured / OG Image URL
-              </label>
-              <input {...register('featured_image_url')} id="featured_image_url" className="form-input text-sm" placeholder="https://..." />
+              <label className="form-label mb-2 block">Featured / OG Image</label>
+              <Controller
+                name="featured_image_url"
+                control={control}
+                render={({ field }) => (
+                  <ImageDropZone value={field.value ?? ''} onChange={field.onChange} />
+                )}
+              />
             </div>
 
             <div>
