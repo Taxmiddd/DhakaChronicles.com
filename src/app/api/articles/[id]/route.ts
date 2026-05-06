@@ -57,9 +57,16 @@ export async function PATCH(request: Request, { params }: Params) {
 
   const data = validated.data
 
-  // Set published_at if being published now
-  let updatePayload: Record<string, unknown> = {
+  // Normalize empty strings to null for DB
+  const normalizedData = {
     ...data,
+    category_id: data.category_id || null,
+    published_at: data.published_at || null,
+    featured_image_url: data.featured_image_url || null,
+  }
+
+  let updatePayload: Record<string, unknown> = {
+    ...normalizedData,
     updated_by: user.id,
     updated_at: new Date().toISOString(),
     last_edited_at: new Date().toISOString(),
@@ -103,7 +110,7 @@ export async function DELETE(_req: Request, { params }: Params) {
 
   const { error } = await supabaseAdmin
     .from('articles')
-    .update({ status: 'deleted', deleted_at: new Date().toISOString() })
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', id)
 
   if (error) {

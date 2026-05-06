@@ -22,6 +22,7 @@ async function getAllArticles(page = 1, perPage = 12) {
       .from('articles')
       .select(ARTICLE_SELECT, { count: 'exact' })
       .eq('status', 'published')
+      .is('deleted_at', null)
       .order('published_at', { ascending: false })
       .range(from, to)
     return { articles: data ?? [], total: count ?? 0 }

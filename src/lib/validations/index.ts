@@ -43,7 +43,7 @@ export const ArticleSchema = z.object({
   meta_title: z.string().max(60).optional(),
   meta_description: z.string().max(160).optional(),
   meta_keywords: z.array(z.string()).optional(),
-  category_id: z.string().uuid().optional(),
+  category_id: z.string().uuid().optional().or(z.literal('')),
   article_type: z.enum(['news', 'opinion', 'feature', 'interview', 'photo_essay', 'video', 'live_blog', 'sponsored']).default('news'),
   status: z.enum(['draft', 'review', 'scheduled', 'published', 'archived']).default('draft'),
   is_breaking: z.boolean().default(false),

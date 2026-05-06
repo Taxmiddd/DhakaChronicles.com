@@ -12,6 +12,8 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') ?? '50')
     const offset = (page - 1) * limit
 
+    const user = await getSession()
+
     let query = supabaseAdmin
       .from('articles')
       .select(`
@@ -19,9 +21,14 @@ export async function GET(request: Request) {
         author:users!author_id(full_name),
         category:categories!category_id(name)
       `)
-      .neq('status', 'deleted')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
+
+    // If user is not authenticated or is not an admin/founder, only show published articles
+    if (!user || !['founder', 'admin'].includes(user.role)) {
+      query = query.eq('status', 'published')
+    }
 
     if (status) query = query.eq('status', status)
     if (search) query = query.ilike('title', `%${search}%`)
@@ -55,18 +62,23 @@ export async function POST(request: Request) {
 
     const data = validated.data
 
-    // If publishing, set published_at
-    let published_at = null
-    if (data.status === 'published') {
-      published_at = new Date().toISOString()
+    // Normalize empty strings to null for DB
+    const categoryId = data.category_id || null
+    const publishedAt = data.published_at || null
+
+    // If publishing now (no explicit future date), set published_at
+    let finalPublishedAt: string | null = publishedAt
+    if (data.status === 'published' && !finalPublishedAt) {
+      finalPublishedAt = new Date().toISOString()
     }
 
     const { data: newArticle, error } = await supabaseAdmin
       .from('articles')
       .insert({
         ...data,
+        category_id: categoryId,
         author_id: user.id,
-        published_at,
+        published_at: finalPublishedAt,
         view_count: 0,
         unique_view_count: 0,
         share_count: 0,
