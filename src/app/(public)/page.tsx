@@ -90,18 +90,16 @@ async function getFeaturedArticles(excludeId?: string): Promise<ArticleRow[]> {
   } catch { return [] }
 }
 
-async function getLatestArticles(excludeIds: string[]): Promise<ArticleRow[]> {
+async function getLatestArticles(): Promise<ArticleRow[]> {
   try {
-    let query = supabaseAdmin
+    const { data } = await supabaseAdmin
       .from('articles')
       .select(ARTICLE_SELECT)
       .eq('status', 'published')
       .is('deleted_at', null)
       .order('published_at', { ascending: false })
-      .limit(excludeIds.length > 0 ? 12 : 8)
-    const { data } = await query
-    const rows = (data as unknown as ArticleRow[]) ?? []
-    return rows.filter(a => !excludeIds.includes(a.id)).slice(0, 8)
+      .limit(8)
+    return (data as unknown as ArticleRow[]) ?? []
   } catch { return [] }
 }
 
@@ -164,7 +162,7 @@ export default async function HomePage() {
   const featured = await getFeaturedArticles(hero?.id)
   const excludedIds = [hero?.id, ...featured.map(a => a.id)].filter(Boolean) as string[]
   const [latest, trending, categories] = await Promise.all([
-    getLatestArticles(excludedIds),
+    getLatestArticles(),
     getTrendingArticles(excludedIds),
     getCategories(),
   ])
