@@ -87,13 +87,13 @@ export async function PublicHeader() {
           >
             {/* Light mode logo */}
             <img
-              src="/dc-logo-black.svg"
+              src="/dc-mark-black.svg"
               alt="Dhaka Chronicles"
               className="h-12 w-auto light-only-ib"
             />
             {/* Dark mode logo */}
             <img
-              src="/dc-logo-white.svg"
+              src="/dc-mark-white.svg"
               alt="Dhaka Chronicles"
               className="h-12 w-auto dark-only-ib"
             />

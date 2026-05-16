@@ -73,7 +73,7 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
           style={{ borderBottom: '1px solid var(--dc-border)' }}
         >
           <Link href="/" onClick={close} aria-label="Home">
-            <img src="/dc-logo-black.svg" alt="Dhaka Chronicles" className="h-6 w-auto" />
+            <img src="/dc-mark-black.svg" alt="Dhaka Chronicles" className="h-6 w-auto" />
           </Link>
           <button
             onClick={close}

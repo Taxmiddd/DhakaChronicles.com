@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "X-Frame-Options", value: "ALLOWALL" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
@@ -25,6 +25,7 @@ const securityHeaders = [
       "media-src 'self' https://res.cloudinary.com https://*.supabase.co",
       "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://analytics.google.com https://onesignal.com https://api.onesignal.com wss://*.supabase.co",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.facebook.com",
+      "frame-ancestors 'self' https://noeticstudio.net https://www.noeticstudio.net",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
