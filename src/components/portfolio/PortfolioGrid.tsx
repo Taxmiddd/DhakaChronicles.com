@@ -22,7 +22,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'F&B':     '#F59E0B',
   Tech:      '#06B6D4',
   Lifestyle: '#8B5CF6',
-  Corporate: '#00A651',
+  Corporate: '#DC1A2C',
   Media:     '#F42A41',
   NGO:       '#6366F1',
 }
@@ -183,7 +183,7 @@ export function PortfolioGrid({ items, categories }: { items: PortfolioItem[]; c
                 {item.outcome && (
                   <div
                     className="mt-auto flex items-start gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group-hover:scale-105 group-hover:shadow-md"
-                    style={{ background: 'rgba(0,166,81,0.08)', color: 'var(--dc-green)', border: '1px solid rgba(0,166,81,0.15)' }}
+                    style={{ background: 'rgba(220,26,44,0.08)', color: 'var(--dc-green)', border: '1px solid rgba(220,26,44,0.15)' }}
                   >
                     <TrendingUp className="w-4 h-4 shrink-0 mt-0.5 animate-pulse" />
                     <span>{item.outcome}</span>

@@ -35,7 +35,7 @@ const ICON_OPTIONS = ['Heart', 'Code2', 'Briefcase', 'PenTool', 'TrendingUp', 'Z
 
 const EMPTY_JOB = {
   title: '', department: 'Editorial', type: 'Full-time',
-  location: 'Dhaka, Bangladesh', description: '', color: '#00A651',
+  location: 'Dhaka, Bangladesh', description: '', color: '#DC1A2C',
   is_active: true, display_order: 0,
 }
 

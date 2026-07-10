@@ -142,6 +142,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {isProduction && (
           <>
+            {/* Google Consent Mode v2 — must run BEFORE GTM/GA to be GDPR compliant */}
+            <Script
+              id="consent-mode-v2"
+              strategy="beforeInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  // Default: granted for non-EEA audience (Bangladesh, etc.)
+                  gtag('consent', 'default', {
+                    'analytics_storage': 'granted',
+                    'ad_storage': 'granted',
+                    'ad_user_data': 'granted',
+                    'ad_personalization': 'granted',
+                  });
+                  // Override: denied for EEA / UK / Switzerland until Google CMP collects consent
+                  gtag('consent', 'default', {
+                    'analytics_storage': 'denied',
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'wait_for_update': 500,
+                    'region': ['AT','BE','BG','CY','CZ','DE','DK','EE','ES','FI','FR','GR','HR','HU','IE','IT','LT','LU','LV','MT','NL','PL','PT','RO','SE','SI','SK','GB','IS','LI','NO','CH']
+                  });
+                `,
+              }}
+            />
             {/* Google Tag Manager */}
             <Script
               id="gtm"

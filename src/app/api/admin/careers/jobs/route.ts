@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         type: body.type,
         location: body.location,
         description: body.description,
-        color: body.color ?? '#00A651',
+        color: body.color ?? '#DC1A2C',
         is_active: body.is_active ?? true,
         display_order: body.display_order ?? 0,
       }])

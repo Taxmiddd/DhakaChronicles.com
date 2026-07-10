@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { TrendingUp, ChevronRight, Mail } from 'lucide-react'
+import { ChevronRight, TrendingUp, Filter, Hash, Star } from 'lucide-react'
 import { ArticleCard } from '@/components/article/ArticleCard'
 import { CityWidgets } from '@/components/widgets/CityWidgets'
 import AdBanner from '@/components/ui/AdBanner'
 import { NewsletterForm } from '@/components/layout/NewsletterForm'
 import { supabaseAdmin } from '@/lib/db/admin'
+import { getCategoryColor } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Dhaka Chronicles – The Pulse of Bangladesh',
@@ -51,7 +52,6 @@ const ARTICLE_SELECT = `
 
 async function getHeroArticle(): Promise<ArticleRow | null> {
   try {
-    // Prefer a featured article; fall back to the most-recent published one
     const { data: featured } = await supabaseAdmin
       .from('articles')
       .select(ARTICLE_SELECT)
@@ -98,7 +98,7 @@ async function getLatestArticles(): Promise<ArticleRow[]> {
       .eq('status', 'published')
       .is('deleted_at', null)
       .order('published_at', { ascending: false })
-      .limit(8)
+      .limit(12)
     return (data as unknown as ArticleRow[]) ?? []
   } catch { return [] }
 }
@@ -113,7 +113,7 @@ async function getTrendingArticles(excludeIds: string[]): Promise<ArticleRow[]> 
       .order('view_count', { ascending: false })
       .limit(10)
     const rows = (data as unknown as ArticleRow[]) ?? []
-    return rows.filter(a => !excludeIds.includes(a.id)).slice(0, 5)
+    return rows.filter(a => !excludeIds.includes(a.id)).slice(0, 6)
   } catch { return [] }
 }
 
@@ -123,10 +123,9 @@ async function getCategories(): Promise<CategoryRow[]> {
       .from('categories')
       .select('id, name, slug, color, display_order')
       .order('display_order', { ascending: true })
-      .limit(8)
+      .limit(12)
     if (!data || data.length === 0) return []
 
-    // Get article counts per category
     const ids = (data as CategoryRow[]).map(c => c.id)
     const counts: Record<string, number> = {}
     await Promise.all(
@@ -144,18 +143,14 @@ async function getCategories(): Promise<CategoryRow[]> {
   } catch { return [] }
 }
 
-// ── Fallback data (when DB is empty) ─────────────────────────────────────────
-
 const FALLBACK_CATEGORIES = [
   { id: '1', name: 'Politics', slug: 'politics', color: '#F42A41', display_order: 0, article_count: 0 },
-  { id: '2', name: 'Business', slug: 'business', color: '#00A651', display_order: 1, article_count: 0 },
+  { id: '2', name: 'Business', slug: 'business', color: '#DC1A2C', display_order: 1, article_count: 0 },
   { id: '3', name: 'Sports', slug: 'sports', color: '#F59E0B', display_order: 2, article_count: 0 },
   { id: '4', name: 'Culture', slug: 'culture', color: '#8B5CF6', display_order: 3, article_count: 0 },
   { id: '5', name: 'Technology', slug: 'technology', color: '#06B6D4', display_order: 4, article_count: 0 },
   { id: '6', name: 'Education', slug: 'education', color: '#EC4899', display_order: 5, article_count: 0 },
 ]
-
-// ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
   const hero = await getHeroArticle()
@@ -170,213 +165,151 @@ export default async function HomePage() {
   const displayCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-
-      {/* ── City Widgets ── */}
-      <CityWidgets />
-
-      {/* ── Mobile category quick-nav ── */}
-      <div className="sm:hidden -mx-4 mb-5 overflow-x-auto scrollbar-none">
-        <div className="flex gap-2 px-4 pb-1 pt-1">
-          {displayCategories.map(cat => (
-            <Link
-              key={cat.slug}
-              href={`/category/${cat.slug}`}
-              className="shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all"
-              style={{
-                background: `${cat.color ?? '#00A651'}15`,
-                color: cat.color ?? '#00A651',
-                border: `1px solid ${cat.color ?? '#00A651'}30`,
-              }}
-            >
-              {cat.name}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Hero + Featured ── */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
-        {/* Hero */}
-        <div className="lg:col-span-2">
-          {hero ? (
-            <ArticleCard variant="hero" {...hero} />
-          ) : (
-            <div className="aspect-[16/9] sm:aspect-[2/1] rounded-2xl flex items-center justify-center" style={{ background: 'var(--dc-surface)' }}>
-              <div className="text-center px-6">
-                <p className="font-headline font-bold text-xl mb-2" style={{ color: 'var(--dc-text)' }}>Welcome to Dhaka Chronicles</p>
-                <p style={{ color: 'var(--dc-text-muted)' }} className="text-sm">Bangladesh&apos;s trusted news source. Articles will appear here once published.</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Featured sidebar */}
-        <div className="flex flex-col gap-3">
-          {featured.length > 0 ? (
-            featured.map(a => <ArticleCard key={a.id} variant="featured" {...a} />)
-          ) : (
-            <div className="flex-1 rounded-xl flex items-center justify-center p-6" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}>
-              <p className="text-sm text-center" style={{ color: 'var(--dc-text-muted)' }}>Featured stories will appear here</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── Mobile square ad pair — phone only, renders nothing when no ads ── */}
-      <div className="sm:hidden flex gap-3 mb-6">
-        <AdBanner position="mobile_square_1" className="flex-1 aspect-square rounded-xl" />
-        <AdBanner position="mobile_square_2" className="flex-1 aspect-square rounded-xl" />
-      </div>
-
-      {/* ── Homepage banner ad ── */}
-      <AdBanner position="homepage_banner" className="w-full h-[60px] sm:h-[90px] mb-8" />
-
-      {/* ── Latest + Trending ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-
-        {/* Latest stories */}
-        <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="section-heading">Latest Stories</h2>
-            <Link
-              href="/news"
-              className="text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all text-dc-green"
-            >
-              View all <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          {latest.length > 0 ? (
-            <div>
-              {latest.slice(0, 4).map(a => (
-                <ArticleCard key={a.id} variant="list" {...a} />
-              ))}
-              {/* Native feed ad between articles */}
-              <div style={{ borderTop: '1px solid var(--dc-border)' }}>
-                <AdBanner position="feed_native" variant="native" />
-              </div>
-              {latest.slice(4).map(a => (
-                <ArticleCard key={a.id} variant="list" {...a} />
-              ))}
-            </div>
-          ) : (
-            <div className="py-16 text-center rounded-xl" style={{ border: '1px dashed var(--dc-border)' }}>
-              <p style={{ color: 'var(--dc-text-muted)' }}>No articles published yet.</p>
-            </div>
-          )}
-        </div>
-
-        {/* Trending + Newsletter */}
-        <aside className="space-y-6">
-          {/* Trending */}
-          <div className="glass p-5 rounded-xl">
-            <h3 className="font-headline font-bold text-base flex items-center gap-2 mb-5" style={{ color: 'var(--dc-text)' }}>
-              <TrendingUp className="w-4 h-4 text-dc-green" />
-              Most Read
-            </h3>
-            {trending.length > 0 ? (
-              <ol className="space-y-4">
-                {trending.map((item, i) => (
-                  <li key={item.id}>
-                    <Link
-                      href={`/news/${item.slug}`}
-                      className="group flex items-start gap-3"
-                    >
-                      <span
-                        className="text-2xl font-headline font-black leading-none w-8 shrink-0 select-none"
-                        style={{ color: 'var(--dc-border)' }}
-                      >
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <div>
-                        <p
-                          className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-dc-green transition-colors"
-                          style={{ color: 'var(--dc-text)' }}
-                        >
-                          {item.title}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1 text-xs" style={{ color: 'var(--dc-text-muted)' }}>
-                          {item.category && <span>{item.category.name}</span>}
-                          {item.view_count > 0 && (
-                            <>
-                              <span>·</span>
-                              <span>{item.view_count.toLocaleString()} views</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="text-sm" style={{ color: 'var(--dc-text-muted)' }}>
-                Trending articles will appear here.
-              </p>
-            )}
-          </div>
-
-          {/* Newsletter */}
-          <div className="glass p-5 rounded-xl">
-            <div className="flex items-center gap-2 mb-2">
-              <Mail className="w-4 h-4 text-dc-green" />
-              <h3 className="font-headline font-bold text-sm" style={{ color: 'var(--dc-text)' }}>
-                Morning Briefing
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      
+      {/* ── 3-Column Dashboard Layout ── */}
+      <div className="flex flex-col lg:flex-row gap-8">
+        
+        {/* ── LEFT COLUMN: Navigation & Widgets ── */}
+        <aside className="w-full lg:w-[260px] shrink-0 space-y-6 hidden lg:block">
+          <div className="sticky top-[88px] space-y-6">
+            
+            <div className="bg-dc-surface border border-dc-border rounded-2xl p-5 shadow-sm">
+              <h3 className="text-[11px] font-black uppercase tracking-widest text-dc-text-muted mb-4 flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5" /> Explore
               </h3>
+              <nav className="flex flex-col gap-1.5">
+                <Link href="/" className="px-3 py-2 rounded-lg bg-dc-surface-2 text-dc-text font-bold text-sm flex items-center justify-between group">
+                  <span className="flex items-center gap-2"><Star className="w-4 h-4 text-dc-red" /> For You</span>
+                </Link>
+                <Link href="/news" className="px-3 py-2 rounded-lg hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text font-semibold text-sm transition-colors">
+                  Latest Feed
+                </Link>
+                <div className="h-px bg-dc-border my-2" />
+                {displayCategories.map(cat => (
+                  <Link
+                    key={cat.slug}
+                    href={`/category/${cat.slug}`}
+                    className="px-3 py-2 rounded-lg hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text font-semibold text-sm transition-colors flex items-center justify-between group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Hash className="w-4 h-4 opacity-50" style={{ color: getCategoryColor(cat.color) }} /> 
+                      {cat.name}
+                    </span>
+                    <span className="text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity bg-dc-surface border border-dc-border px-1.5 py-0.5 rounded">
+                      {cat.article_count}
+                    </span>
+                  </Link>
+                ))}
+              </nav>
             </div>
-            <p className="text-sm mb-4" style={{ color: 'var(--dc-text-muted)' }}>
-              Top 5 stories in your inbox at 7 AM daily.
-            </p>
-            <NewsletterForm />
+
+            <CityWidgets />
           </div>
         </aside>
-      </div>
 
-      {/* ── Explore by Section ── */}
-      <section className="mb-10">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="section-heading">Explore by Section</h2>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {displayCategories.slice(0, 6).map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/category/${cat.slug}`}
-              className="group flex flex-col items-center gap-2.5 p-4 rounded-xl text-center transition-all hover:shadow-md overflow-hidden relative"
-              style={{
-                background: 'var(--dc-surface)',
-                border: '1px solid var(--dc-border)',
-                borderTopColor: cat.color ?? '#00A651',
-                borderTopWidth: '3px',
-              }}
-            >
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center"
-                style={{ background: `${cat.color ?? '#00A651'}15` }}
-              >
-                <span
-                  className="w-4 h-4 rounded-full transition-transform group-hover:scale-110"
-                  style={{ background: cat.color ?? '#00A651' }}
-                />
-              </div>
-              <div>
-                <p
-                  className="font-bold text-sm transition-colors"
-                  style={{ color: cat.color ?? 'var(--dc-text)' }}
-                >
-                  {cat.name}
-                </p>
-                {cat.article_count > 0 && (
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--dc-text-muted)' }}>
-                    {cat.article_count} {cat.article_count === 1 ? 'story' : 'stories'}
-                  </p>
+        {/* ── CENTER COLUMN: The Pulse Feed ── */}
+        <main className="flex-1 min-w-0">
+          
+          <AdBanner position="homepage_banner" className="w-full h-[90px] mb-6 rounded-2xl border border-dc-border hidden md:block" />
+
+          {/* Main Hero Card */}
+          {hero && (
+            <div className="mb-6 group cursor-pointer relative overflow-hidden rounded-3xl border border-dc-border shadow-sm">
+              <Link href={`/news/${hero.slug}`} className="absolute inset-0 z-20" aria-label={hero.title}></Link>
+              <div className="aspect-[16/10] sm:aspect-[21/9] w-full relative bg-dc-surface-2">
+                {hero.featured_image_url && (
+                  <img src={hero.featured_image_url} alt={hero.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="px-2.5 py-1 rounded bg-dc-red text-white text-[10px] font-black uppercase tracking-widest">
+                      Top Story
+                    </span>
+                    {hero.category && (
+                      <span className="text-xs font-bold text-white uppercase tracking-wider opacity-90">
+                        {hero.category.name}
+                      </span>
+                    )}
+                  </div>
+                  <h1 className="text-2xl sm:text-4xl font-headline font-black text-white leading-[1.15] mb-3 group-hover:text-gray-200 transition-colors">
+                    {hero.title}
+                  </h1>
+                  {hero.excerpt && (
+                    <p className="text-sm sm:text-base text-gray-300 line-clamp-2 max-w-3xl">
+                      {hero.excerpt}
+                    </p>
+                  )}
+                </div>
               </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+            </div>
+          )}
+
+          <AdBanner position="homepage_mid" className="w-full h-[90px] mb-6 rounded-2xl border border-dc-border hidden md:block" />
+
+          <div className="flex items-center gap-3 mb-6 pt-4">
+            <h2 className="text-2xl font-headline font-black text-dc-text">The Pulse</h2>
+            <div className="h-px bg-dc-border flex-1" />
+          </div>
+
+          <div className="flex flex-col gap-5">
+            {latest.map((article, idx) => (
+              <div key={article.id}>
+                {idx === 4 && <AdBanner position="feed_native" className="w-full h-[90px] mb-5 rounded-2xl border border-dc-border" />}
+                {idx === 8 && <AdBanner position="category_banner" className="w-full h-[90px] mb-5 rounded-2xl border border-dc-border" />}
+                
+                <ArticleCard variant="list" {...article} className="bg-dc-surface border border-dc-border hover:border-dc-border/80 shadow-sm rounded-2xl p-4 sm:p-5 transition-all hover:shadow-md" />
+              </div>
+            ))}
+          </div>
+
+        </main>
+
+        {/* ── RIGHT COLUMN: Context & Sidebar ── */}
+        <aside className="w-full lg:w-[320px] xl:w-[360px] shrink-0 space-y-6">
+          <div className="sticky top-[88px] space-y-6">
+            
+            {/* Top Stories Leaderboard */}
+            <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-dc-red/5 blur-[40px] pointer-events-none" />
+              
+              <h3 className="font-headline font-black text-lg text-dc-text mb-6 flex items-center gap-2 relative z-10">
+                <TrendingUp className="w-5 h-5 text-dc-red" /> Trending Now
+              </h3>
+              
+              <div className="flex flex-col gap-5 relative z-10">
+                {trending.map((a, i) => (
+                  <Link key={a.id} href={`/news/${a.slug}`} className="group flex gap-4 items-start">
+                    <span className="text-4xl font-black text-dc-border group-hover:text-dc-red transition-colors leading-none -mt-1 w-6 text-center">{i + 1}</span>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-[13px] text-dc-text group-hover:text-dc-red transition-colors line-clamp-3 leading-snug">{a.title}</h4>
+                      <p className="text-[11px] text-dc-text-muted mt-2 font-semibold tracking-wide uppercase flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: getCategoryColor(a.category?.color) }} />
+                        {a.category?.name}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Newsletter Mini Widget */}
+            <div className="bg-[#141414] rounded-2xl p-6 shadow-sm border border-dc-border relative overflow-hidden">
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-dc-red/20 blur-[50px] pointer-events-none" />
+              <div className="relative z-10">
+                <h3 className="font-headline font-black text-white text-xl mb-2">Stay Informed</h3>
+                <p className="text-xs text-gray-400 mb-5">Bangladesh's most vital stories, delivered straight to you.</p>
+                <NewsletterForm variant="dark" />
+              </div>
+            </div>
+
+            <AdBanner position="sidebar_sticky" className="w-full h-[600px] rounded-2xl overflow-hidden border border-dc-border" />
+          </div>
+        </aside>
+
+      </div>
     </div>
   )
 }

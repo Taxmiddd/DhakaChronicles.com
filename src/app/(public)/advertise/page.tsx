@@ -169,12 +169,12 @@ export default async function AdvertisePage() {
       >
         <div
           className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse, rgba(0,166,81,0.07) 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(ellipse, rgba(220,26,44,0.07) 0%, transparent 70%)' }}
         />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center relative">
           <span
             className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] px-3 py-1.5 rounded-full mb-5"
-            style={{ color: '#00A651', background: 'rgba(0,166,81,0.1)', border: '1px solid rgba(0,166,81,0.2)' }}
+            style={{ color: '#DC1A2C', background: 'rgba(220,26,44,0.1)', border: '1px solid rgba(220,26,44,0.2)' }}
           >
             Advertising
           </span>
@@ -218,7 +218,7 @@ export default async function AdvertisePage() {
                 >
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
-                    style={{ background: 'rgba(0,166,81,0.1)' }}
+                    style={{ background: 'rgba(220,26,44,0.1)' }}
                   >
                     <Icon className="w-5 h-5 text-dc-green" />
                   </div>
@@ -302,7 +302,7 @@ export default async function AdvertisePage() {
                 style={{
                   background: 'var(--dc-surface)',
                   border: pkg.is_highlighted ? undefined : '1px solid var(--dc-border)',
-                  boxShadow: pkg.is_highlighted ? '0 0 40px rgba(0,166,81,0.15)' : 'var(--card-shadow)',
+                  boxShadow: pkg.is_highlighted ? '0 0 40px rgba(220,26,44,0.15)' : 'var(--card-shadow)',
                 }}
               >
                 {pkg.is_highlighted && (
@@ -355,7 +355,7 @@ export default async function AdvertisePage() {
         >
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse at 100% 100%, rgba(0,166,81,0.06) 0%, transparent 60%)' }}
+            style={{ background: 'radial-gradient(ellipse at 100% 100%, rgba(220,26,44,0.06) 0%, transparent 60%)' }}
           />
           <div className="relative text-center">
             <h2 className="font-headline font-bold text-2xl mb-3" style={{ color: 'var(--dc-text)' }}>

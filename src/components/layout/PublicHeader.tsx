@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import { Search, Lightbulb } from 'lucide-react'
+import { Facebook, Twitter, Instagram } from '@/components/ui/BrandIcons'
 import { ThemeToggle } from '@/components/common/ThemeToggle'
 import { MobileMenuButton } from '@/components/layout/MobileMenu'
 import { supabaseAdmin } from '@/lib/db/admin'
+import { getCategoryColor } from '@/lib/utils'
 
 interface Category {
   name: string
@@ -52,7 +54,7 @@ export async function PublicHeader() {
 
   const navCats: Category[] = categories.length > 0 ? categories : [
     { name: 'Politics',   slug: 'politics',   color: '#F42A41' },
-    { name: 'Business',   slug: 'business',   color: '#00A651' },
+    { name: 'Business',   slug: 'business',   color: '#DC1A2C' },
     { name: 'Sports',     slug: 'sports',     color: '#F59E0B' },
     { name: 'Culture',    slug: 'culture',    color: '#8B5CF6' },
     { name: 'Technology', slug: 'technology', color: '#06B6D4' },
@@ -60,199 +62,97 @@ export async function PublicHeader() {
   ]
 
   const dateStr = new Date().toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
+    weekday: 'long',
+    month: 'long',
     day: 'numeric',
     year: 'numeric',
   })
 
   return (
-    <header className="sticky top-0 z-50">
-
-      {/* ── Main header row ── */}
-      <div
-        className="border-b"
-        style={{
-          background: 'var(--background)',
-          borderColor: 'var(--dc-header-border)',
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[64px] flex items-center justify-between gap-4">
-
-          {/* Logo — swaps black ↔ white based on theme via CSS class */}
-          <Link
-            href="/"
-            className="shrink-0 flex items-center"
-            aria-label="Dhaka Chronicles — Home"
-          >
-            {/* Light mode logo */}
-            <img
-              src="/dc-mark-black.svg"
-              alt="Dhaka Chronicles"
-              className="h-12 w-auto light-only-ib"
-            />
-            {/* Dark mode logo */}
-            <img
-              src="/dc-mark-white.svg"
-              alt="Dhaka Chronicles"
-              className="h-12 w-auto dark-only-ib"
-            />
-          </Link>
-
-          {/* Right actions */}
-          <div className="flex items-center gap-1">
-
-            {/* Date — desktop only */}
-            <time
-              className="hidden lg:block text-xs mr-3 tabular-nums"
-              style={{ color: 'var(--dc-text-muted)' }}
-            >
-              {dateStr}
-            </time>
-
-            <Link
-              href="/search"
-              className="p-2.5 rounded-lg transition-colors hover:bg-dc-surface-2"
-              style={{ color: 'var(--dc-text-muted)' }}
-              aria-label="Search"
-            >
-              <Search className="w-[18px] h-[18px]" />
-            </Link>
-
-            <ThemeToggle />
-
-            <Link
-              href="/tips"
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border ml-1 transition-colors hover:border-dc-green hover:text-dc-green"
-              style={{ color: 'var(--dc-text-muted)', borderColor: 'var(--dc-border)' }}
-            >
-              <Lightbulb className="w-3.5 h-3.5" />
-              Tip Us
-            </Link>
-
-            <Link
-              href="#newsletter"
-              className="hidden sm:inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90 ml-1"
-              style={{ background: 'var(--dc-green)' }}
-            >
-              Subscribe
-            </Link>
-
-            <MobileMenuButton categories={navCats} />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Mobile category pill scroll — phone only ── */}
-      <div
-        className="sm:hidden overflow-x-auto scrollbar-none border-b"
-        style={{
-          background: 'var(--dc-nav-strip-bg)',
-          borderColor: 'var(--dc-nav-strip-border)',
-        }}
-      >
-        <div className="flex items-center gap-2 px-4 py-2 min-w-max">
-          <Link
-            href="/"
-            className="shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-bold text-white"
-            style={{ background: 'var(--dc-green)' }}
-          >
-            Latest
-          </Link>
-          {navCats.map(cat => (
-            <Link
-              key={cat.slug}
-              href={`/category/${cat.slug}`}
-              className="shrink-0 px-3.5 py-1.5 rounded-full text-[11px] font-semibold border"
-              style={{
-                color: cat.color ?? 'var(--dc-text-muted)',
-                borderColor: `${cat.color ?? 'var(--dc-border)'}50`,
-                background: `${cat.color ?? 'var(--dc-surface-2)'}14`,
-              }}
-            >
-              {cat.name}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Desktop category navigation strip ── */}
-      <nav
-        className="hidden lg:block border-b"
-        style={{
-          background: 'var(--dc-nav-strip-bg)',
-          borderColor: 'var(--dc-nav-strip-border)',
-        }}
-        aria-label="Section navigation"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center h-10 gap-0.5 overflow-x-auto scrollbar-none">
-            <Link
-              href="/"
-              className="shrink-0 px-3 h-full flex items-center text-sm font-bold relative group transition-colors"
-              style={{ color: 'var(--dc-text)' }}
-            >
-              Latest
-              <span
-                className="absolute bottom-0 left-3 right-3 h-[2px] rounded-t-full"
-                style={{ background: 'var(--dc-green)' }}
-              />
-            </Link>
-            {navCats.map((cat) => (
-              <Link
-                key={cat.slug}
-                href={`/category/${cat.slug}`}
-                className="shrink-0 px-3 h-full flex items-center text-sm font-medium relative group transition-colors"
-                style={{ color: 'var(--dc-text-muted)' }}
-              >
-                <span className="group-hover:opacity-100 transition-colors" style={{ color: 'inherit' }}>
-                  {cat.name}
-                </span>
-                <span
-                  className="absolute bottom-0 left-3 right-3 h-[2px] rounded-t-full scale-x-0 group-hover:scale-x-100 transition-transform origin-left"
-                  style={{ background: cat.color ?? 'var(--dc-green)' }}
-                />
-              </Link>
-            ))}
-            <div className="ml-auto shrink-0 flex items-center gap-0.5 pl-4 border-l border-dc-border">
-              <Link
-                href="/search"
-                className="px-3 h-full flex items-center text-sm font-medium text-dc-muted hover:text-dc-green transition-colors"
-              >
-                All Sections
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* ── Breaking news ticker ── */}
-      {banners.length > 0 && (
-        <div style={{ background: '#F42A41', borderTop: '1px solid rgba(255,255,255,0.15)' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-9 flex items-center gap-4 overflow-hidden">
-            <div className="shrink-0 flex items-center gap-2 bg-black/20 px-2.5 py-1 rounded-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-white">Breaking</span>
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <div className="ticker-animate inline-flex items-center gap-8 text-sm font-medium text-white">
+    <header className="sticky top-0 z-50 flex flex-col backdrop-blur-lg bg-background/85 supports-[backdrop-filter]:bg-background/60 border-b border-dc-border shadow-sm">
+      
+      {/* ── Top Bar: Ticker, Date, Socials ── */}
+      <div className="hidden lg:flex items-center justify-between px-6 py-1.5 bg-dc-surface-2/50 border-b border-dc-border/50 text-[11px] font-medium text-dc-text-muted">
+        <div className="flex items-center gap-6">
+          <time className="tabular-nums uppercase tracking-wider">{dateStr}</time>
+          {banners.length > 0 && (
+            <div className="flex items-center gap-3 overflow-hidden max-w-xl">
+              <span className="flex items-center gap-1.5 text-[#DC1A2C] font-bold uppercase tracking-widest shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#DC1A2C] animate-pulse" />
+                Breaking
+              </span>
+              <div className="ticker-animate flex items-center gap-6 whitespace-nowrap">
                 {[...banners, ...banners].map((b, i) => (
-                  <span key={i} className="flex items-center gap-8 shrink-0">
+                  <span key={i} className="flex items-center gap-6">
                     {b.link ? (
-                      <Link href={b.link} className="hover:underline underline-offset-2 whitespace-nowrap">
-                        {b.title}
-                      </Link>
+                      <Link href={b.link} className="hover:text-dc-text transition-colors">{b.title}</Link>
                     ) : (
-                      <span className="whitespace-nowrap">{b.title}</span>
+                      <span>{b.title}</span>
                     )}
-                    <span className="opacity-40 text-base">◆</span>
+                    <span className="opacity-30">◆</span>
                   </span>
                 ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            <Link href="#" className="hover:text-dc-red transition-colors"><Facebook className="w-3.5 h-3.5" /></Link>
+            <Link href="#" className="hover:text-dc-red transition-colors"><Twitter className="w-3.5 h-3.5" /></Link>
+            <Link href="#" className="hover:text-dc-red transition-colors"><Instagram className="w-3.5 h-3.5" /></Link>
+          </div>
+          <div className="w-px h-3 bg-dc-border" />
+          <ThemeToggle />
+        </div>
+      </div>
+
+      {/* ── Main Nav Bar ── */}
+      <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 h-[60px] flex items-center justify-between gap-6">
+        
+        {/* Logo */}
+        <Link href="/" className="shrink-0 flex items-center" aria-label="Dhaka Chronicles">
+          <img src="/dc-mark-black.svg" alt="Dhaka Chronicles" className="h-14 md:h-16 w-auto light-only-ib" />
+          <img src="/dc-mark-white.svg" alt="Dhaka Chronicles" className="h-14 md:h-16 w-auto dark-only-ib" />
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex items-center gap-1 h-full flex-1 justify-center">
+          <Link href="/" className="px-3 h-full flex items-center text-[13px] font-bold text-dc-text relative group">
+            Latest
+            <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-t-full bg-dc-red" />
+          </Link>
+          {navCats.map((cat) => (
+            <Link key={cat.slug} href={`/category/${cat.slug}`} className="px-3 h-full flex items-center text-[13px] font-semibold text-dc-text-muted hover:text-dc-text transition-colors relative group">
+              {cat.name}
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-t-full scale-x-0 group-hover:scale-x-100 transition-transform origin-center" style={{ background: getCategoryColor(cat.color) }} />
+            </Link>
+          ))}
+        </nav>
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link href="/search" className="p-2 rounded-full transition-colors hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text" aria-label="Search">
+            <Search className="w-4 h-4" />
+          </Link>
+          <Link href="/tips" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-dc-border text-dc-text-muted hover:border-dc-red hover:text-dc-red transition-all">
+            <Lightbulb className="w-3.5 h-3.5" />
+            Tip Us
+          </Link>
+          <Link href="#newsletter" className="hidden sm:inline-flex px-4 py-1.5 rounded-full text-xs font-bold text-white bg-dc-red hover:bg-[#A8121F] transition-colors">
+            Subscribe
+          </Link>
+          <MobileMenuButton categories={navCats} />
+        </div>
+      </div>
+      
+      {/* Mobile breaking banner & theme toggle */}
+      <div className="lg:hidden flex items-center justify-between px-4 py-2 border-t border-dc-border bg-dc-surface-2/30">
+        <div className="flex items-center gap-2 text-xs font-medium text-dc-text-muted">
+           <time className="tabular-nums">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</time>
+        </div>
+        <ThemeToggle />
+      </div>
     </header>
   )
 }

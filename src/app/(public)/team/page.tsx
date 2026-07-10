@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import Script from 'next/script'
@@ -11,14 +11,14 @@ export const revalidate = 60
 const BASE = 'https://dhakachronicles.com'
 
 export const metadata: Metadata = {
-  title: 'Our Team – Dhaka Chronicles',
+  title: 'Our Team â€“ Dhaka Chronicles',
   description: 'Meet the journalists, editors, and creators driving independent reporting at Dhaka Chronicles.',
   alternates: { canonical: `${BASE}/team` },
   openGraph: {
     type: 'website',
     url: `${BASE}/team`,
     siteName: 'Dhaka Chronicles',
-    title: 'Our Team – Dhaka Chronicles',
+    title: 'Our Team â€“ Dhaka Chronicles',
     description: 'Meet the journalists, editors, and creators driving independent reporting at Dhaka Chronicles.',
     images: [{ url: `${BASE}/og-default.png`, width: 1200, height: 630, alt: 'Dhaka Chronicles' }],
   },
@@ -43,7 +43,7 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const ROLE_COLOR: Record<string, string> = {
-  founder: '#00A651',
+  founder: '#DC1A2C',
   admin: '#06B6D4',
   publisher: '#8B5CF6',
 }
@@ -101,11 +101,11 @@ export default async function TeamPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="text-center mb-12 sm:mb-16">
         <span
           className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest mb-3 px-3 py-1.5 rounded-full border"
-          style={{ color: 'var(--dc-green)', borderColor: 'rgba(0,166,81,0.3)', background: 'rgba(0,166,81,0.08)' }}
+          style={{ color: 'var(--dc-red)', borderColor: 'rgba(220,26,44,0.3)', background: 'rgba(220,26,44,0.08)' }}
         >
           <Users className="w-3 h-3" />
           Our Team
@@ -122,7 +122,7 @@ export default async function TeamPage() {
         </p>
       </div>
 
-      {/* ── Leadership ── */}
+      {/* â”€â”€ Leadership â”€â”€ */}
       {founders.length > 0 && (
         <section className="mb-14">
           <div
@@ -131,7 +131,7 @@ export default async function TeamPage() {
           >
             <span
               className="w-3 h-3 rounded-full"
-              style={{ background: 'var(--dc-green)' }}
+              style={{ background: 'var(--dc-red)' }}
             />
             <h2 className="font-headline font-bold text-lg" style={{ color: 'var(--dc-text)' }}>
               Leadership
@@ -145,7 +145,7 @@ export default async function TeamPage() {
         </section>
       )}
 
-      {/* ── Editorial Team ── */}
+      {/* â”€â”€ Editorial Team â”€â”€ */}
       {team.length > 0 && (
         <section className="mb-14">
           <div
@@ -168,7 +168,7 @@ export default async function TeamPage() {
         </section>
       )}
 
-      {/* ── Empty state ── */}
+      {/* â”€â”€ Empty state â”€â”€ */}
       {members.length === 0 && (
         <div className="py-24 text-center" style={{ color: 'var(--dc-text-muted)' }}>
           <BookOpen className="w-10 h-10 mx-auto mb-3 opacity-30" />
@@ -176,14 +176,14 @@ export default async function TeamPage() {
         </div>
       )}
 
-      {/* ── Join CTA ── */}
+      {/* â”€â”€ Join CTA â”€â”€ */}
       <section
         className="mt-4 py-14 px-6 sm:px-12 rounded-2xl text-center"
         style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
       >
         <span
           className="inline-block text-xs font-bold uppercase tracking-widest mb-3"
-          style={{ color: 'var(--dc-green)' }}
+          style={{ color: 'var(--dc-red)' }}
         >
           Join Us
         </span>
@@ -197,13 +197,13 @@ export default async function TeamPage() {
           <Link
             href="/careers"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
-            style={{ background: 'var(--dc-green)' }}
+            style={{ background: 'var(--dc-red)' }}
           >
             View Openings
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border transition-colors hover:border-dc-green hover:text-dc-green"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border transition-colors hover:border-dc-red hover:text-dc-red"
             style={{ color: 'var(--dc-text-muted)', borderColor: 'var(--dc-border)' }}
           >
             Get in Touch
@@ -218,7 +218,7 @@ function MemberCard({ member, featured = false }: { member: TeamMember; featured
   const slug = slugify(member.full_name ?? '')
   const roleLower = (member.role ?? '').toLowerCase()
   const role = ROLE_LABELS[roleLower] ?? member.role ?? 'Journalist'
-  const roleColor = ROLE_COLOR[roleLower] ?? 'var(--dc-green)'
+  const roleColor = ROLE_COLOR[roleLower] ?? 'var(--dc-red)'
 
   return (
     <Link
@@ -265,7 +265,7 @@ function MemberCard({ member, featured = false }: { member: TeamMember; featured
       {/* Info */}
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         <h3
-          className="font-headline font-bold text-sm sm:text-base leading-snug mb-1 group-hover:text-dc-green transition-colors"
+          className="font-headline font-bold text-sm sm:text-base leading-snug mb-1 group-hover:text-dc-red transition-colors"
           style={{ color: 'var(--dc-text)' }}
         >
           {member.full_name}
@@ -280,11 +280,12 @@ function MemberCard({ member, featured = false }: { member: TeamMember; featured
         )}
         <span
           className="mt-2 text-[10px] font-semibold"
-          style={{ color: 'var(--dc-green)' }}
+          style={{ color: 'var(--dc-red)' }}
         >
-          View articles →
+          View articles â†’
         </span>
       </div>
     </Link>
   )
 }
+

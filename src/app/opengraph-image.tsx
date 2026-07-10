@@ -1,7 +1,7 @@
-import { ImageResponse } from 'next/og'
+﻿import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Dhaka Chronicles — News from the Heart of Bangladesh'
+export const alt = 'Dhaka Chronicles â€” News from the Heart of Bangladesh'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -29,7 +29,7 @@ export default function OGImage() {
             left: 0,
             right: 0,
             height: '6px',
-            background: '#00A651',
+            background: '#DC1A2C',
           }}
         />
 
@@ -96,17 +96,17 @@ export default function OGImage() {
             gap: 12,
           }}
         >
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00A651' }} />
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#DC1A2C' }} />
           <div
             style={{
               fontSize: 14,
-              color: '#00A651',
+              color: '#DC1A2C',
               fontWeight: 700,
               letterSpacing: '0.1em',
               textTransform: 'uppercase',
             }}
           >
-            Independent · Bilingual · Trusted
+            Independent Â· Bilingual Â· Trusted
           </div>
         </div>
       </div>
@@ -114,3 +114,4 @@ export default function OGImage() {
     { ...size }
   )
 }
+

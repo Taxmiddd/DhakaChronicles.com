@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { MessageSquare, Send, ChevronDown, User, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
@@ -93,7 +93,7 @@ export default function CommentsSection({ articleId, allowComments = true }: Com
   return (
     <section id="comments" className="mt-10 pt-8 border-t border-dc-border">
       <h2 className="font-headline font-bold text-white text-xl mb-6 flex items-center gap-2">
-        <MessageSquare className="w-5 h-5 text-dc-green" />
+        <MessageSquare className="w-5 h-5 text-dc-red" />
         Discussion
         {total > 0 && (
           <span className="text-sm font-normal text-dc-text-muted ml-1">({total})</span>
@@ -116,7 +116,7 @@ export default function CommentsSection({ articleId, allowComments = true }: Com
         {notification && (
           <div className={`flex items-start gap-2 p-3 rounded-lg mb-4 text-sm ${
             notification.type === 'success'
-              ? 'bg-dc-green/10 text-dc-green border border-dc-green/20'
+              ? 'bg-dc-red/10 text-dc-red border border-dc-red/20'
               : 'bg-dc-red/10 text-dc-red border border-dc-red/20'
           }`}>
             {notification.type === 'success'
@@ -221,7 +221,7 @@ function CommentCard({ comment, onReply }: { comment: Comment; onReply: (id: str
           <div className="flex items-center gap-3 mt-2">
             <button
               onClick={() => onReply(comment.id)}
-              className="text-xs text-dc-text-muted hover:text-dc-green transition-colors"
+              className="text-xs text-dc-text-muted hover:text-dc-red transition-colors"
             >
               Reply
             </button>
@@ -264,3 +264,4 @@ function CommentCard({ comment, onReply }: { comment: Comment; onReply: (id: str
     </div>
   )
 }
+

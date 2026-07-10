@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
@@ -33,7 +33,7 @@ function ResetForm() {
       })
       const data = await res.json()
       if (res.ok) {
-        toast.success('Password updated! Redirecting to login…')
+        toast.success('Password updated! Redirecting to loginâ€¦')
         setTimeout(() => router.push('/login'), 2000)
       } else {
         toast.error(data.error ?? 'Reset failed. The link may have expired.')
@@ -50,7 +50,7 @@ function ResetForm() {
       <div className="text-center bg-red-500/10 border border-red-500/30 rounded-xl p-6">
         <p className="text-red-400 font-semibold">Invalid reset link</p>
         <p className="text-gray-400 text-sm mt-2">This link is missing a token. Please request a new one.</p>
-        <Link href="/forgot-password" className="inline-block mt-4 text-[#00A651] hover:underline text-sm">
+        <Link href="/forgot-password" className="inline-block mt-4 text-[#DC1A2C] hover:underline text-sm">
           Request new link
         </Link>
       </div>
@@ -71,7 +71,7 @@ function ResetForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Min 8 characters"
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#00A651] transition-colors"
+          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#DC1A2C] transition-colors"
         />
       </div>
       <div>
@@ -86,16 +86,16 @@ function ResetForm() {
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
           placeholder="Repeat new password"
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#00A651] transition-colors"
+          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#DC1A2C] transition-colors"
         />
       </div>
       <button
         id="reset-submit-btn"
         type="submit"
         disabled={loading}
-        className="w-full py-3 bg-[#00A651] hover:bg-[#009040] disabled:opacity-60 text-white font-semibold rounded-lg transition-colors"
+        className="w-full py-3 bg-[#DC1A2C] hover:bg-[#A8121F] disabled:opacity-60 text-white font-semibold rounded-lg transition-colors"
       >
-        {loading ? 'Updating…' : 'Set New Password'}
+        {loading ? 'Updatingâ€¦' : 'Set New Password'}
       </button>
     </form>
   )
@@ -107,17 +107,17 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 font-headline font-black text-2xl mb-6">
-            <span className="text-[#00A651]">Dhaka</span>
+            <span className="text-[#DC1A2C]">Dhaka</span>
             <span className="text-white">Chronicles</span>
           </Link>
           <h1 className="text-3xl font-bold text-white">Set new password</h1>
           <p className="text-gray-400 mt-2">Choose a strong password for your account.</p>
         </div>
-        <Suspense fallback={<div className="text-gray-400 text-center">Loading…</div>}>
+        <Suspense fallback={<div className="text-gray-400 text-center">Loadingâ€¦</div>}>
           <ResetForm />
         </Suspense>
         <p className="text-center text-sm text-gray-500 mt-6">
-          <Link href="/forgot-password" className="text-[#00A651] hover:underline">
+          <Link href="/forgot-password" className="text-[#DC1A2C] hover:underline">
             Request a new link
           </Link>
         </p>
@@ -125,3 +125,4 @@ export default function ResetPasswordPage() {
     </main>
   )
 }
+

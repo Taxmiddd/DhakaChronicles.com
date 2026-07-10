@@ -43,7 +43,7 @@ interface ViewsChartPoint {
   views: number
 }
 
-const COLORS = ['#00A651', '#F42A41', '#F59E0B', '#8B5CF6', '#06B6D4']
+const COLORS = ['#DC1A2C', '#F42A41', '#F59E0B', '#8B5CF6', '#06B6D4']
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? ''
 
@@ -310,9 +310,9 @@ export default function AnalyticsPage() {
                 <Line
                   type="monotone"
                   dataKey="views"
-                  stroke="#00A651"
+                  stroke="#DC1A2C"
                   strokeWidth={2}
-                  dot={{ fill: '#00A651', r: 4 }}
+                  dot={{ fill: '#DC1A2C', r: 4 }}
                   activeDot={{ r: 6 }}
                 />
               </LineChart>

@@ -31,7 +31,7 @@ import {
 type AdPosition =
   | 'homepage_banner' | 'article_sidebar' | 'article_inline' | 'category_banner'
   | 'feed_native' | 'sticky_mobile' | 'before_footer' | 'widget_mid' | 'widget_right'
-  | 'mobile_square_1' | 'mobile_square_2'
+  | 'mobile_square_1' | 'mobile_square_2' | 'sidebar_sticky' | 'homepage_mid'
 type AdSize = 'banner' | 'bite-sized' | 'sidebar-tall' | 'native' | 'auto' | 'square-1000' | 'square-300' | 'custom'
 
 interface Ad {
@@ -62,6 +62,8 @@ const POSITIONS: { value: AdPosition; label: string }[] = [
   { value: 'before_footer',    label: 'Before Footer'          },
   { value: 'mobile_square_1',  label: 'Mobile Square (Left)'  },
   { value: 'mobile_square_2',  label: 'Mobile Square (Right)' },
+  { value: 'sidebar_sticky',   label: 'Sidebar Sticky'        },
+  { value: 'homepage_mid',     label: 'Homepage Mid'          },
 ]
 
 const SIZES: { value: AdSize; label: string; note: string }[] = [
@@ -76,7 +78,7 @@ const SIZES: { value: AdSize; label: string; note: string }[] = [
 ]
 
 const POSITION_COLOR: Record<AdPosition, string> = {
-  homepage_banner:  '#00A651',
+  homepage_banner:  '#DC1A2C',
   widget_mid:       '#10B981',
   widget_right:     '#34D399',
   article_sidebar:  '#06B6D4',
@@ -87,6 +89,8 @@ const POSITION_COLOR: Record<AdPosition, string> = {
   before_footer:    '#0EA5E9',
   mobile_square_1:  '#F97316',
   mobile_square_2:  '#FB923C',
+  sidebar_sticky:   '#8B5CF6',
+  homepage_mid:     '#10B981',
 }
 
 const EMPTY: Omit<Ad, 'id' | 'created_at' | 'click_count' | 'impression_count'> = {

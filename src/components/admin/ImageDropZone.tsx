@@ -78,12 +78,12 @@ export function ImageDropZone({ value, onChange }: Props) {
         onDrop={onDrop}
         className={`relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed cursor-pointer transition-all min-h-[120px] ${
           isDragging
-            ? 'border-[#00A651] bg-[#00A651]/10'
+            ? 'border-[#DC1A2C] bg-[#DC1A2C]/10'
             : 'border-white/15 hover:border-white/30 bg-black/20'
         }`}
       >
         {isUploading ? (
-          <Loader2 className="w-7 h-7 animate-spin text-[#00A651]" />
+          <Loader2 className="w-7 h-7 animate-spin text-[#DC1A2C]" />
         ) : value ? (
           <img
             src={value}
@@ -94,7 +94,7 @@ export function ImageDropZone({ value, onChange }: Props) {
           <>
             <Upload className="w-7 h-7 text-gray-500" />
             <p className="text-xs text-gray-500 text-center px-4">
-              Drop an image here or <span className="text-[#00A651] font-semibold">click to browse</span>
+              Drop an image here or <span className="text-[#DC1A2C] font-semibold">click to browse</span>
               <br />
               <span className="text-gray-600">Any format → auto-converted to WebP</span>
             </p>

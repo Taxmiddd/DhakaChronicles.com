@@ -21,7 +21,7 @@ export default async function ArticleOGImage({ params }: Props) {
   const title = article?.title ?? 'Dhaka Chronicles'
   const category = (article?.category as unknown as { name: string; color: string | null } | null)
   const author = (article?.author as unknown as { full_name: string | null } | null)
-  const catColor = category?.color ?? '#00A651'
+  const catColor = category?.color ?? '#DC1A2C'
   const pubDate = article?.published_at
     ? new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : ''
@@ -164,7 +164,7 @@ export default async function ArticleOGImage({ params }: Props) {
               style={{
                 marginLeft: 'auto',
                 fontSize: 15,
-                color: '#00A651',
+                color: '#DC1A2C',
                 fontWeight: 700,
               }}
             >

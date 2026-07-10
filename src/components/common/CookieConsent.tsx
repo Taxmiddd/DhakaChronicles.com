@@ -3,26 +3,45 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    googlefc?: { getConsentedProviderIds?: () => string[] }
+    dataLayer?: unknown[]
+    gtag?: (...args: unknown[]) => void
+  }
+}
+
+function updateConsent(granted: boolean) {
+  if (typeof window === 'undefined' || typeof window.gtag !== 'function') return
+  const state = granted ? 'granted' : 'denied'
+  window.gtag('consent', 'update', {
+    analytics_storage: state,
+    ad_storage: state,
+    ad_user_data: state,
+    ad_personalization: state,
+  })
+}
+
 export default function CookieConsent() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
+    // Google's CMP (Funding Choices) manages EEA/UK/CH — skip our banner for those users
+    if (window.googlefc) return
     const consent = localStorage.getItem('dc_cookie_consent')
     if (!consent) setVisible(true)
   }, [])
 
   function accept() {
     localStorage.setItem('dc_cookie_consent', 'accepted')
+    updateConsent(true)
     setVisible(false)
   }
 
   function decline() {
     localStorage.setItem('dc_cookie_consent', 'declined')
-    // Disable GA if declined
-    if (typeof window !== 'undefined') {
-      // @ts-expect-error GA disable flag
-      window[`ga-disable-${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`] = true
-    }
+    updateConsent(false)
     setVisible(false)
   }
 
@@ -40,11 +59,11 @@ export default function CookieConsent() {
             <span className="font-semibold text-white">We use cookies</span> to improve your experience,
             analyse traffic, and personalise content. By clicking{' '}
             <strong className="text-white">&ldquo;Accept&rdquo;</strong> you consent to our use of cookies.{' '}
-            <Link href="/cookies" className="underline text-[#00A651] hover:text-[#00c462] transition-colors">
+            <Link href="/cookies" className="underline text-[#DC1A2C] hover:text-[#A8121F] transition-colors">
               Cookie Policy
             </Link>{' '}
             &middot;{' '}
-            <Link href="/privacy" className="underline text-[#00A651] hover:text-[#00c462] transition-colors">
+            <Link href="/privacy" className="underline text-[#DC1A2C] hover:text-[#A8121F] transition-colors">
               Privacy Policy
             </Link>
           </p>
@@ -60,7 +79,7 @@ export default function CookieConsent() {
           <button
             id="cookie-accept-btn"
             onClick={accept}
-            className="text-sm px-5 py-2 rounded bg-[#00A651] hover:bg-[#009040] text-white font-semibold transition-colors"
+            className="text-sm px-5 py-2 rounded bg-[#DC1A2C] hover:bg-[#A8121F] text-white font-semibold transition-colors"
           >
             Accept All
           </button>

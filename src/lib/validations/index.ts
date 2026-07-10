@@ -70,7 +70,7 @@ export const CategorySchema = z.object({
   description: z.string().optional(),
   description_bn: z.string().optional(),
   parent_id: z.string().uuid().optional().or(z.literal('')),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#00A651'),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#DC1A2C'),
   is_featured: z.boolean().default(false),
   display_order: z.number().int().default(0),
   meta_title: z.string().max(60).optional(),

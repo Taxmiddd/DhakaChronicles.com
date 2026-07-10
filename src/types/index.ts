@@ -229,6 +229,18 @@ export interface Comment {
   updated_at: string
 }
 
+// ---- Ads ----
+export interface PopupAd {
+  id: string
+  title: string
+  image_url: string
+  link_url?: string
+  is_active: boolean
+  display_frequency: 'always' | 'once_per_session' | 'once_per_day' | 'once_per_week'
+  created_at: string
+  updated_at: string
+}
+
 // ---- Newsletter Subscriber ----
 export interface NewsletterSubscriber {
   id: string

@@ -44,7 +44,7 @@ export default function NotFound() {
         <div
           className="inline-block font-headline font-black text-[8rem] sm:text-[12rem] leading-none select-none"
           style={{
-            background: 'linear-gradient(135deg, var(--dc-green) 0%, #007a3c 50%, rgba(0,166,81,0.2) 100%)',
+            background: 'linear-gradient(135deg, var(--dc-green) 0%, #A8121F 50%, rgba(220,26,44,0.2) 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Clock, Eye, ChevronRight, BookOpen } from 'lucide-react'
+import { Clock, Eye, ChevronRight, BookOpen, Home, Hash, Star } from 'lucide-react'
 import CommentsSection from '@/components/article/CommentsSection'
 import ViewTracker from '@/components/article/ViewTracker'
 import ArticleReactions from '@/components/article/ArticleReactions'
@@ -10,9 +10,10 @@ import ShareButtons from '@/components/article/ShareButtons'
 import JsonLd from '@/components/seo/JsonLd'
 import LiveBlogFeed from '@/components/article/LiveBlogFeed'
 import AdBanner from '@/components/ui/AdBanner'
+import { NewsletterForm } from '@/components/layout/NewsletterForm'
 import { supabaseAdmin } from '@/lib/db/admin'
 import { renderTipTap } from '@/lib/utils/tiptap'
-import { timeAgo, formatViewCount, slugify } from '@/lib/utils'
+import { timeAgo, formatViewCount, slugify, getCategoryColor } from '@/lib/utils'
 
 export const revalidate = 60
 
@@ -50,15 +51,8 @@ async function getRelatedArticles(categoryId: string, excludeId: string) {
       .eq('category_id', categoryId)
       .neq('id', excludeId)
       .order('published_at', { ascending: false })
-      .limit(3)
-    return (data ?? []) as unknown as {
-      id: string
-      title: string
-      slug: string
-      featured_image_url: string | null
-      published_at: string | null
-      category: { name: string; slug: string; color: string | null } | null
-    }[]
+      .limit(4)
+    return (data ?? []) as any[]
   } catch { return [] }
 }
 
@@ -100,7 +94,7 @@ export default async function ArticlePage({ params }: Props) {
     : []
 
   const categoryName = (article as any).category?.name ?? 'News'
-  const catColor = (article as any).category?.color ?? '#00A651'
+  const catColor = getCategoryColor((article as any).category?.color)
   const author = (article as any).author
   const contentHtml = renderTipTap((article as any).content)
 
@@ -110,376 +104,203 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
       <JsonLd article={article as any} />
       <ViewTracker articleId={article.id} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-        {/* ── Article body ── */}
-        <article className="lg:col-span-2 min-w-0">
-
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-xs mb-5" style={{ color: 'var(--dc-text-muted)' }}>
-            <Link href="/" className="hover:text-dc-green transition-colors">Home</Link>
-            <ChevronRight className="w-3 h-3" />
+      <div className="flex flex-col lg:flex-row gap-8">
+        
+        {/* ── LEFT COLUMN: Minimized Navigation ── */}
+        <aside className="w-full lg:w-[80px] shrink-0 hidden lg:block">
+          <div className="sticky top-[88px] flex flex-col items-center gap-4">
+            <Link href="/" className="w-12 h-12 rounded-full bg-dc-surface border border-dc-border flex items-center justify-center text-dc-text-muted hover:text-dc-red hover:border-dc-red/50 transition-all shadow-sm" aria-label="Home">
+              <Home className="w-5 h-5" />
+            </Link>
+            <Link href="/news" className="w-12 h-12 rounded-full bg-dc-surface border border-dc-border flex items-center justify-center text-dc-text-muted hover:text-dc-red hover:border-dc-red/50 transition-all shadow-sm" aria-label="Latest Feed">
+              <Star className="w-5 h-5" />
+            </Link>
             {(article as any).category && (
-              <>
-                <Link
-                  href={`/category/${(article as any).category.slug}`}
-                  className="hover:text-dc-green transition-colors"
-                >
-                  {categoryName}
-                </Link>
-                <ChevronRight className="w-3 h-3" />
-              </>
-            )}
-            <span className="truncate max-w-[180px]" style={{ color: 'var(--dc-text)' }}>
-              {article.title}
-            </span>
-          </nav>
-
-          {/* Breaking badge */}
-          {(article as any).is_breaking && (
-            <span className="inline-block bg-dc-red text-white text-xs font-black uppercase tracking-widest px-2.5 py-0.5 rounded-sm mb-3">
-              Breaking
-            </span>
-          )}
-
-          {/* Category */}
-          <span className="text-xs font-bold uppercase tracking-widest block mb-2" style={{ color: catColor }}>
-            {categoryName}
-          </span>
-
-          {/* Title */}
-          <h1
-            className="font-headline font-black text-3xl sm:text-4xl leading-tight mb-4"
-            style={{ color: 'var(--dc-text)' }}
-          >
-            {article.title}
-          </h1>
-
-          {/* Excerpt */}
-          {article.excerpt && (
-            <p className="text-lg leading-relaxed mb-5" style={{ color: 'var(--dc-text-muted)' }}>
-              {article.excerpt}
-            </p>
-          )}
-
-          {/* Meta bar */}
-          <div
-            className="flex flex-wrap items-center gap-4 py-4 mb-6"
-            style={{ borderTop: '1px solid var(--dc-border)', borderBottom: '1px solid var(--dc-border)' }}
-          >
-            {/* Author */}
-            {author ? (
-              <Link
-                href={`/author/${slugify(author.full_name ?? '')}`}
-                className="flex items-center gap-3 group"
-              >
-                {author.avatar_url ? (
-                  <Image
-                    src={author.avatar_url}
-                    alt={author.full_name ?? 'Author'}
-                    width={40}
-                    height={40}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-sm shrink-0">
-                    {(author.full_name ?? 'DC').substring(0, 2).toUpperCase()}
-                  </div>
-                )}
-                <div>
-                  <p className="font-semibold text-sm group-hover:text-dc-green transition-colors" style={{ color: 'var(--dc-text)' }}>
-                    {author.full_name}
-                  </p>
-                  <p className="text-xs capitalize" style={{ color: 'var(--dc-text-muted)' }}>
-                    {authorTitle(author.role)}
-                  </p>
-                </div>
+              <Link href={`/category/${(article as any).category.slug}`} className="w-12 h-12 rounded-full bg-dc-surface border border-dc-border flex items-center justify-center text-dc-text-muted hover:border-dc-red/50 transition-all shadow-sm" aria-label={categoryName}>
+                <Hash className="w-5 h-5" style={{ color: catColor }} />
               </Link>
-            ) : (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-sm shrink-0">
-                  DC
-                </div>
-                <div>
-                  <p className="font-semibold text-sm" style={{ color: 'var(--dc-text)' }}>Dhaka Chronicles</p>
-                  <p className="text-xs" style={{ color: 'var(--dc-text-muted)' }}>Staff Reporter</p>
-                </div>
-              </div>
             )}
-
-            {/* Meta stats */}
-            <div className="flex flex-wrap items-center gap-3 ml-auto text-xs" style={{ color: 'var(--dc-text-muted)' }}>
-              {article.published_at && (
-                <span>{timeAgo(article.published_at)}</span>
-              )}
-              {(article as any).reading_time && (
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  {(article as any).reading_time} min read
-                </span>
-              )}
-              {(article as any).view_count > 0 && (
-                <span className="flex items-center gap-1">
-                  <Eye className="w-3.5 h-3.5" />
-                  {formatViewCount((article as any).view_count)}
-                </span>
-              )}
+            <div className="h-10 w-px bg-dc-border my-2" />
+            <div className="rotate-90 text-[10px] font-black uppercase tracking-widest text-dc-text-muted whitespace-nowrap mt-10">
+              Share Article
+            </div>
+            {/* Minimal Share block */}
+            <div className="flex flex-col gap-3 mt-10">
+               <ShareButtons slug={slug} title={article.title} />
             </div>
           </div>
+        </aside>
 
-          {/* Hero image */}
-          {(article as any).article_type === 'video' && article.featured_image_url ? (
-            <div className="w-full aspect-video rounded-xl overflow-hidden mb-8 bg-black">
-              <iframe
-                src={article.featured_image_url}
-                className="w-full h-full"
-                allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              />
+        {/* ── CENTER COLUMN: The Article ── */}
+        <main className="flex-1 min-w-0">
+          
+          <article className="bg-dc-surface rounded-3xl border border-dc-border overflow-hidden shadow-sm">
+            {/* Cinematic Hero Image */}
+            <div className="relative aspect-video w-full bg-dc-surface-2">
+              {article.featured_image_url ? (
+                <img src={article.featured_image_url} alt={article.title} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Image src="/dc-logo-black.svg" alt="Dhaka Chronicles" width={120} height={32} className="opacity-10 dark:invert" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+              
+              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10">
+                {(article as any).is_breaking && (
+                  <span className="inline-block bg-dc-red text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded mb-4">
+                    Breaking
+                  </span>
+                )}
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-white/90">
+                    {categoryName}
+                  </span>
+                </div>
+                <h1 className="font-headline font-black text-3xl sm:text-5xl lg:text-6xl text-white leading-[1.1] mb-4 drop-shadow-md">
+                  {article.title}
+                </h1>
+                {article.excerpt && (
+                  <p className="text-lg sm:text-xl text-gray-300 leading-snug max-w-3xl drop-shadow">
+                    {article.excerpt}
+                  </p>
+                )}
+              </div>
             </div>
-          ) : article.featured_image_url ? (
-            <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-8">
-              <Image
-                src={article.featured_image_url}
-                alt={article.title}
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
-              />
-            </div>
-          ) : null}
 
-          {/* Article content */}
-          {contentHtml ? (
-            <div
-              className="prose-dc mb-8"
-              dangerouslySetInnerHTML={{ __html: contentHtml }}
-            />
-          ) : (
-            <div className="py-8 mb-8 text-center rounded-xl" style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}>
-              <BookOpen className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--dc-text-muted)' }} />
-              <p style={{ color: 'var(--dc-text-muted)' }}>Article content not available.</p>
-            </div>
-          )}
-
-          {/* Live blog */}
-          {(article as any).article_type === 'live_blog' && (
-            <LiveBlogFeed articleId={article.id} />
-          )}
-
-          {/* ── Mobile: related stories horizontal scroll ── */}
-          {related.length > 0 && (
-            <div className="lg:hidden mt-8 -mx-4">
-              <h3
-                className="px-4 font-headline font-bold text-sm mb-3 uppercase tracking-wide"
-                style={{ color: 'var(--dc-text-muted)' }}
-              >
-                Related Stories
-              </h3>
-              <div className="flex gap-3 px-4 overflow-x-auto scrollbar-none pb-2">
-                {related.map(r => {
-                  const rColor = r.category?.color ?? '#00A651'
-                  return (
-                    <Link key={r.id} href={`/news/${r.slug}`} className="group shrink-0 w-[172px]">
-                      <div
-                        className="w-full h-[100px] rounded-xl overflow-hidden mb-2"
-                        style={{ background: `${rColor}15` }}
-                      >
-                        {r.featured_image_url && (
-                          <img
-                            src={r.featured_image_url}
-                            alt={r.title}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
+            <div className="p-6 sm:p-10">
+              
+              {/* Meta bar */}
+              <div className="flex flex-wrap items-center justify-between gap-4 pb-8 mb-8 border-b border-dc-border">
+                {author && (
+                  <Link href={`/author/${slugify(author.full_name ?? '')}`} className="flex items-center gap-3 group">
+                    {author.avatar_url ? (
+                      <img src={author.avatar_url} alt={author.full_name ?? 'Author'} className="w-12 h-12 rounded-full object-cover border border-dc-border" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-dc-red flex items-center justify-center font-black text-white text-sm shrink-0">
+                        {(author.full_name ?? 'DC').substring(0, 2).toUpperCase()}
                       </div>
-                      {r.category && (
-                        <span className="text-[10px] font-bold uppercase" style={{ color: rColor }}>
-                          {r.category.name}
-                        </span>
-                      )}
-                      <p
-                        className="text-xs font-semibold leading-tight mt-0.5 line-clamp-2 group-hover:text-dc-green transition-colors"
-                        style={{ color: 'var(--dc-text)' }}
-                      >
-                        {r.title}
+                    )}
+                    <div>
+                      <p className="font-bold text-sm text-dc-text group-hover:text-dc-red transition-colors">
+                        {author.full_name}
                       </p>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ── Mobile bite-sized ad strip ── */}
-          <div className="lg:hidden mt-4">
-            <AdBanner position="article_inline" variant="bite" className="w-full h-[50px]" />
-          </div>
-
-          {/* Share */}
-          <div className="pt-6 border-t" style={{ borderColor: 'var(--dc-border)' }}>
-            <ShareButtons slug={slug} title={article.title} />
-          </div>
-
-          {/* Reactions */}
-          <div className="mt-4">
-            <ArticleReactions articleId={article.id} />
-          </div>
-
-          {/* Author bio */}
-          {author && (
-            <div
-              className="mt-8 p-5 rounded-xl flex gap-4"
-              style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
-            >
-              <Link href={`/author/${slugify(author.full_name ?? '')}`} className="shrink-0">
-                {author.avatar_url ? (
-                  <Image
-                    src={author.avatar_url}
-                    alt={author.full_name ?? 'Author'}
-                    width={56}
-                    height={56}
-                    className="w-14 h-14 rounded-full object-cover hover:opacity-90 transition-opacity"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-dc-green flex items-center justify-center font-bold text-white text-lg">
-                    {(author.full_name ?? 'DC').substring(0, 2).toUpperCase()}
-                  </div>
+                      <p className="text-xs text-dc-text-muted capitalize">
+                        {authorTitle(author.role)}
+                      </p>
+                    </div>
+                  </Link>
                 )}
-              </Link>
-              <div className="min-w-0">
-                <Link
-                  href={`/author/${slugify(author.full_name ?? '')}`}
-                  className="font-bold hover:text-dc-green transition-colors"
-                  style={{ color: 'var(--dc-text)' }}
-                >
-                  {author.full_name}
-                </Link>
-                <p className="text-sm capitalize" style={{ color: 'var(--dc-text-muted)' }}>
-                  {authorTitle(author.role)}
-                </p>
-                {author.bio && (
-                  <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--dc-text-muted)' }}>
-                    {author.bio}
-                  </p>
-                )}
-                {(author.twitter_url || author.linkedin_url || author.facebook_url) && (
-                  <div className="flex gap-3 mt-3 text-xs font-semibold" style={{ color: 'var(--dc-text-muted)' }}>
-                    {author.twitter_url && (
-                      <a href={author.twitter_url} target="_blank" rel="noopener noreferrer" className="hover:text-dc-green transition-colors">
-                        Twitter / X
-                      </a>
-                    )}
-                    {author.linkedin_url && (
-                      <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-dc-green transition-colors">
-                        LinkedIn
-                      </a>
-                    )}
-                    {author.facebook_url && (
-                      <a href={author.facebook_url} target="_blank" rel="noopener noreferrer" className="hover:text-dc-green transition-colors">
-                        Facebook
-                      </a>
-                    )}
-                  </div>
-                )}
+                
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-semibold text-dc-text-muted">
+                  {article.published_at && (
+                    <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {timeAgo(article.published_at)}</span>
+                  )}
+                  {article.reading_time && (
+                    <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4" /> {article.reading_time}m read</span>
+                  )}
+                  <span className="flex items-center gap-1.5"><Eye className="w-4 h-4" /> {formatViewCount(article.view_count)} views</span>
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* Comments */}
-          <div className="mt-10">
-            <CommentsSection articleId={article.id} allowComments={(article as any).allow_comments ?? true} />
-          </div>
-        </article>
-
-        {/* ── Sidebar ── */}
-        <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
-
-          {/* Related stories */}
-          {related.length > 0 && (
-            <div
-              className="p-5 rounded-xl"
-              style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
-            >
-              <h3 className="font-headline font-bold text-base mb-4" style={{ color: 'var(--dc-text)' }}>
-                Related Stories
-              </h3>
-              <div className="space-y-4">
-                {related.map(r => {
-                  const rColor = r.category?.color ?? '#00A651'
-                  return (
-                    <Link key={r.id} href={`/news/${r.slug}`} className="group flex gap-3">
-                      <div className="w-20 h-16 rounded-lg overflow-hidden shrink-0" style={{ background: `${rColor}15` }}>
-                        {r.featured_image_url ? (
-                          <Image
-                            src={r.featured_image_url}
-                            alt={r.title}
-                            width={80}
-                            height={64}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : null}
-                      </div>
-                      <div className="min-w-0">
-                        {r.category && (
-                          <span className="text-xs font-bold uppercase" style={{ color: rColor }}>
-                            {r.category.name}
-                          </span>
-                        )}
-                        <p
-                          className="text-sm font-semibold leading-snug mt-0.5 line-clamp-2 group-hover:text-dc-green transition-colors"
-                          style={{ color: 'var(--dc-text)' }}
-                        >
-                          {r.title}
-                        </p>
-                        {r.published_at && (
-                          <p className="text-xs mt-1" style={{ color: 'var(--dc-text-muted)' }}>
-                            {timeAgo(r.published_at)}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Sidebar ad */}
-          <AdBanner position="article_sidebar" className="w-full h-[300px] sm:h-[600px]" />
-
-          {/* Newsletter */}
-          <div
-            className="p-5 rounded-xl"
-            style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
-          >
-            <h3 className="font-headline font-bold text-sm mb-1" style={{ color: 'var(--dc-text)' }}>
-              Morning Briefing
-            </h3>
-            <p className="text-sm mb-4" style={{ color: 'var(--dc-text-muted)' }}>
-              Top stories delivered at 7 AM daily.
-            </p>
-            <form action="/api/newsletter/subscribe" method="POST" className="space-y-2.5">
-              <input
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                required
-                className="form-input text-sm"
+              {/* Tiptap Content */}
+              <div className="prose prose-lg dark:prose-invert max-w-none 
+                prose-headings:font-headline prose-headings:font-black prose-headings:text-dc-text
+                prose-p:text-dc-text-muted prose-p:leading-relaxed
+                prose-a:text-dc-red prose-a:no-underline hover:prose-a:underline
+                prose-strong:text-dc-text
+                prose-blockquote:border-dc-red prose-blockquote:bg-dc-surface-2 prose-blockquote:px-5 prose-blockquote:py-2 prose-blockquote:rounded-r-lg prose-blockquote:not-italic
+                prose-img:rounded-xl prose-img:border prose-img:border-dc-border"
+                dangerouslySetInnerHTML={{ __html: contentHtml }}
               />
-              <button type="submit" className="btn-primary w-full py-2.5 text-sm">
-                Subscribe Free
-              </button>
-            </form>
-          </div>
 
-          {/* Inline ad below newsletter */}
-          <AdBanner position="article_inline" className="w-full h-[250px]" />
+              {(article as any).article_type === 'live' && (
+                <div className="mt-12">
+                  <LiveBlogFeed articleId={article.id} />
+                </div>
+              )}
+
+              <div className="lg:hidden mt-8 pt-8 border-t border-dc-border">
+                <ShareButtons slug={slug} title={article.title} />
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-dc-border">
+                <ArticleReactions articleId={article.id} />
+              </div>
+
+              {/* Author bio box */}
+              {author && author.bio && (
+                <div className="mt-10 p-6 rounded-2xl bg-dc-surface-2 border border-dc-border flex gap-5">
+                  <div className="shrink-0">
+                    <img src={author.avatar_url || '/dc-logo-black.svg'} alt={author.full_name ?? ''} className="w-16 h-16 rounded-full object-cover border border-dc-border" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-dc-text mb-1">{author.full_name}</h4>
+                    <p className="text-sm text-dc-text-muted leading-relaxed">{author.bio}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Comments */}
+              <div className="mt-12 pt-8 border-t border-dc-border">
+                <CommentsSection articleId={article.id} allowComments={(article as any).allow_comments ?? true} />
+              </div>
+
+            </div>
+          </article>
+        </main>
+
+        {/* ── RIGHT COLUMN: Context & Sidebar ── */}
+        <aside className="w-full lg:w-[320px] xl:w-[360px] shrink-0 space-y-6">
+          <div className="sticky top-[88px] space-y-6">
+            
+            {/* Newsletter */}
+            <div className="bg-[#141414] rounded-2xl p-6 shadow-sm border border-dc-border relative overflow-hidden">
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-dc-red/20 blur-[50px] pointer-events-none" />
+              <div className="relative z-10">
+                <h3 className="font-headline font-black text-white text-xl mb-2">Join the Elite</h3>
+                <p className="text-xs text-gray-400 mb-5">Bangladesh's most vital stories, delivered straight to you.</p>
+                <NewsletterForm variant="dark" />
+              </div>
+            </div>
+
+            {/* Related stories */}
+            {related.length > 0 && (
+              <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
+                <h3 className="font-headline font-black text-lg text-dc-text mb-6">
+                  Related Stories
+                </h3>
+                <div className="flex flex-col gap-5">
+                  {related.map(r => {
+                    const rColor = getCategoryColor(r.category?.color)
+                    return (
+                      <Link key={r.id} href={`/news/${r.slug}`} className="group flex gap-4 items-start">
+                        <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0 border border-dc-border relative bg-dc-surface-2">
+                          {r.featured_image_url && (
+                            <img src={r.featured_image_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          {r.category && (
+                            <span className="text-[10px] font-bold uppercase tracking-widest block mb-1" style={{ color: rColor }}>
+                              {r.category.name}
+                            </span>
+                          )}
+                          <h4 className="font-bold text-[13px] text-dc-text group-hover:text-dc-red transition-colors line-clamp-3 leading-snug">{r.title}</h4>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <AdBanner position="article_sidebar" className="w-full h-[600px] rounded-2xl overflow-hidden border border-dc-border" />
+          </div>
         </aside>
       </div>
     </div>

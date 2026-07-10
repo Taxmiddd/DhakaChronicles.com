@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
@@ -41,7 +41,7 @@ export default function LiveBlogFeed({ articleId }: { articleId: string }) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12 border-t border-dc-border mt-12">
-        <Loader2 className="w-8 h-8 animate-spin text-dc-green" />
+        <Loader2 className="w-8 h-8 animate-spin text-dc-red" />
       </div>
     )
   }
@@ -69,7 +69,7 @@ export default function LiveBlogFeed({ articleId }: { articleId: string }) {
               {/* Timeline dot */}
               <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-dc-surface bg-dc-surface-2 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow">
                 {update.is_pinned ? (
-                  <Pin className="w-4 h-4 text-dc-green" />
+                  <Pin className="w-4 h-4 text-dc-red" />
                 ) : (
                   <div className="w-2 h-2 rounded-full bg-dc-text-muted"></div>
                 )}
@@ -81,11 +81,11 @@ export default function LiveBlogFeed({ articleId }: { articleId: string }) {
                   <span className="text-xs font-mono text-dc-text-muted flex items-center gap-1">
                     <Clock className="w-3 h-3" /> {format(new Date(update.created_at), 'h:mm a')}
                   </span>
-                  {update.is_pinned && <span className="text-[10px] uppercase tracking-wider font-bold text-dc-green border border-dc-green/30 bg-dc-green/10 px-2 py-0.5 rounded">Pinned</span>}
+                  {update.is_pinned && <span className="text-[10px] uppercase tracking-wider font-bold text-dc-red border border-dc-red/30 bg-dc-red/10 px-2 py-0.5 rounded">Pinned</span>}
                 </div>
                 <p className="text-white whitespace-pre-wrap leading-relaxed">{textContent}</p>
                 {update.author?.full_name && (
-                  <p className="text-xs text-dc-text-muted mt-3 pt-3 border-t border-dc-border/50">— {update.author.full_name}</p>
+                  <p className="text-xs text-dc-text-muted mt-3 pt-3 border-t border-dc-border/50">â€” {update.author.full_name}</p>
                 )}
               </div>
             </div>
@@ -95,3 +95,4 @@ export default function LiveBlogFeed({ articleId }: { articleId: string }) {
     </div>
   )
 }
+

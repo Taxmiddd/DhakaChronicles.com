@@ -18,7 +18,7 @@ interface CalendarEvent {
 
 const TYPE_COLORS: Record<string, string> = {
   article_deadline: '#F42A41',
-  scheduled_publish: '#00A651',
+  scheduled_publish: '#DC1A2C',
   meeting: '#F59E0B',
   event_coverage: '#8B5CF6',
 }

@@ -76,7 +76,7 @@ const FALLBACK_SERVICES: PortfolioService[] = [
 ]
 
 const STATS = [
-  { icon: Users,      value: '500K+', label: 'Monthly Readers',    color: '#00A651', trend: '+12%' },
+  { icon: Users,      value: '500K+', label: 'Monthly Readers',    color: '#DC1A2C', trend: '+12%' },
   { icon: BarChart2,  value: '4:30',  label: 'Avg. Time on Site',  color: '#06B6D4', trend: '+8%' },
   { icon: TrendingUp, value: '12M+',  label: 'Annual Impressions', color: '#8B5CF6', trend: '+25%' },
   { icon: Award,      value: '40+',   label: 'Brand Partners',     color: '#F59E0B', trend: '+15%' },
@@ -157,14 +157,14 @@ export default async function PortfolioPage() {
         <div
           className="absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, #00A651 1px, transparent 0)',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, #DC1A2C 1px, transparent 0)',
             backgroundSize: '28px 28px',
           }}
         />
         {/* Glow */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
-          style={{ background: 'radial-gradient(circle, rgba(0,166,81,0.07) 0%, transparent 65%)' }}
+          style={{ background: 'radial-gradient(circle, rgba(220,26,44,0.07) 0%, transparent 65%)' }}
         />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 text-center">
@@ -177,7 +177,7 @@ export default async function PortfolioPage() {
 
           <span
             className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] px-3 py-1.5 rounded-full mb-5"
-            style={{ color: '#00A651', background: 'rgba(0,166,81,0.12)', border: '1px solid rgba(0,166,81,0.25)' }}
+            style={{ color: '#DC1A2C', background: 'rgba(220,26,44,0.12)', border: '1px solid rgba(220,26,44,0.25)' }}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-dc-green animate-pulse" />
             Partner With Us
@@ -215,7 +215,7 @@ export default async function PortfolioPage() {
       </section>
 
       {/* ── Stats bar ── */}
-      <div style={{ background: '#0a1410', borderBottom: '1px solid rgba(0,166,81,0.18)' }}>
+      <div style={{ background: '#0a1410', borderBottom: '1px solid rgba(220,26,44,0.18)' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {STATS.map(({ icon: Icon, value, label, color, trend }) => (
@@ -253,7 +253,7 @@ export default async function PortfolioPage() {
           <div className="text-center mb-12">
             <span
               className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] px-4 py-2 rounded-full mb-4"
-              style={{ color: '#00A651', background: 'rgba(0,166,81,0.08)', border: '1px solid rgba(0,166,81,0.15)' }}
+              style={{ color: '#DC1A2C', background: 'rgba(220,26,44,0.08)', border: '1px solid rgba(220,26,44,0.15)' }}
             >
               <Heart className="w-3 h-3" />
               Trusted By
@@ -385,7 +385,7 @@ export default async function PortfolioPage() {
           <div className="text-center mb-16">
             <span
               className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] px-4 py-2 rounded-full mb-4"
-              style={{ color: '#00A651', background: 'rgba(0,166,81,0.08)', border: '1px solid rgba(0,166,81,0.15)' }}
+              style={{ color: '#DC1A2C', background: 'rgba(220,26,44,0.08)', border: '1px solid rgba(220,26,44,0.15)' }}
             >
               <Target className="w-3 h-3" />
               What We Offer
@@ -402,7 +402,7 @@ export default async function PortfolioPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, i) => {
               const Icon = ICON_MAP[service.icon_name] ?? Layers
-              const accent = ['#00A651', '#06B6D4', '#8B5CF6', '#F59E0B', '#F42A41', '#EC4899'][i % 6]
+              const accent = ['#DC1A2C', '#06B6D4', '#8B5CF6', '#F59E0B', '#F42A41', '#EC4899'][i % 6]
               return (
                 <div
                   key={service.id}
@@ -456,12 +456,12 @@ export default async function PortfolioPage() {
       {/* ── CTA ── */}
       <section
         className="py-24 px-4 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #060d09 0%, #0d1a12 60%, #060d09 100%)', borderTop: '1px solid rgba(0,166,81,0.15)' }}
+        style={{ background: 'linear-gradient(135deg, #060d09 0%, #0d1a12 60%, #060d09 100%)', borderTop: '1px solid rgba(220,26,44,0.15)' }}
       >
         {/* Enhanced background effects */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(0,166,81,0.1) 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(220,26,44,0.1) 0%, transparent 70%)' }}
         />
         <div
           className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full animate-pulse"
@@ -481,7 +481,7 @@ export default async function PortfolioPage() {
           <div className="mb-8">
             <span
               className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] px-4 py-2 rounded-full mb-6 animate-pulse"
-              style={{ color: '#00A651', background: 'rgba(0,166,81,0.12)', border: '1px solid rgba(0,166,81,0.25)' }}
+              style={{ color: '#DC1A2C', background: 'rgba(220,26,44,0.12)', border: '1px solid rgba(220,26,44,0.25)' }}
             >
               <Sparkles className="w-3 h-3 animate-spin" />
               Let&apos;s Talk

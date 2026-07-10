@@ -102,13 +102,13 @@ export default function NewArticlePage() {
         <div className="flex bg-black/50 rounded-lg p-1 border border-white/10">
           <button
             onClick={() => setActiveTab('en')}
-            className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'en' ? 'bg-[#00A651] text-white' : 'text-gray-400 hover:text-white'}`}
+            className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'en' ? 'bg-[#DC1A2C] text-white' : 'text-gray-400 hover:text-white'}`}
           >
             English
           </button>
           <button
             onClick={() => setActiveTab('bn')}
-            className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'bn' ? 'bg-[#00A651] text-white' : 'text-gray-400 hover:text-white'}`}
+            className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'bn' ? 'bg-[#DC1A2C] text-white' : 'text-gray-400 hover:text-white'}`}
           >
             বাংলা
           </button>

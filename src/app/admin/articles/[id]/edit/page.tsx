@@ -244,13 +244,13 @@ export default function EditArticlePage({ params }: Props) {
           <div className="flex bg-black/50 rounded-lg p-1 border border-white/10">
             <button
               onClick={() => setActiveTab('en')}
-              className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'en' ? 'bg-[#00A651] text-white' : 'text-gray-400 hover:text-white'}`}
+              className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'en' ? 'bg-[#DC1A2C] text-white' : 'text-gray-400 hover:text-white'}`}
             >
               English
             </button>
             <button
               onClick={() => setActiveTab('bn')}
-              className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'bn' ? 'bg-[#00A651] text-white' : 'text-gray-400 hover:text-white'}`}
+              className={`px-4 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'bn' ? 'bg-[#DC1A2C] text-white' : 'text-gray-400 hover:text-white'}`}
             >
               বাংলা
             </button>
@@ -481,7 +481,7 @@ export default function EditArticlePage({ params }: Props) {
           <div className="glass p-5 rounded-xl space-y-4">
             <div className="flex items-center justify-between border-b border-dc-border pb-2">
               <h3 className="font-headline font-bold text-white">Version History</h3>
-              <button type="button" onClick={createVersionSnapshot} className="text-xs bg-[#00A651]/20 hover:bg-[#00A651]/40 text-[#00A651] px-2 py-1 rounded">
+              <button type="button" onClick={createVersionSnapshot} className="text-xs bg-[#DC1A2C]/20 hover:bg-[#DC1A2C]/40 text-[#DC1A2C] px-2 py-1 rounded">
                 Snapshot
               </button>
             </div>

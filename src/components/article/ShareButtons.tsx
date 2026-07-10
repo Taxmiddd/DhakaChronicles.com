@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Facebook, Twitter, Whatsapp } from '@/components/ui/BrandIcons'
 import { Link2 } from 'lucide-react'
@@ -27,7 +27,7 @@ export default function ShareButtons({ slug, title }: ShareButtonsProps) {
           href={href} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="p-2 rounded-lg bg-dc-surface-2 hover:bg-dc-green text-dc-text-muted hover:text-white transition-all"
+          className="p-2 rounded-lg bg-dc-surface-2 hover:bg-dc-red text-dc-text-muted hover:text-white transition-all"
           title={`Share on ${label}`}
         >
           <Icon className="w-4 h-4" />
@@ -46,3 +46,4 @@ export default function ShareButtons({ slug, title }: ShareButtonsProps) {
     </div>
   )
 }
+

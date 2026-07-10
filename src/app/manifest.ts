@@ -1,4 +1,4 @@
-import { MetadataRoute } from 'next'
+﻿import { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     display: 'standalone',
     background_color: '#050505',
-    theme_color: '#00A651',
+    theme_color: '#DC1A2C',
     orientation: 'portrait-primary',
     icons: [
       {
@@ -41,3 +41,4 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
   }
 }
+

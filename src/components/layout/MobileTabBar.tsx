@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -35,7 +35,7 @@ export function MobileTabBar() {
               key={href}
               href={href}
               className="flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors"
-              style={{ color: active ? 'var(--dc-green)' : 'var(--dc-text-muted)' }}
+              style={{ color: active ? 'var(--dc-red)' : 'var(--dc-text-muted)' }}
             >
               <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.5 : 1.75} />
               <span className="text-[9px] font-semibold tracking-wide">{label}</span>
@@ -56,3 +56,4 @@ export function MobileTabBar() {
     </nav>
   )
 }
+

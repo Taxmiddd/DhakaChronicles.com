@@ -14,11 +14,11 @@ interface Category {
 }
 
 const DEFAULT_COLORS = [
-  '#F42A41', '#00A651', '#F59E0B', '#8B5CF6',
+  '#F42A41', '#DC1A2C', '#F59E0B', '#8B5CF6',
   '#06B6D4', '#EC4899', '#10B981', '#3B82F6',
 ]
 
-const EMPTY_FORM = { name: '', slug: '', description: '', color: '#00A651' }
+const EMPTY_FORM = { name: '', slug: '', description: '', color: '#DC1A2C' }
 
 function slugify(str: string) {
   return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
@@ -62,7 +62,7 @@ export default function AdminCategoriesPage() {
       name: cat.name,
       slug: cat.slug,
       description: cat.description ?? '',
-      color: cat.color ?? '#00A651',
+      color: cat.color ?? '#DC1A2C',
     })
     setShowModal(true)
   }
@@ -144,9 +144,9 @@ export default function AdminCategoriesPage() {
                 <div className="flex items-center gap-3">
                   <div
                     className="w-10 h-10 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${cat.color ?? '#00A651'}20`, border: `1px solid ${cat.color ?? '#00A651'}40` }}
+                    style={{ backgroundColor: `${cat.color ?? '#DC1A2C'}20`, border: `1px solid ${cat.color ?? '#DC1A2C'}40` }}
                   >
-                    <Tag className="w-5 h-5" style={{ color: cat.color ?? '#00A651' }} />
+                    <Tag className="w-5 h-5" style={{ color: cat.color ?? '#DC1A2C' }} />
                   </div>
                   <div>
                     <h3 className="font-headline font-bold text-white">{cat.name}</h3>
@@ -181,7 +181,7 @@ export default function AdminCategoriesPage() {
                 <div className="h-1 flex-1 mx-3 rounded-full bg-dc-surface-2 overflow-hidden">
                   <div
                     className="h-full rounded-full"
-                    style={{ width: `${Math.min((cat.article_count ?? 0) / 2.5, 100)}%`, backgroundColor: cat.color ?? '#00A651' }}
+                    style={{ width: `${Math.min((cat.article_count ?? 0) / 2.5, 100)}%`, backgroundColor: cat.color ?? '#DC1A2C' }}
                   />
                 </div>
               </div>

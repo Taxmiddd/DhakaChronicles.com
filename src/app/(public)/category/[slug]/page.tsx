@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, TrendingUp, Filter, Hash, Star } from 'lucide-react'
 import { ArticleCard } from '@/components/article/ArticleCard'
+import { CityWidgets } from '@/components/widgets/CityWidgets'
 import AdBanner from '@/components/ui/AdBanner'
+import { NewsletterForm } from '@/components/layout/NewsletterForm'
 import { supabaseAdmin } from '@/lib/db/admin'
+import { getCategoryColor } from '@/lib/utils'
 
 export const revalidate = 120
 
@@ -44,14 +47,40 @@ async function getCategoryArticles(categoryId: string, page = 1, perPage = 12) {
   } catch { return { articles: [], total: 0 } }
 }
 
-async function getOtherCategories(currentSlug: string) {
+async function getCategories() {
   try {
     const { data } = await supabaseAdmin
       .from('categories')
-      .select('id, name, slug, color')
-      .neq('slug', currentSlug)
+      .select('id, name, slug, color, display_order')
       .order('display_order', { ascending: true })
-      .limit(8)
+      .limit(12)
+    if (!data || data.length === 0) return []
+    const ids = data.map(c => c.id)
+    const counts: Record<string, number> = {}
+    await Promise.all(
+      ids.map(async (catId) => {
+        const { count } = await supabaseAdmin
+          .from('articles')
+          .select('id', { count: 'exact', head: true })
+          .eq('category_id', catId)
+          .eq('status', 'published')
+        counts[catId] = count ?? 0
+      })
+    )
+    return data.map(c => ({ ...c, article_count: counts[c.id] ?? 0 }))
+  } catch { return [] }
+}
+
+async function getTrendingArticles(categoryId: string): Promise<any[]> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('articles')
+      .select(ARTICLE_SELECT)
+      .eq('status', 'published')
+      .eq('category_id', categoryId)
+      .is('deleted_at', null)
+      .order('view_count', { ascending: false })
+      .limit(6)
     return data ?? []
   } catch { return [] }
 }
@@ -59,10 +88,10 @@ async function getOtherCategories(currentSlug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const category = await getCategoryBySlug(slug)
-  if (!category) return { title: 'Category Not Found | Dhaka Chronicles' }
+  if (!category) return { title: 'Category Not Found' }
   return {
     title: `${category.name} News – Dhaka Chronicles`,
-    description: category.description ?? `Latest ${category.name} news from Bangladesh`,
+    description: category.description || `Latest ${category.name} news from Bangladesh`,
   }
 }
 
@@ -71,118 +100,127 @@ export default async function CategoryPage({ params }: Props) {
   const category = await getCategoryBySlug(slug)
   if (!category) notFound()
 
-  const [{ articles, total }, otherCats] = await Promise.all([
+  const [{ articles, total }, allCategories, trending] = await Promise.all([
     getCategoryArticles(category.id),
-    getOtherCategories(slug),
+    getCategories(),
+    getTrendingArticles(category.id),
   ])
 
-  const catColor = category.color ?? '#00A651'
+  const catColor = getCategoryColor(category.color)
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-
-      {/* Category header */}
-      <div className="mb-8 py-10 rounded-2xl px-6 text-center relative overflow-hidden" style={{ background: `${catColor}0D` }}>
-        <span
-          className="inline-block w-12 h-1 rounded-full mb-4"
-          style={{ background: catColor }}
-        />
-        <h1
-          className="font-headline font-black text-4xl sm:text-5xl mb-3"
-          style={{ color: 'var(--dc-text)' }}
-        >
-          {category.name}
-        </h1>
-        {category.description && (
-          <p className="text-base max-w-xl mx-auto" style={{ color: 'var(--dc-text-muted)' }}>
-            {category.description}
-          </p>
-        )}
-        <p className="mt-2 text-sm font-semibold" style={{ color: catColor }}>
-          {total} {total === 1 ? 'story' : 'stories'}
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Article list */}
-        <div className="lg:col-span-2">
-          {articles.length === 0 ? (
-            <div className="py-20 text-center rounded-xl" style={{ border: '1px dashed var(--dc-border)' }}>
-              <p className="font-headline text-lg mb-2" style={{ color: 'var(--dc-text)' }}>
-                No articles yet
-              </p>
-              <p className="text-sm" style={{ color: 'var(--dc-text-muted)' }}>
-                {category.name} stories will appear here once published.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {/* First article: grid card (larger) */}
-              <ArticleCard key={articles[0].id} variant="grid" {...(articles[0] as any)} />
-
-              {/* Rest: list cards with native ad injected after 3rd */}
-              <div className="divide-y" style={{ borderColor: 'var(--dc-border)' }}>
-                {articles.slice(1, 4).map(a => (
-                  <ArticleCard key={a.id} variant="list" {...(a as any)} />
-                ))}
-                {articles.length > 4 && (
-                  <AdBanner position="feed_native" variant="native" />
-                )}
-                {articles.slice(4).map(a => (
-                  <ArticleCard key={a.id} variant="list" {...(a as any)} />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar */}
-        <aside className="lg:sticky lg:top-24 lg:self-start space-y-6">
-          {/* Category banner ad */}
-          <AdBanner position="category_banner" className="w-full h-[250px]" />
-
-          <div className="glass p-5 rounded-xl">
-            <h3
-              className="font-headline font-bold text-base mb-4"
-              style={{ color: 'var(--dc-text)' }}
-            >
-              Other Sections
-            </h3>
-            <div className="space-y-1">
-              {(otherCats.length > 0
-                ? otherCats
-                : [
-                    { id: '1', name: 'Politics',   slug: 'politics',   color: '#F42A41' },
-                    { id: '2', name: 'Business',   slug: 'business',   color: '#00A651' },
-                    { id: '3', name: 'Sports',     slug: 'sports',     color: '#F59E0B' },
-                    { id: '4', name: 'Culture',    slug: 'culture',    color: '#8B5CF6' },
-                    { id: '5', name: 'Technology', slug: 'technology', color: '#06B6D4' },
-                  ].filter(c => c.slug !== slug)
-              ).map(c => (
-                <Link
-                  key={c.id ?? c.slug}
-                  href={`/category/${c.slug}`}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors group hover:bg-dc-surface-2"
-                >
-                  <div className="flex items-center gap-3">
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ background: c.color ?? '#00A651' }}
-                    />
-                    <span
-                      className="text-sm font-medium group-hover:text-dc-green transition-colors"
-                      style={{ color: 'var(--dc-text)' }}
-                    >
-                      {c.name}
-                    </span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-dc-text-muted group-hover:text-dc-green transition-colors" />
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <div className="flex flex-col lg:flex-row gap-8">
+        
+        {/* ── LEFT COLUMN: Navigation & Widgets ── */}
+        <aside className="w-full lg:w-[260px] shrink-0 space-y-6 hidden lg:block">
+          <div className="sticky top-[88px] space-y-6">
+            <div className="bg-dc-surface border border-dc-border rounded-2xl p-5 shadow-sm">
+              <h3 className="text-[11px] font-black uppercase tracking-widest text-dc-text-muted mb-4 flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5" /> Explore
+              </h3>
+              <nav className="flex flex-col gap-1.5">
+                <Link href="/" className="px-3 py-2 rounded-lg hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text font-semibold text-sm transition-colors group">
+                  <span className="flex items-center gap-2"><Star className="w-4 h-4 text-dc-text-muted group-hover:text-dc-text" /> For You</span>
                 </Link>
-              ))}
+                <Link href="/news" className="px-3 py-2 rounded-lg hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text font-semibold text-sm transition-colors group">
+                  <span className="flex items-center gap-2">Latest Feed</span>
+                </Link>
+                <div className="h-px bg-dc-border my-2" />
+                {allCategories.map(cat => {
+                  const isActive = cat.slug === category.slug
+                  return (
+                    <Link
+                      key={cat.slug}
+                      href={`/category/${cat.slug}`}
+                      className={`px-3 py-2 rounded-lg font-semibold text-sm transition-colors flex items-center justify-between group ${isActive ? 'bg-dc-surface-2 text-dc-text font-bold' : 'hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text'}`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Hash className="w-4 h-4" style={{ color: getCategoryColor(cat.color), opacity: isActive ? 1 : 0.5 }} /> 
+                        {cat.name}
+                      </span>
+                      <span className={`text-[10px] font-medium transition-opacity bg-dc-surface border border-dc-border px-1.5 py-0.5 rounded ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                        {cat.article_count}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </nav>
             </div>
+            <CityWidgets />
           </div>
         </aside>
+
+        {/* ── CENTER COLUMN: The Pulse Feed ── */}
+        <main className="flex-1 min-w-0">
+          <div className="mb-8 py-10 rounded-3xl px-6 text-center relative overflow-hidden border" style={{ background: `${catColor}10`, borderColor: `${catColor}30` }}>
+            <div className="absolute top-0 right-1/2 translate-x-1/2 w-64 h-64 opacity-20 blur-[100px] pointer-events-none" style={{ background: catColor }} />
+            <h1 className="font-headline font-black text-4xl sm:text-5xl mb-3 relative z-10" style={{ color: catColor }}>
+              {category.name}
+            </h1>
+            {category.description && (
+              <p className="text-base text-dc-text-muted relative z-10 max-w-2xl mx-auto">
+                {category.description}
+              </p>
+            )}
+            <p className="mt-2 text-xs font-bold tracking-widest uppercase relative z-10" style={{ color: catColor }}>
+              {total} Stories Total
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-5">
+            {articles.length === 0 ? (
+              <div className="py-20 text-center rounded-2xl border border-dashed border-dc-border">
+                <p className="font-headline text-lg mb-2 text-dc-text">No articles yet in {category.name}</p>
+              </div>
+            ) : (
+              articles.map((article, idx) => (
+                <div key={article.id}>
+                  {idx === 4 && <AdBanner position="feed_native" className="w-full h-[90px] mb-5 rounded-2xl border border-dc-border" />}
+                  <ArticleCard variant="list" {...article as any} className="bg-dc-surface border border-dc-border hover:border-dc-border/80 shadow-sm rounded-2xl p-4 sm:p-5 transition-all hover:shadow-md" />
+                </div>
+              ))
+            )}
+          </div>
+        </main>
+
+        {/* ── RIGHT COLUMN: Context & Sidebar ── */}
+        <aside className="w-full lg:w-[320px] xl:w-[360px] shrink-0 space-y-6">
+          <div className="sticky top-[88px] space-y-6">
+            <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 blur-[40px] pointer-events-none opacity-10" style={{ background: catColor }} />
+              <h3 className="font-headline font-black text-lg text-dc-text mb-6 flex items-center gap-2 relative z-10">
+                <TrendingUp className="w-5 h-5" style={{ color: catColor }} /> Top in {category.name}
+              </h3>
+              <div className="flex flex-col gap-5 relative z-10">
+                {trending.length > 0 ? (
+                  trending.map((a, i) => (
+                    <Link key={a.id} href={`/news/${a.slug}`} className="group flex gap-4 items-start">
+                      <span className="text-4xl font-black text-dc-border transition-colors leading-none -mt-1 w-6 text-center group-hover:text-dc-text" style={{ ':hover': { color: catColor } } as any}>{i + 1}</span>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-[13px] text-dc-text transition-colors line-clamp-3 leading-snug group-hover:opacity-80">{a.title}</h4>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-sm text-dc-text-muted">Not enough data yet.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-[#141414] rounded-2xl p-6 shadow-sm border border-dc-border relative overflow-hidden">
+              <div className="absolute -right-10 -top-10 w-40 h-40 bg-dc-red/20 blur-[50px] pointer-events-none" />
+              <div className="relative z-10">
+                <h3 className="font-headline font-black text-white text-xl mb-2">Stay Informed</h3>
+                <p className="text-xs text-gray-400 mb-5">Bangladesh's most vital stories, delivered straight to you.</p>
+                <NewsletterForm variant="dark" />
+              </div>
+            </div>
+
+            <AdBanner position="sidebar_sticky" className="w-full h-[600px] rounded-2xl overflow-hidden border border-dc-border" />
+          </div>
+        </aside>
+
       </div>
     </div>
   )

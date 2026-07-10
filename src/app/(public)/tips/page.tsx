@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -44,8 +44,8 @@ export default function SubmitTipPage() {
   if (success) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 text-center">
-        <div className="w-20 h-20 bg-dc-green/10 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-dc-green" />
+        <div className="w-20 h-20 bg-dc-red/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle className="w-10 h-10 text-dc-red" />
         </div>
         <h1 className="font-headline font-bold text-dc-text text-3xl mb-4">Tip Received</h1>
         <p className="text-dc-text-muted text-lg mb-8">
@@ -59,7 +59,7 @@ export default function SubmitTipPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12">
       <div className="mb-10 text-center">
-        <span className="text-xs font-bold uppercase tracking-widest text-dc-green">Newsroom</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-dc-red">Newsroom</span>
         <h1 className="font-headline font-black text-dc-text text-4xl mt-2 mb-4">Send a News Tip</h1>
         <p className="text-dc-text-muted text-lg">
           Do you have a story that needs to be told? Share your tip with the Dhaka Chronicles investigative team.
@@ -114,7 +114,7 @@ export default function SubmitTipPage() {
               id="anonymous"
               checked={isAnonymous}
               onChange={(e) => setIsAnonymous(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-[#00A651] cursor-pointer"
+              className="mt-0.5 w-4 h-4 accent-[#DC1A2C] cursor-pointer"
             />
             <span>
               <strong className="block text-dc-text text-sm font-semibold">Submit anonymously</strong>
@@ -154,3 +154,4 @@ export default function SubmitTipPage() {
     </div>
   )
 }
+

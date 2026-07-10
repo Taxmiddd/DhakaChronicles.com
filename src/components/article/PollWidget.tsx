@@ -94,8 +94,8 @@ export default function PollWidget({ pollId }: { pollId: string }) {
 
   return (
     <div className="my-10 bg-gradient-to-br from-[#0d0d0d] to-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-      <div className="bg-[#00A651]/10 px-6 py-4 border-b border-[#00A651]/20 flex items-center gap-3">
-        <BarChart2 className="w-5 h-5 text-[#00A651]" />
+      <div className="bg-[#DC1A2C]/10 px-6 py-4 border-b border-[#DC1A2C]/20 flex items-center gap-3">
+        <BarChart2 className="w-5 h-5 text-[#DC1A2C]" />
         <h3 className="font-bold font-headline text-white tracking-wide uppercase text-sm">Reader Poll</h3>
       </div>
       
@@ -116,7 +116,7 @@ export default function PollWidget({ pollId }: { pollId: string }) {
                 disabled={showResults || isSubmitting}
                 className={`w-full relative overflow-hidden rounded-xl border transition-all duration-300 text-left
                   ${showResults 
-                    ? isSelected ? 'border-[#00A651] bg-[#00A651]/5' : 'border-white/5 bg-white/5 opacity-80'
+                    ? isSelected ? 'border-[#DC1A2C] bg-[#DC1A2C]/5' : 'border-white/5 bg-white/5 opacity-80'
                     : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30 cursor-pointer'
                   }
                 `}
@@ -125,7 +125,7 @@ export default function PollWidget({ pollId }: { pollId: string }) {
                 {showResults && (
                   <div 
                     className={`absolute top-0 left-0 bottom-0 transition-all duration-1000 ease-out
-                      ${isSelected ? 'bg-[#00A651]/20' : 'bg-white/5'}
+                      ${isSelected ? 'bg-[#DC1A2C]/20' : 'bg-white/5'}
                     `}
                     style={{ width: `${percentage}%` }}
                   />
@@ -134,15 +134,15 @@ export default function PollWidget({ pollId }: { pollId: string }) {
                 <div className="relative z-10 flex justify-between items-center px-5 py-4">
                   <div className="flex items-center gap-3 pr-4">
                     {showResults && isSelected && (
-                      <CheckCircle2 className="w-5 h-5 text-[#00A651] shrink-0" />
+                      <CheckCircle2 className="w-5 h-5 text-[#DC1A2C] shrink-0" />
                     )}
-                    <span className={`font-medium ${showResults && isSelected ? 'text-[#00A651]' : 'text-gray-200'}`}>
+                    <span className={`font-medium ${showResults && isSelected ? 'text-[#DC1A2C]' : 'text-gray-200'}`}>
                       {opt.option_text}
                     </span>
                   </div>
                   
                   {showResults && (
-                    <span className={`font-bold tabular-nums ${isSelected ? 'text-[#00A651]' : 'text-gray-400'}`}>
+                    <span className={`font-bold tabular-nums ${isSelected ? 'text-[#DC1A2C]' : 'text-gray-400'}`}>
                       {percentage}%
                     </span>
                   )}

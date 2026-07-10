@@ -4,10 +4,12 @@ import { MobileNavProvider } from '@/components/layout/MobileNavContext'
 import { MobileTabBar } from '@/components/layout/MobileTabBar'
 import AdBanner from '@/components/ui/AdBanner'
 import BreakingNewsTicker from '@/components/ui/BreakingNewsTicker'
+import { PopupAdManager } from '@/components/ui/PopupAd'
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <MobileNavProvider>
+      <PopupAdManager />
       <div className="min-h-screen flex flex-col">
         <PublicHeader />
         <BreakingNewsTicker />

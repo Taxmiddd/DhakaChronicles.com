@@ -33,7 +33,7 @@ export default function SearchForm({ initialQuery }: { initialQuery: string }) {
         }}
         onFocus={e => {
           e.currentTarget.style.borderColor = 'var(--dc-green)'
-          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,166,81,0.1)'
+          e.currentTarget.style.boxShadow = '0 0 0 3px rgba(220,26,44,0.1)'
         }}
         onBlur={e => {
           e.currentTarget.style.borderColor = 'var(--dc-border)'

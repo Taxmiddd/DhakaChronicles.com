@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Search as SearchIcon, Clock } from 'lucide-react'
 import { supabaseAdmin } from '@/lib/db/admin'
@@ -6,7 +6,7 @@ import { timeAgo } from '@/lib/utils'
 import SearchForm from './SearchForm'
 
 export const metadata: Metadata = {
-  title: 'Search – Dhaka Chronicles',
+  title: 'Search â€“ Dhaka Chronicles',
   description: 'Search for news, articles, and topics from Dhaka Chronicles.',
 }
 
@@ -80,7 +80,7 @@ export default async function SearchPage({ searchParams }: Props) {
               style={{ border: '1px solid var(--dc-border)' }}
             >
               {results.map((article, i) => {
-                const catColor = article.category?.color ?? '#00A651'
+                const catColor = article.category?.color ?? '#DC1A2C'
                 return (
                   <Link
                     key={article.id}
@@ -100,7 +100,7 @@ export default async function SearchPage({ searchParams }: Props) {
                       </span>
                     )}
                     <h2
-                      className="font-headline font-bold text-lg leading-snug mt-1 mb-2 group-hover:text-dc-green transition-colors"
+                      className="font-headline font-bold text-lg leading-snug mt-1 mb-2 group-hover:text-dc-red transition-colors"
                       style={{ color: 'var(--dc-text)' }}
                     >
                       {article.title}
@@ -149,7 +149,7 @@ export default async function SearchPage({ searchParams }: Props) {
               <Link
                 key={topic}
                 href={`/search?q=${encodeURIComponent(topic)}`}
-                className="px-4 py-2 rounded-full text-sm font-medium transition-colors hover:text-dc-green hover:border-dc-green"
+                className="px-4 py-2 rounded-full text-sm font-medium transition-colors hover:text-dc-red hover:border-dc-red"
                 style={{
                   border: '1px solid var(--dc-border)',
                   background: 'var(--dc-surface)',
@@ -165,3 +165,4 @@ export default async function SearchPage({ searchParams }: Props) {
     </div>
   )
 }
+

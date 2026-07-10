@@ -87,7 +87,7 @@ export default function AboutPage() {
             style={{ background: 'var(--dc-surface)', border: '1px solid var(--dc-border)' }}
           >
             <div className="absolute top-0 right-0 w-32 h-32 opacity-[0.04]"
-              style={{ background: 'radial-gradient(circle, #00A651, transparent 70%)' }} />
+              style={{ background: 'radial-gradient(circle, #DC1A2C, transparent 70%)' }} />
             <p className="text-base leading-relaxed mb-4" style={{ color: 'var(--dc-text)' }}>
               Dhaka Chronicles was established on <strong>17 July 2024</strong> with a single conviction:
               Bangladesh deserves a news platform that is fast, bilingual, and fearlessly independent.

@@ -56,7 +56,7 @@ const FALLBACK_OPENINGS: JobOpening[] = [
     location: 'Dhaka, Bangladesh',
     department: 'Editorial',
     description: 'Edit and publish Bangla-language content across all sections. A deep command of written Bangla and rigorous news style is a must.',
-    color: '#00A651',
+    color: '#DC1A2C',
   },
   {
     id: '4',
@@ -130,12 +130,12 @@ export default async function CareersPage() {
         {/* Decorative green glow */}
         <div
           className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(0,166,81,0.08) 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, rgba(220,26,44,0.08) 0%, transparent 70%)' }}
         />
         <div className="max-w-3xl mx-auto px-4 sm:px-6 relative">
           <span
             className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.25em] px-3 py-1.5 rounded-full mb-5"
-            style={{ color: '#00A651', background: 'rgba(0,166,81,0.1)', border: '1px solid rgba(0,166,81,0.2)' }}
+            style={{ color: '#DC1A2C', background: 'rgba(220,26,44,0.1)', border: '1px solid rgba(220,26,44,0.2)' }}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-dc-green animate-pulse" />
             We&apos;re Hiring
@@ -172,7 +172,7 @@ export default async function CareersPage() {
                 >
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                    style={{ background: 'rgba(0,166,81,0.1)' }}
+                    style={{ background: 'rgba(220,26,44,0.1)' }}
                   >
                     <Icon className="w-5 h-5 text-dc-green" />
                   </div>
@@ -196,7 +196,7 @@ export default async function CareersPage() {
             </h2>
             <span
               className="text-xs font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(0,166,81,0.12)', color: '#00A651' }}
+              style={{ background: 'rgba(220,26,44,0.12)', color: '#DC1A2C' }}
             >
               {openings.length} open
             </span>
@@ -280,12 +280,12 @@ export default async function CareersPage() {
           className="rounded-2xl p-10 text-center relative overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, #0d1a12, #0a0a0a)',
-            border: '1px solid rgba(0,166,81,0.2)',
+            border: '1px solid rgba(220,26,44,0.2)',
           }}
         >
           <div
             className="absolute inset-0 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(0,166,81,0.12) 0%, transparent 70%)' }}
+            style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(220,26,44,0.12) 0%, transparent 70%)' }}
           />
           <div className="relative">
             <h2 className="font-headline font-bold text-2xl text-white mb-3">

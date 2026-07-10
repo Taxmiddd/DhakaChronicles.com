@@ -1,5 +1,4 @@
 import { NewsArticle, WithContext } from 'schema-dts'
-import Script from 'next/script'
 import { slugify } from '@/lib/utils'
 
 interface JsonLdProps {
@@ -76,16 +75,14 @@ export default function JsonLd({ article }: JsonLdProps) {
 
   return (
     <>
-      <Script
+      <script
         id={`news-article-jsonld-${article.slug}`}
         type="application/ld+json"
-        strategy="beforeInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(newsArticle) }}
       />
-      <Script
+      <script
         id={`breadcrumb-jsonld-${article.slug}`}
         type="application/ld+json"
-        strategy="beforeInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
     </>

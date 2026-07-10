@@ -15,6 +15,8 @@ export type AdPosition =
   | 'widget_right'
   | 'mobile_square_1'
   | 'mobile_square_2'
+  | 'sidebar_sticky'
+  | 'homepage_mid'
 
 export type AdVariant = 'banner' | 'native' | 'bite' | 'sticky'
 
@@ -51,7 +53,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
 
   if (ad === undefined || ad === null || dismissed) return null
 
-  // ── Fill mode: image stretches to fill parent (used in widget slots) ─────
+  // â”€â”€ Fill mode: image stretches to fill parent (used in widget slots) â”€â”€â”€â”€â”€
   if (forceFill) {
     return (
       <a
@@ -80,7 +82,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     )
   }
 
-  // ── Sticky bottom bar (mobile only, dismissible) ──────────────────────────
+  // â”€â”€ Sticky bottom bar (mobile only, dismissible) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (variant === 'sticky') {
     return (
       <div
@@ -115,7 +117,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
             <div className="min-w-0">
               <span
                 className="block text-[9px] font-bold uppercase tracking-widest mb-0.5"
-                style={{ color: 'var(--dc-green)' }}
+                style={{ color: 'var(--dc-red)' }}
               >
                 Sponsored
               </span>
@@ -133,7 +135,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
             rel="noopener noreferrer sponsored"
             onClick={trackClick}
             className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-white whitespace-nowrap"
-            style={{ background: 'var(--dc-green)' }}
+            style={{ background: 'var(--dc-red)' }}
           >
             Learn More
           </a>
@@ -143,14 +145,14 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
             style={{ color: 'var(--dc-text-muted)' }}
             aria-label="Close ad"
           >
-            ×
+            Ã—
           </button>
         </div>
       </div>
     )
   }
 
-  // ── Native card — blends seamlessly into article feed ────────────────────
+  // â”€â”€ Native card â€” blends seamlessly into article feed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (variant === 'native') {
     return (
       <a
@@ -179,10 +181,10 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
             className="text-[9px] font-bold uppercase tracking-widest block mb-1"
             style={{ color: 'var(--dc-text-muted)' }}
           >
-            Sponsored · {ad.client_name}
+            Sponsored Â· {ad.client_name}
           </span>
           <p
-            className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-dc-green transition-colors"
+            className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-dc-red transition-colors"
             style={{ color: 'var(--dc-text)' }}
           >
             {ad.title}
@@ -192,7 +194,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     )
   }
 
-  // ── Bite-sized compact strip ─────────────────────────────────────────────
+  // â”€â”€ Bite-sized compact strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (variant === 'bite') {
     return (
       <a
@@ -218,7 +220,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
           />
         </div>
         <span
-          className="text-xs font-semibold truncate flex-1 group-hover:text-dc-green transition-colors"
+          className="text-xs font-semibold truncate flex-1 group-hover:text-dc-red transition-colors"
           style={{ color: 'var(--dc-text)' }}
         >
           {ad.title}
@@ -233,7 +235,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     )
   }
 
-  // ── Square 300×300 ──────────────────────────────────────────────────────
+  // â”€â”€ Square 300Ã—300 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (ad.size === 'square-300') {
     return (
       <a
@@ -263,7 +265,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     )
   }
 
-  // ── Custom dimensions (stored as custom-WxH) ─────────────────────────────
+  // â”€â”€ Custom dimensions (stored as custom-WxH) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (ad.size?.startsWith('custom-')) {
     const [w, h] = ad.size.replace('custom-', '').split('x').map(Number)
     if (w && h) {
@@ -296,7 +298,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     }
   }
 
-  // ── Square 1000×1000 ────────────────────────────────────────────────────
+  // â”€â”€ Square 1000Ã—1000 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (ad.size === 'square-1000') {
     return (
       <a
@@ -326,7 +328,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     )
   }
 
-  // ── Auto: natural image dimensions, no fixed height ─────────────────────
+  // â”€â”€ Auto: natural image dimensions, no fixed height â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (ad.size === 'auto') {
     return (
       <a
@@ -356,7 +358,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     )
   }
 
-  // ── Default: banner (full-width image) ───────────────────────────────────
+  // â”€â”€ Default: banner (full-width image) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <a
       href={ad.link_url}
@@ -383,3 +385,4 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
     </a>
   )
 }
+

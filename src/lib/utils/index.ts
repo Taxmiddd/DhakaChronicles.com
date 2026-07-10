@@ -77,7 +77,7 @@ export function slugify(text: string): string {
 /** Truncate text with ellipsis */
 export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text
-  return text.slice(0, maxLength).replace(/\s\S*$/, '') + '…'
+  return text.slice(0, maxLength).replace(/\s\S*$/, '') + 'â€¦'
 }
 
 /** Format view count (e.g., 1.2K, 3.4M) */
@@ -126,9 +126,14 @@ export function formatFileSize(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
 }
 
-/** Get category color with fallback */
-export function getCategoryColor(color?: string): string {
-  return color ?? '#00A651'
+/** Legacy green hex values stored in DB that should be remapped to brand crimson */
+const LEGACY_GREENS = new Set(['#00a651', '#007a3c', '#009040', '#00c462', '#00A651', '#007A3C'])
+
+/** Get category color with fallback — remaps legacy green DB values to brand red */
+export function getCategoryColor(color?: string | null): string {
+  if (!color) return '#DC1A2C'
+  if (LEGACY_GREENS.has(color) || LEGACY_GREENS.has(color.toLowerCase())) return '#DC1A2C'
+  return color
 }
 
 /** Debounce utility */
@@ -142,3 +147,4 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
     timer = setTimeout(() => fn(...args), delay)
   }
 }
+

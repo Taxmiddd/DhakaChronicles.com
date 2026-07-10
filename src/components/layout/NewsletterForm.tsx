@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
@@ -29,13 +29,13 @@ export function NewsletterForm({ variant = 'default' }: { variant?: 'default' | 
       }
     } catch {
       setStatus('error')
-      setMessage('Network error — please try again.')
+      setMessage('Network error â€” please try again.')
     }
   }
 
   if (status === 'success') {
     return (
-      <div className="flex items-center gap-3 text-dc-green py-2">
+      <div className="flex items-center gap-3 text-dc-red py-2">
         <CheckCircle2 className="w-5 h-5 shrink-0" />
         <p className="text-sm font-medium">{message}</p>
       </div>
@@ -43,7 +43,7 @@ export function NewsletterForm({ variant = 'default' }: { variant?: 'default' | 
   }
 
   const inputClass = variant === 'dark'
-    ? 'flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-dc-green focus:bg-white/15 transition-all min-w-0'
+    ? 'flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder:text-white/40 text-sm focus:outline-none focus:border-dc-red focus:bg-white/15 transition-all min-w-0'
     : 'form-input flex-1 text-sm min-w-0'
 
   return (
@@ -60,7 +60,7 @@ export function NewsletterForm({ variant = 'default' }: { variant?: 'default' | 
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="shrink-0 bg-dc-green hover:bg-dc-green-dark text-white rounded-lg px-4 py-2.5 transition-colors disabled:opacity-60 flex items-center gap-2 text-sm font-semibold"
+          className="shrink-0 bg-dc-red hover:bg-dc-red-dark text-white rounded-lg px-4 py-2.5 transition-colors disabled:opacity-60 flex items-center gap-2 text-sm font-semibold"
           aria-label="Subscribe"
         >
           {status === 'loading' ? (
@@ -76,3 +76,4 @@ export function NewsletterForm({ variant = 'default' }: { variant?: 'default' | 
     </form>
   )
 }
+

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Cloud, Sun, CloudRain, Loader2, Wind, MapPin, AlertTriangle } from 'lucide-react'
@@ -74,7 +74,7 @@ export default function WeatherWidget() {
 
   // AQI Level Color
   const getAQIColor = (aqi: number) => {
-    if (aqi <= 50) return 'text-dc-green'
+    if (aqi <= 50) return 'text-dc-red'
     if (aqi <= 100) return 'text-amber-400'
     if (aqi <= 150) return 'text-orange-500'
     if (aqi <= 200) return 'text-dc-red'
@@ -93,7 +93,7 @@ export default function WeatherWidget() {
   if (loading) {
     return (
       <div className="glass p-6 rounded-xl flex items-center justify-center h-32 border border-dc-border">
-        <Loader2 className="w-6 h-6 animate-spin text-dc-green" />
+        <Loader2 className="w-6 h-6 animate-spin text-dc-red" />
       </div>
     )
   }
@@ -105,7 +105,7 @@ export default function WeatherWidget() {
   return (
     <div className="glass p-6 rounded-xl border border-dc-border shadow-lg">
       <div className="flex items-center gap-2 mb-4">
-        <MapPin className="w-4 h-4 text-dc-green" />
+        <MapPin className="w-4 h-4 text-dc-red" />
         <h3 className="font-headline font-bold text-white uppercase tracking-wider text-sm">
           {data.locationName}
         </h3>
@@ -140,3 +140,4 @@ export default function WeatherWidget() {
     </div>
   )
 }
+

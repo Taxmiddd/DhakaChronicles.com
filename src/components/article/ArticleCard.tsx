@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Clock, Eye } from 'lucide-react'
-import { timeAgo, formatViewCount } from '@/lib/utils'
+import { timeAgo, formatViewCount, getCategoryColor } from '@/lib/utils'
 
 interface ArticleCardProps {
   id: string
@@ -27,13 +27,14 @@ interface ArticleCardProps {
 }
 
 const FALLBACK_COLORS: Record<string, string> = {
-  Politics: '#F42A41', Business: '#00A651', Sports: '#F59E0B',
+  Politics: '#F42A41', Business: '#6366F1', Sports: '#F59E0B',
   Culture: '#8B5CF6', Technology: '#06B6D4', Education: '#EC4899',
 }
 
 function getCatColor(cat?: { name: string; color?: string | null } | null) {
-  if (!cat) return '#00A651'
-  return cat.color || FALLBACK_COLORS[cat.name] || '#00A651'
+  if (!cat) return '#DC1A2C'
+  const raw = cat.color || FALLBACK_COLORS[cat.name] || '#DC1A2C'
+  return getCategoryColor(raw)
 }
 
 function CategoryBadge({ category }: { category: ArticleCardProps['category'] }) {
@@ -90,7 +91,7 @@ function HeroCard({ article }: { article: ArticleCardProps }) {
           )}
           <CategoryBadge category={article.category} />
         </div>
-        <h2 className="font-headline font-bold text-white text-2xl sm:text-3xl leading-tight mb-3 group-hover:text-dc-green transition-colors line-clamp-3">
+        <h2 className="font-headline font-bold text-white text-2xl sm:text-3xl leading-tight mb-3 group-hover:text-dc-red transition-colors line-clamp-3">
           {article.title}
         </h2>
         {article.excerpt && (
@@ -137,7 +138,7 @@ function FeaturedCard({ article }: { article: ArticleCardProps }) {
       <div className="flex-1 min-w-0 py-0.5">
         <CategoryBadge category={article.category} />
         <h3
-          className="font-headline font-bold text-sm leading-snug mt-1 line-clamp-2 transition-colors group-hover:text-dc-green"
+          className="font-headline font-bold text-sm leading-snug mt-1 line-clamp-2 transition-colors group-hover:text-dc-red"
           style={{ color: 'var(--dc-text)' }}
         >
           {article.title}
@@ -167,7 +168,7 @@ function ListCard({ article }: { article: ArticleCardProps }) {
       <div className="flex-1 min-w-0">
         <CategoryBadge category={article.category} />
         <h3
-          className="font-headline font-semibold text-base leading-snug mt-1 group-hover:text-dc-green transition-colors"
+          className="font-headline font-semibold text-base leading-snug mt-1 group-hover:text-dc-red transition-colors"
           style={{ color: 'var(--dc-text)' }}
         >
           {article.title}
@@ -224,7 +225,7 @@ function GridCard({ article }: { article: ArticleCardProps }) {
       <div className="p-4">
         <CategoryBadge category={article.category} />
         <h3
-          className="font-headline font-bold text-base leading-snug mt-1.5 line-clamp-2 group-hover:text-dc-green transition-colors"
+          className="font-headline font-bold text-base leading-snug mt-1.5 line-clamp-2 group-hover:text-dc-red transition-colors"
           style={{ color: 'var(--dc-text)' }}
         >
           {article.title}

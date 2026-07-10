@@ -7,7 +7,7 @@ const DHAKA_LAT = 23.8103
 const DHAKA_LON = 90.4125
 
 const AQI_LABELS: Record<number, { label: string; color: string }> = {
-  1: { label: 'Good',      color: '#00A651' },
+  1: { label: 'Good',      color: '#DC1A2C' },
   2: { label: 'Fair',      color: '#84cc16' },
   3: { label: 'Moderate',  color: '#F59E0B' },
   4: { label: 'Poor',      color: '#F97316' },
@@ -24,7 +24,7 @@ function parseCoord(value: string | null, min: number, max: number, fallback: nu
 }
 
 function trafficLevel(congestionPercent: number) {
-  if (congestionPercent <= 20) return { label: 'Light', color: '#00A651' }
+  if (congestionPercent <= 20) return { label: 'Light', color: '#DC1A2C' }
   if (congestionPercent <= 45) return { label: 'Moderate', color: '#F59E0B' }
   return { label: 'Heavy', color: '#F42A41' }
 }

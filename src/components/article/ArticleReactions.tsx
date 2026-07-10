@@ -104,14 +104,14 @@ export default function ArticleReactions({ articleId }: ArticleReactionsProps) {
               title={label}
               className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200 select-none
                 ${isActive
-                  ? 'border-[#00A651] bg-[#00A651]/15 text-[#00A651] scale-105 shadow-sm'
+                  ? 'border-[#DC1A2C] bg-[#DC1A2C]/15 text-[#DC1A2C] scale-105 shadow-sm'
                   : 'border-white/10 bg-transparent text-gray-400 hover:border-white/30 hover:text-white hover:bg-white/5'
                 }`}
             >
               <span className="text-lg leading-none">{emoji}</span>
               <span>{label}</span>
               {counts[type] > 0 && (
-                <span className={`text-xs ${isActive ? 'text-[#00A651]' : 'text-gray-500'}`}>
+                <span className={`text-xs ${isActive ? 'text-[#DC1A2C]' : 'text-gray-500'}`}>
                   {counts[type]}
                 </span>
               )}
