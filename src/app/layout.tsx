@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Inter, Lora } from 'next/font/google'
 import { Toaster } from 'sonner'
 import CookieConsent from '@/components/common/CookieConsent'
 import './globals.css'
@@ -10,8 +10,8 @@ const inter = Inter({
   display: 'swap',
 })
 
-const playfair = Playfair_Display({
-  variable: '--font-playfair',
+const lora = Lora({
+  variable: '--font-lora',
   subsets: ['latin'],
   display: 'swap',
 })
@@ -124,7 +124,7 @@ const isProduction = process.env.NODE_ENV === 'production'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${lora.variable}`} suppressHydrationWarning>
       <body className="min-h-dvh flex flex-col" style={{ background: 'var(--background)', color: 'var(--dc-text)' }}>
         {/* Google Tag Manager (noscript) */}
         <noscript>

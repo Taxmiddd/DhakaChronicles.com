@@ -56,7 +56,7 @@
   --color-dc-text-muted: var(--dc-text-muted);
   --color-dc-muted: var(--dc-muted);
   --font-sans: var(--font-inter);
-  --font-serif: var(--font-playfair);
+  --font-serif: var(--font-lora);
 }
 
 /* ── Base ── */
@@ -84,7 +84,7 @@ body {
 
 /* ── Typography ── */
 .font-headline {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-lora), Georgia, serif;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -96,14 +96,14 @@ body {
   font-size: 1.0625rem;
 }
 .prose-dc h2 {
-  font-family: var(--font-playfair), serif;
+  font-family: var(--font-lora), serif;
   font-size: 1.5rem;
   font-weight: 700;
   margin: 2rem 0 1rem;
   color: var(--dc-text);
 }
 .prose-dc h3 {
-  font-family: var(--font-playfair), serif;
+  font-family: var(--font-lora), serif;
   font-size: 1.25rem;
   font-weight: 600;
   margin: 1.5rem 0 0.75rem;
@@ -319,7 +319,7 @@ body {
 
 /* ── Section heading accent ── */
 .section-heading {
-  font-family: var(--font-playfair), serif;
+  font-family: var(--font-lora), serif;
   font-weight: 700;
   font-size: 1.125rem;
   color: var(--dc-text);
@@ -339,7 +339,7 @@ body {
 
 /* ── Bold editorial section title (Cablgram-inspired) ── */
 .section-title-bold {
-  font-family: var(--font-playfair), serif;
+  font-family: var(--font-lora), serif;
   font-weight: 800;
   font-size: 1.5rem;
   color: var(--dc-text);
