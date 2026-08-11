@@ -117,7 +117,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
             <div className="min-w-0">
               <span
                 className="block text-[9px] font-bold uppercase tracking-widest mb-0.5"
-                style={{ color: 'var(--dc-red)' }}
+                style={{ color: 'var(--dc-text)' }}
               >
                 Sponsored
               </span>
@@ -135,7 +135,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
             rel="noopener noreferrer sponsored"
             onClick={trackClick}
             className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold text-white whitespace-nowrap"
-            style={{ background: 'var(--dc-red)' }}
+            style={{ background: 'var(--dc-text)' }}
           >
             Learn More
           </a>
@@ -184,7 +184,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
             Sponsored Â· {ad.client_name}
           </span>
           <p
-            className="text-sm font-semibold leading-snug line-clamp-2 group-hover:text-dc-red transition-colors"
+            className="text-sm font-semibold leading-snug line-clamp-2 group-hover:opacity-75 transition-opacity"
             style={{ color: 'var(--dc-text)' }}
           >
             {ad.title}
@@ -220,7 +220,7 @@ export default function AdBanner({ position, variant = 'banner', className = 'w-
           />
         </div>
         <span
-          className="text-xs font-semibold truncate flex-1 group-hover:text-dc-red transition-colors"
+          className="text-xs font-semibold truncate flex-1 group-hover:opacity-75 transition-opacity"
           style={{ color: 'var(--dc-text)' }}
         >
           {ad.title}

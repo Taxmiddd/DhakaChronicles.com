@@ -18,10 +18,10 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Dhaka Chronicles',
-    default: 'Dhaka Chronicles — News from the Heart of Bangladesh',
+    template: '%s — Dhaka Chronicles',
+    default: 'Dhaka Chronicles',
   },
-  description: 'Your trusted bilingual source for breaking news, analysis, and stories from Dhaka and Bangladesh. আপনার বিশ্বস্ত দ্বিভাষিক সংবাদ উৎস।',
+  description: 'Your trusted source for breaking news, analysis, and stories from Dhaka and Bangladesh.',
   keywords: [
     'Bangladesh news', 'Dhaka news', 'Bangladesh breaking news',
     'Dhaka Chronicles', 'বাংলাদেশ সংবাদ', 'ঢাকা ক্রনিকেলস',

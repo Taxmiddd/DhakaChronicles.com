@@ -6,7 +6,7 @@ import { supabaseAdmin } from '@/lib/db/admin'
 import AdBanner from '@/components/ui/AdBanner'
 
 export const metadata: Metadata = {
-  title: 'Dhaka Chronicles – The Pulse of Bangladesh',
+  title: 'Dhaka Chronicles',
   description: 'Breaking news, in-depth analysis, and stories shaping Bangladesh.',
 }
 

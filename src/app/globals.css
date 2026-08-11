@@ -70,7 +70,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100dvh;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 ::selection {
@@ -111,14 +110,14 @@ body {
   color: var(--dc-text);
 }
 .prose-dc p  { margin: 0 0 1.25rem; }
-.prose-dc a  { color: var(--dc-red); text-decoration: underline; text-underline-offset: 3px; }
-.prose-dc a:hover { color: var(--dc-red-dark); }
+.prose-dc a  { color: var(--dc-text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--dc-border); }
+.prose-dc a:hover { text-decoration-color: var(--dc-text); }
 .prose-dc blockquote {
-  border-left: 3px solid var(--dc-red);
+  border-left: 2px solid var(--dc-text);
   padding-left: 1.25rem;
   color: var(--dc-text-muted);
   font-style: italic;
-  margin: 1.5rem 0;
+  margin: 1.75rem 0;
 }
 .prose-dc ul, .prose-dc ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
 .prose-dc li { margin-bottom: 0.4rem; }
@@ -298,8 +297,8 @@ body {
   color: var(--dc-text-dark);
 }
 .admin-sidebar-link.active {
-  background: rgba(220,26,44,0.15);
-  color: var(--dc-red);
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
 }
 
 /* ── Table ── */
