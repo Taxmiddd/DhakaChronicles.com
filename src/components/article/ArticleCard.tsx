@@ -42,7 +42,7 @@ function CategoryBadge({ category }: { category: ArticleCardProps['category'] })
   const color = getCatColor(category)
   return (
     <span
-      className="text-xs font-bold uppercase tracking-widest"
+      className="text-[10px] font-bold uppercase tracking-widest"
       style={{ color }}
     >
       {category.name}
@@ -208,9 +208,9 @@ function GridCard({ article }: { article: ArticleCardProps }) {
   return (
     <Link
       href={`/news/${article.slug}`}
-      className="group article-card block overflow-hidden hover:no-underline"
+      className="group article-card block overflow-hidden hover:no-underline rounded-none border-0 shadow-none"
     >
-      <div className="aspect-[4/3] overflow-hidden" style={{ background: `${getCatColor(article.category)}15` }}>
+      <div className="aspect-[3/2] overflow-hidden" style={{ background: `${getCatColor(article.category)}15` }}>
         {article.featured_image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -225,22 +225,22 @@ function GridCard({ article }: { article: ArticleCardProps }) {
       <div className="p-4">
         <CategoryBadge category={article.category} />
         <h3
-          className="font-headline font-bold text-base leading-snug mt-1.5 line-clamp-2 group-hover:text-dc-red transition-colors"
+          className="font-headline font-bold text-xl leading-snug mt-1.5 line-clamp-3 group-hover:text-dc-red transition-colors"
           style={{ color: 'var(--dc-text)' }}
         >
           {article.title}
         </h3>
         {article.excerpt && (
-          <p className="text-sm line-clamp-2 mt-1.5" style={{ color: 'var(--dc-text-muted)' }}>
+          <p className="text-sm line-clamp-2 mt-2" style={{ color: 'var(--dc-text-muted)' }}>
             {article.excerpt}
           </p>
         )}
-        <div className="flex items-center gap-2 mt-3 text-xs" style={{ color: 'var(--dc-text-muted)' }}>
-          {article.published_at && <span>{timeAgo(article.published_at)}</span>}
-          {article.reading_time && (
+        <div className="flex items-center gap-3 mt-4 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'var(--dc-text-muted)' }}>
+          {article.published_at && <span>{new Date(article.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
+          {article.author?.full_name && (
             <>
               <span>·</span>
-              <span>{article.reading_time} min read</span>
+              <span>{article.author.full_name}</span>
             </>
           )}
         </div>

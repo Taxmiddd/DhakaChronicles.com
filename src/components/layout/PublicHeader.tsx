@@ -1,7 +1,5 @@
 import Link from 'next/link'
 import { Search, Lightbulb } from 'lucide-react'
-import { Facebook, Twitter, Instagram } from '@/components/ui/BrandIcons'
-import { ThemeToggle } from '@/components/common/ThemeToggle'
 import { MobileMenuButton } from '@/components/layout/MobileMenu'
 import { supabaseAdmin } from '@/lib/db/admin'
 import { getCategoryColor } from '@/lib/utils'
@@ -71,49 +69,12 @@ export async function PublicHeader() {
   return (
     <header className="sticky top-0 z-50 flex flex-col backdrop-blur-lg bg-background/85 supports-[backdrop-filter]:bg-background/60 border-b border-dc-border shadow-sm">
       
-      {/* ── Top Bar: Ticker, Date, Socials ── */}
-      <div className="hidden lg:flex items-center justify-between px-6 py-1.5 bg-dc-surface-2/50 border-b border-dc-border/50 text-[11px] font-medium text-dc-text-muted">
-        <div className="flex items-center gap-6">
-          <time className="tabular-nums uppercase tracking-wider">{dateStr}</time>
-          {banners.length > 0 && (
-            <div className="flex items-center gap-3 overflow-hidden max-w-xl">
-              <span className="flex items-center gap-1.5 text-[#DC1A2C] font-bold uppercase tracking-widest shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#DC1A2C] animate-pulse" />
-                Breaking
-              </span>
-              <div className="ticker-animate flex items-center gap-6 whitespace-nowrap">
-                {[...banners, ...banners].map((b, i) => (
-                  <span key={i} className="flex items-center gap-6">
-                    {b.link ? (
-                      <Link href={b.link} className="hover:text-dc-text transition-colors">{b.title}</Link>
-                    ) : (
-                      <span>{b.title}</span>
-                    )}
-                    <span className="opacity-30">◆</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            <Link href="#" className="hover:text-dc-red transition-colors"><Facebook className="w-3.5 h-3.5" /></Link>
-            <Link href="#" className="hover:text-dc-red transition-colors"><Twitter className="w-3.5 h-3.5" /></Link>
-            <Link href="#" className="hover:text-dc-red transition-colors"><Instagram className="w-3.5 h-3.5" /></Link>
-          </div>
-          <div className="w-px h-3 bg-dc-border" />
-          <ThemeToggle />
-        </div>
-      </div>
-
       {/* ── Main Nav Bar ── */}
       <div className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 h-[60px] flex items-center justify-between gap-6">
         
         {/* Logo */}
         <Link href="/" className="shrink-0 flex items-center" aria-label="Dhaka Chronicles">
-          <img src="/dc-mark-black.svg" alt="Dhaka Chronicles" className="h-14 md:h-16 w-auto light-only-ib" />
-          <img src="/dc-mark-white.svg" alt="Dhaka Chronicles" className="h-14 md:h-16 w-auto dark-only-ib" />
+          <img src="/dc-mark-black.svg" alt="Dhaka Chronicles" className="h-14 md:h-16 w-auto" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -146,13 +107,6 @@ export async function PublicHeader() {
         </div>
       </div>
       
-      {/* Mobile breaking banner & theme toggle */}
-      <div className="lg:hidden flex items-center justify-between px-4 py-2 border-t border-dc-border bg-dc-surface-2/30">
-        <div className="flex items-center gap-2 text-xs font-medium text-dc-text-muted">
-           <time className="tabular-nums">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</time>
-        </div>
-        <ThemeToggle />
-      </div>
     </header>
   )
 }

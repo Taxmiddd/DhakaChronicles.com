@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Menu, X, Search, ChevronRight, Lightbulb, Rss } from 'lucide-react'
-import { ThemeToggle } from '@/components/common/ThemeToggle'
 import { Facebook, Linkedin, Instagram } from '@/components/ui/BrandIcons'
 import { useMobileNav } from './MobileNavContext'
 import { getCategoryColor } from '@/lib/utils'
@@ -222,10 +221,6 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
             >
               <Rss className="w-3.5 h-3.5" />
             </a>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs" style={{ color: 'var(--dc-text-muted)' }}>Appearance</span>
-            <ThemeToggle />
           </div>
         </div>
       </div>

@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { Toaster } from 'sonner'
 import CookieConsent from '@/components/common/CookieConsent'
-import { ThemeProvider } from '@/components/common/ThemeProvider'
 import './globals.css'
 
 const inter = Inter({
@@ -242,15 +241,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </>
         )}
 
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-          {children}
-          <Analytics />
-          <CookieConsent />
-          <Toaster
-            richColors
-            position="bottom-right"
-          />
-        </ThemeProvider>
+        {children}
+        <Analytics />
+        <CookieConsent />
+        <Toaster
+          richColors
+          position="bottom-right"
+        />
       </body>
     </html>
   )

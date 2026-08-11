@@ -17,52 +17,29 @@
   --dc-text-muted-dark: #9ca3af;
 
   /* Light mode adaptive tokens */
-  --background: #ffffff;
+  --background: #FCFBF9;
   --foreground: #111827;
-  --dc-surface: #F9FAFB;
-  --dc-surface-2: #F3F4F6;
-  --dc-border: #E5E7EB;
-  --dc-text: #111827;
-  --dc-text-muted: #6B7280;
+  --dc-surface: #F6F5F0;
+  --dc-surface-2: #EAE8DF;
+  --dc-border: #DEDCD3;
+  --dc-text: #171717;
+  --dc-text-muted: #666666;
   --dc-muted: #9CA3AF;
   --dc-white: #ffffff;
-  --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --card-shadow-hover: 0 8px 28px rgba(220,26,44,0.12), 0 4px 12px rgba(0,0,0,0.08);
+  --card-shadow: none;
+  --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.04);
   /* Header/nav accent */
   --dc-header-border: var(--dc-border);
   --dc-nav-strip-bg: var(--background);
   --dc-nav-strip-border: var(--dc-border);
 }
 
-/* ── Dark Mode Overrides ── */
-.dark {
-  --background: #0a0a0a;
-  --foreground: #f0f0f0;
-  --dc-surface: #111111;
-  --dc-surface-2: #1a1a1a;
-  --dc-border: rgba(255,255,255,0.08);
-  --dc-text: #f0f0f0;
-  --dc-text-muted: #9ca3af;
-  --dc-muted: #6b7280;
-  --card-shadow: 0 1px 3px rgba(0,0,0,0.4);
-  --card-shadow-hover: 0 8px 32px rgba(220,26,44,0.18), 0 4px 16px rgba(0,0,0,0.5);
-  /* Dark-mode header/nav accent — red glow */
-  --dc-header-border: rgba(220,26,44,0.2);
-  --dc-nav-strip-bg: #0c0c0c;
-  --dc-nav-strip-border: rgba(220,26,44,0.13);
-}
-
 /* ── Theme-conditional display utilities ── */
-/* Logo / element swap based on active theme */
+/* Kept empty for compatibility if any classes are still used */
 .light-only { display: block; }
-.dark .light-only { display: none; }
 .dark-only { display: none; }
-.dark .dark-only { display: block; }
-/* Inline-block variants (for images inside flex containers) */
 .light-only-ib { display: inline-block; }
-.dark .light-only-ib { display: none; }
 .dark-only-ib { display: none; }
-.dark .dark-only-ib { display: inline-block; }
 
 @theme inline {
   --color-background: var(--background);
