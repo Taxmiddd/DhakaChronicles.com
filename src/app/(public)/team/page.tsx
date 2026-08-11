@@ -1,7 +1,7 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import Script from 'next/script'
+
 import { Users, BookOpen } from 'lucide-react'
 import { supabaseAdmin } from '@/lib/db/admin'
 import { slugify } from '@/lib/utils'
@@ -43,9 +43,9 @@ const ROLE_LABELS: Record<string, string> = {
 }
 
 const ROLE_COLOR: Record<string, string> = {
-  founder: '#DC1A2C',
-  admin: '#06B6D4',
-  publisher: '#8B5CF6',
+  founder: '#171717',
+  admin: '#171717',
+  publisher: '#171717',
 }
 
 type TeamMember = {
@@ -94,10 +94,8 @@ export default async function TeamPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-      <Script
-        id="team-org-jsonld"
+      <script
         type="application/ld+json"
-        strategy="beforeInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />
 
@@ -105,7 +103,7 @@ export default async function TeamPage() {
       <div className="text-center mb-12 sm:mb-16">
         <span
           className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest mb-3 px-3 py-1.5 rounded-full border"
-          style={{ color: 'var(--dc-red)', borderColor: 'rgba(220,26,44,0.3)', background: 'rgba(220,26,44,0.08)' }}
+          style={{ color: 'var(--dc-text)', borderColor: 'var(--dc-border)', background: 'var(--dc-surface-2)' }}
         >
           <Users className="w-3 h-3" />
           Our Team
@@ -131,7 +129,7 @@ export default async function TeamPage() {
           >
             <span
               className="w-3 h-3 rounded-full"
-              style={{ background: 'var(--dc-red)' }}
+              style={{ background: 'var(--dc-text)' }}
             />
             <h2 className="font-headline font-bold text-lg" style={{ color: 'var(--dc-text)' }}>
               Leadership
@@ -154,7 +152,7 @@ export default async function TeamPage() {
           >
             <span
               className="w-3 h-3 rounded-full"
-              style={{ background: '#06B6D4' }}
+              style={{ background: 'var(--dc-text)' }}
             />
             <h2 className="font-headline font-bold text-lg" style={{ color: 'var(--dc-text)' }}>
               Editorial Team
@@ -183,7 +181,7 @@ export default async function TeamPage() {
       >
         <span
           className="inline-block text-xs font-bold uppercase tracking-widest mb-3"
-          style={{ color: 'var(--dc-red)' }}
+          style={{ color: 'var(--dc-text-muted)' }}
         >
           Join Us
         </span>
@@ -197,13 +195,13 @@ export default async function TeamPage() {
           <Link
             href="/careers"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
-            style={{ background: 'var(--dc-red)' }}
+            style={{ background: 'var(--dc-text)' }}
           >
             View Openings
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border transition-colors hover:border-dc-red hover:text-dc-red"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-semibold border transition-colors hover:border-dc-text hover:text-dc-text"
             style={{ color: 'var(--dc-text-muted)', borderColor: 'var(--dc-border)' }}
           >
             Get in Touch
@@ -218,7 +216,7 @@ function MemberCard({ member, featured = false }: { member: TeamMember; featured
   const slug = slugify(member.full_name ?? '')
   const roleLower = (member.role ?? '').toLowerCase()
   const role = ROLE_LABELS[roleLower] ?? member.role ?? 'Journalist'
-  const roleColor = ROLE_COLOR[roleLower] ?? 'var(--dc-red)'
+  const roleColor = ROLE_COLOR[roleLower] ?? 'var(--dc-text-muted)'
 
   return (
     <Link
@@ -265,7 +263,7 @@ function MemberCard({ member, featured = false }: { member: TeamMember; featured
       {/* Info */}
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         <h3
-          className="font-headline font-bold text-sm sm:text-base leading-snug mb-1 group-hover:text-dc-red transition-colors"
+          className="font-headline font-bold text-sm sm:text-base leading-snug mb-1 group-hover:opacity-75 transition-opacity"
           style={{ color: 'var(--dc-text)' }}
         >
           {member.full_name}
@@ -280,7 +278,7 @@ function MemberCard({ member, featured = false }: { member: TeamMember; featured
         )}
         <span
           className="mt-2 text-[10px] font-semibold"
-          style={{ color: 'var(--dc-red)' }}
+          style={{ color: 'var(--dc-text)' }}
         >
           View articles â†’
         </span>
