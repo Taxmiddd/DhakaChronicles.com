@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ChevronRight, TrendingUp, Filter, Hash, Star } from 'lucide-react'
 import { ArticleCard } from '@/components/article/ArticleCard'
-import { CityWidgets } from '@/components/widgets/CityWidgets'
-import AdBanner from '@/components/ui/AdBanner'
 import { NewsletterForm } from '@/components/layout/NewsletterForm'
 import { supabaseAdmin } from '@/lib/db/admin'
-import { getCategoryColor } from '@/lib/utils'
+import AdBanner from '@/components/ui/AdBanner'
 
 export const metadata: Metadata = {
   title: 'Dhaka Chronicles – The Pulse of Bangladesh',
@@ -14,8 +11,6 @@ export const metadata: Metadata = {
 }
 
 export const revalidate = 60
-
-// ── Data types ──────────────────────────────────────────────────────────────
 
 interface ArticleRow {
   id: string
@@ -32,15 +27,6 @@ interface ArticleRow {
   author: { full_name: string | null; avatar_url: string | null } | null
 }
 
-interface CategoryRow {
-  id: string
-  name: string
-  slug: string
-  color: string | null
-  display_order: number
-  article_count: number
-}
-
 const ARTICLE_SELECT = `
   id, title, slug, excerpt, featured_image_url, published_at,
   reading_time, view_count, is_breaking, is_featured,
@@ -48,263 +34,264 @@ const ARTICLE_SELECT = `
   author:users!author_id(full_name, avatar_url)
 `
 
-// ── Data fetching ────────────────────────────────────────────────────────────
-
 async function getHeroArticle(): Promise<ArticleRow | null> {
   try {
     const { data: featured } = await supabaseAdmin
-      .from('articles')
-      .select(ARTICLE_SELECT)
-      .eq('status', 'published')
-      .is('deleted_at', null)
-      .eq('is_featured', true)
-      .order('published_at', { ascending: false })
-      .limit(1)
-      .single()
+      .from('articles').select(ARTICLE_SELECT)
+      .eq('status', 'published').is('deleted_at', null)
+      .eq('is_featured', true).order('published_at', { ascending: false })
+      .limit(1).single()
     if (featured) return featured as unknown as ArticleRow
-
     const { data: latest } = await supabaseAdmin
-      .from('articles')
-      .select(ARTICLE_SELECT)
-      .eq('status', 'published')
-      .is('deleted_at', null)
-      .order('published_at', { ascending: false })
-      .limit(1)
-      .single()
+      .from('articles').select(ARTICLE_SELECT)
+      .eq('status', 'published').is('deleted_at', null)
+      .order('published_at', { ascending: false }).limit(1).single()
     return (latest as unknown as ArticleRow) ?? null
   } catch { return null }
 }
 
-async function getFeaturedArticles(excludeId?: string): Promise<ArticleRow[]> {
+async function getLatestArticles(excludeId?: string, limit = 12): Promise<ArticleRow[]> {
   try {
-    let query = supabaseAdmin
-      .from('articles')
-      .select(ARTICLE_SELECT)
-      .eq('status', 'published')
-      .is('deleted_at', null)
-      .order('published_at', { ascending: false })
-      .limit(excludeId ? 4 : 3)
-    if (excludeId) query = query.neq('id', excludeId)
-    const { data } = await query
-    return ((data as unknown as ArticleRow[]) ?? []).slice(0, 3)
-  } catch { return [] }
-}
-
-async function getLatestArticles(): Promise<ArticleRow[]> {
-  try {
-    const { data } = await supabaseAdmin
-      .from('articles')
-      .select(ARTICLE_SELECT)
-      .eq('status', 'published')
-      .is('deleted_at', null)
-      .order('published_at', { ascending: false })
-      .limit(12)
-    return (data as unknown as ArticleRow[]) ?? []
+    let q = supabaseAdmin.from('articles').select(ARTICLE_SELECT)
+      .eq('status', 'published').is('deleted_at', null)
+      .order('published_at', { ascending: false }).limit(limit + 1)
+    if (excludeId) q = q.neq('id', excludeId)
+    const { data } = await q
+    return ((data as unknown as ArticleRow[]) ?? []).slice(0, limit)
   } catch { return [] }
 }
 
 async function getTrendingArticles(excludeIds: string[]): Promise<ArticleRow[]> {
   try {
-    const { data } = await supabaseAdmin
-      .from('articles')
-      .select(ARTICLE_SELECT)
-      .eq('status', 'published')
-      .is('deleted_at', null)
-      .order('view_count', { ascending: false })
-      .limit(10)
+    const { data } = await supabaseAdmin.from('articles').select(ARTICLE_SELECT)
+      .eq('status', 'published').is('deleted_at', null)
+      .order('view_count', { ascending: false }).limit(15)
     const rows = (data as unknown as ArticleRow[]) ?? []
-    return rows.filter(a => !excludeIds.includes(a.id)).slice(0, 6)
+    return rows.filter(a => !excludeIds.includes(a.id)).slice(0, 5)
   } catch { return [] }
 }
 
-async function getCategories(): Promise<CategoryRow[]> {
-  try {
-    const { data } = await supabaseAdmin
-      .from('categories')
-      .select('id, name, slug, color, display_order')
-      .order('display_order', { ascending: true })
-      .limit(12)
-    if (!data || data.length === 0) return []
-
-    const ids = (data as CategoryRow[]).map(c => c.id)
-    const counts: Record<string, number> = {}
-    await Promise.all(
-      ids.map(async (catId) => {
-        const { count } = await supabaseAdmin
-          .from('articles')
-          .select('id', { count: 'exact', head: true })
-          .eq('category_id', catId)
-          .eq('status', 'published')
-        counts[catId] = count ?? 0
-      })
-    )
-
-    return (data as CategoryRow[]).map(c => ({ ...c, article_count: counts[c.id] ?? 0 }))
-  } catch { return [] }
+function formatDate(dateStr: string | null) {
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric',
+  })
 }
-
-const FALLBACK_CATEGORIES = [
-  { id: '1', name: 'Politics', slug: 'politics', color: '#171717', display_order: 0, article_count: 0 },
-  { id: '2', name: 'Business', slug: 'business', color: '#171717', display_order: 1, article_count: 0 },
-  { id: '3', name: 'Sports', slug: 'sports', color: '#171717', display_order: 2, article_count: 0 },
-  { id: '4', name: 'Culture', slug: 'culture', color: '#171717', display_order: 3, article_count: 0 },
-  { id: '5', name: 'Technology', slug: 'technology', color: '#171717', display_order: 4, article_count: 0 },
-  { id: '6', name: 'Education', slug: 'education', color: '#171717', display_order: 5, article_count: 0 },
-]
 
 export default async function HomePage() {
   const hero = await getHeroArticle()
-  const featured = await getFeaturedArticles(hero?.id)
-  const excludedIds = [hero?.id, ...featured.map(a => a.id)].filter(Boolean) as string[]
-  const [latest, trending, categories] = await Promise.all([
-    getLatestArticles(),
+  const excludedIds = hero ? [hero.id] : []
+  const [latest, trending] = await Promise.all([
+    getLatestArticles(hero?.id, 12),
     getTrendingArticles(excludedIds),
-    getCategories(),
   ])
 
-  const displayCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES
+  // Split latest into grid (first 3) and list (rest)
+  const gridArticles = latest.slice(0, 3)
+  const listArticles = latest.slice(3)
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
-      
-      {/* ── 3-Column Dashboard Layout ── */}
-      <div className="flex flex-col lg:flex-row gap-8">
-        
-        {/* ── LEFT COLUMN: Navigation & Widgets ── */}
-        <aside className="w-full lg:w-[260px] shrink-0 space-y-6 hidden lg:block">
-          <div className="sticky top-[88px] space-y-6">
-            
-            <div className="bg-dc-surface border border-dc-border rounded-2xl p-5 shadow-sm">
-              <h3 className="text-[11px] font-black uppercase tracking-widest text-dc-text-muted mb-4 flex items-center gap-2">
-                <Filter className="w-3.5 h-3.5" /> Explore
-              </h3>
-              <nav className="flex flex-col gap-1.5">
-                <Link href="/" className="px-3 py-2 rounded-lg bg-dc-surface-2 text-dc-text font-bold text-sm flex items-center justify-between group">
-                  <span className="flex items-center gap-2"><Star className="w-4 h-4" /> For You</span>
-                </Link>
-                <Link href="/news" className="px-3 py-2 rounded-lg hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text font-semibold text-sm transition-colors">
-                  Latest Feed
-                </Link>
-                <div className="h-px bg-dc-border my-2" />
-                {displayCategories.map(cat => (
-                  <Link
-                    key={cat.slug}
-                    href={`/category/${cat.slug}`}
-                    className="px-3 py-2 rounded-lg hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text font-semibold text-sm transition-colors flex items-center justify-between group"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Hash className="w-4 h-4 opacity-50" style={{ color: getCategoryColor(cat.color) }} /> 
-                      {cat.name}
-                    </span>
-                    <span className="text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity bg-dc-surface border border-dc-border px-1.5 py-0.5 rounded">
-                      {cat.article_count}
-                    </span>
-                  </Link>
-                ))}
-              </nav>
-            </div>
+    <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
 
-            <CityWidgets />
-          </div>
-        </aside>
-
-        {/* ── CENTER COLUMN: The Pulse Feed ── */}
-        <main className="flex-1 min-w-0">
-          
-          <AdBanner position="homepage_banner" className="w-full h-[90px] mb-6 rounded-2xl border border-dc-border hidden md:block" />
-
-          {/* Main Hero Card */}
-          {hero && (
-            <div className="mb-6 group cursor-pointer relative overflow-hidden rounded-3xl border border-dc-border shadow-sm">
-              <Link href={`/news/${hero.slug}`} className="absolute inset-0 z-20" aria-label={hero.title}></Link>
-              <div className="aspect-[16/10] sm:aspect-[21/9] w-full relative bg-dc-surface-2">
-                {hero.featured_image_url && (
-                  <img src={hero.featured_image_url} alt={hero.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+      {/* ── Hero ── */}
+      {hero && (
+        <section className="border-b border-dc-border py-8 sm:py-12">
+          <Link href={`/news/${hero.slug}`} className="group block">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+              {/* Text side */}
+              <div className="order-2 lg:order-1">
+                {hero.category && (
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-dc-text-muted block mb-4">
+                    {hero.category.name}
+                  </span>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="px-2.5 py-1 rounded bg-black text-white text-[10px] font-black uppercase tracking-widest">
-                      Top Story
-                    </span>
-                    {hero.category && (
-                      <span className="text-xs font-bold text-white uppercase tracking-wider opacity-90">
-                        {hero.category.name}
-                      </span>
-                    )}
-                  </div>
-                  <h1 className="text-2xl sm:text-4xl font-headline font-black text-white leading-[1.15] mb-3 group-hover:text-gray-200 transition-colors">
-                    {hero.title}
-                  </h1>
-                  {hero.excerpt && (
-                    <p className="text-sm sm:text-base text-gray-300 line-clamp-2 max-w-3xl">
-                      {hero.excerpt}
-                    </p>
+                <h1 className="font-headline font-black text-3xl sm:text-4xl lg:text-5xl leading-[1.1] text-dc-text mb-5 group-hover:opacity-75 transition-opacity">
+                  {hero.title}
+                </h1>
+                {hero.excerpt && (
+                  <p className="text-base sm:text-lg text-dc-text-muted leading-relaxed mb-6 line-clamp-3">
+                    {hero.excerpt}
+                  </p>
+                )}
+                <div className="flex items-center gap-4 text-[11px] font-semibold uppercase tracking-widest text-dc-text-muted">
+                  {hero.author?.full_name && <span>{hero.author.full_name}</span>}
+                  {hero.published_at && (
+                    <>
+                      <span className="w-1 h-1 rounded-full bg-dc-text-muted" />
+                      <span>{formatDate(hero.published_at)}</span>
+                    </>
+                  )}
+                </div>
+              </div>
+              {/* Image side */}
+              <div className="order-1 lg:order-2">
+                <div className="aspect-[3/2] overflow-hidden bg-dc-surface-2">
+                  {hero.featured_image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={hero.featured_image_url}
+                      alt={hero.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-dc-surface-2" />
                   )}
                 </div>
               </div>
             </div>
-          )}
+          </Link>
+        </section>
+      )}
 
-          <AdBanner position="homepage_mid" className="w-full h-[90px] mb-6 rounded-2xl border border-dc-border hidden md:block" />
+      {/* ── Main Grid + Sidebar ── */}
+      <div className="flex flex-col xl:flex-row gap-0 xl:gap-16 py-8 sm:py-12">
 
-          <div className="flex items-center gap-3 mb-6 pt-4">
-            <h2 className="text-2xl font-headline font-black text-dc-text">The Pulse</h2>
-            <div className="h-px bg-dc-border flex-1" />
-          </div>
+        {/* ── Main Content ── */}
+        <main className="flex-1 min-w-0">
 
-          <div className="flex flex-col gap-5">
-            {latest.map((article, idx) => (
-              <div key={article.id}>
-                {idx === 4 && <AdBanner position="feed_native" className="w-full h-[90px] mb-5 rounded-2xl border border-dc-border" />}
-                {idx === 8 && <AdBanner position="category_banner" className="w-full h-[90px] mb-5 rounded-2xl border border-dc-border" />}
-                
-                <ArticleCard variant="list" {...article} className="bg-dc-surface border border-dc-border hover:border-dc-border/80 shadow-sm rounded-2xl p-4 sm:p-5 transition-all hover:shadow-md" />
-              </div>
-            ))}
-          </div>
-
-        </main>
-
-        {/* ── RIGHT COLUMN: Context & Sidebar ── */}
-        <aside className="w-full lg:w-[320px] xl:w-[360px] shrink-0 space-y-6">
-          <div className="sticky top-[88px] space-y-6">
-            
-            {/* Top Stories Leaderboard */}
-            <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 opacity-0 pointer-events-none" />
-              
-              <h3 className="font-headline font-black text-lg text-dc-text mb-6 flex items-center gap-2 relative z-10">
-                <TrendingUp className="w-5 h-5" /> Trending Now
-              </h3>
-              
-              <div className="flex flex-col gap-5 relative z-10">
-                {trending.map((a, i) => (
-                  <Link key={a.id} href={`/news/${a.slug}`} className="group flex gap-4 items-start">
-                    <span className="text-4xl font-black text-dc-border group-hover:text-dc-text transition-colors leading-none -mt-1 w-6 text-center">{i + 1}</span>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-[13px] text-dc-text group-hover:opacity-75 transition-opacity line-clamp-3 leading-snug">{a.title}</h4>
-                      <p className="text-[11px] text-dc-text-muted mt-2 font-semibold tracking-wide uppercase flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-dc-text-muted" />
-                        {a.category?.name}
+          {/* Top Grid — 3 cards */}
+          {gridArticles.length > 0 && (
+            <section className="border-b border-dc-border pb-10 mb-10">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+                {gridArticles.map((article) => (
+                  <Link key={article.id} href={`/news/${article.slug}`} className="group block">
+                    <div className="aspect-[3/2] overflow-hidden bg-dc-surface-2 mb-4">
+                      {article.featured_image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={article.featured_image_url}
+                          alt={article.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-dc-surface-2" />
+                      )}
+                    </div>
+                    {article.category && (
+                      <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-dc-text-muted block mb-2">
+                        {article.category.name}
+                      </span>
+                    )}
+                    <h2 className="font-headline font-bold text-lg leading-snug text-dc-text group-hover:opacity-75 transition-opacity line-clamp-3 mb-2">
+                      {article.title}
+                    </h2>
+                    {article.excerpt && (
+                      <p className="text-sm text-dc-text-muted line-clamp-2 leading-relaxed">
+                        {article.excerpt}
                       </p>
+                    )}
+                    <div className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-dc-text-muted">
+                      {formatDate(article.published_at)}
                     </div>
                   </Link>
                 ))}
               </div>
-            </div>
+            </section>
+          )}
 
-            {/* Newsletter Mini Widget */}
-            <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
-              <div className="relative z-10">
-                <h3 className="font-headline font-black text-dc-text text-xl mb-2">Stay Informed</h3>
-                <p className="text-xs text-dc-text-muted mb-5">Bangladesh's most vital stories, delivered straight to you.</p>
-                <NewsletterForm variant="default" />
+          {/* Ad Banner */}
+          <AdBanner position="homepage_mid" className="w-full h-[90px] mb-10 border border-dc-border hidden md:block" />
+
+          {/* List feed */}
+          {listArticles.length > 0 && (
+            <section>
+              <h2 className="font-headline font-black text-xs uppercase tracking-[0.18em] text-dc-text-muted mb-6 pb-3 border-b border-dc-border">
+                Latest
+              </h2>
+              <div className="flex flex-col divide-y divide-dc-border">
+                {listArticles.map((article, idx) => (
+                  <div key={article.id}>
+                    {idx === 5 && (
+                      <AdBanner position="feed_native" className="w-full h-[90px] my-6 border border-dc-border" />
+                    )}
+                    <Link href={`/news/${article.slug}`} className="group flex gap-5 py-6 items-start hover:no-underline">
+                      <div className="flex-1 min-w-0">
+                        {article.category && (
+                          <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-dc-text-muted block mb-1.5">
+                            {article.category.name}
+                          </span>
+                        )}
+                        <h3 className="font-headline font-bold text-base sm:text-lg leading-snug text-dc-text group-hover:opacity-75 transition-opacity line-clamp-2 mb-1">
+                          {article.title}
+                        </h3>
+                        {article.excerpt && (
+                          <p className="text-sm text-dc-text-muted line-clamp-1 hidden sm:block">
+                            {article.excerpt}
+                          </p>
+                        )}
+                        <div className="mt-2 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-widest text-dc-text-muted">
+                          {article.author?.full_name && <span>{article.author.full_name}</span>}
+                          {article.published_at && (
+                            <>
+                              {article.author?.full_name && <span className="w-1 h-1 rounded-full bg-dc-text-muted" />}
+                              <span>{formatDate(article.published_at)}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {article.featured_image_url && (
+                        <div className="w-24 h-20 sm:w-32 sm:h-24 shrink-0 overflow-hidden bg-dc-surface-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={article.featured_image_url}
+                            alt={article.title}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                        </div>
+                      )}
+                    </Link>
+                  </div>
+                ))}
               </div>
-            </div>
+            </section>
+          )}
+        </main>
 
-            <AdBanner position="sidebar_sticky" className="w-full h-[600px] rounded-2xl overflow-hidden border border-dc-border" />
+        {/* ── Sidebar ── */}
+        <aside className="w-full xl:w-[300px] shrink-0 border-t xl:border-t-0 xl:border-l border-dc-border pt-10 xl:pt-0 xl:pl-12">
+          <div className="xl:sticky xl:top-[80px] space-y-10">
+
+            {/* Trending */}
+            {trending.length > 0 && (
+              <section>
+                <h3 className="font-headline font-black text-xs uppercase tracking-[0.18em] text-dc-text-muted mb-5 pb-3 border-b border-dc-border">
+                  Most Read
+                </h3>
+                <div className="flex flex-col gap-0 divide-y divide-dc-border">
+                  {trending.map((a, i) => (
+                    <Link key={a.id} href={`/news/${a.slug}`} className="group flex gap-4 py-4 items-start hover:no-underline">
+                      <span className="text-2xl font-black text-dc-surface-2 leading-none mt-0.5 w-5 shrink-0 select-none tabular-nums" style={{ WebkitTextStroke: '1px var(--dc-border)' }}>
+                        {i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        {a.category && (
+                          <span className="text-[9px] font-bold uppercase tracking-widest text-dc-text-muted block mb-1">
+                            {a.category.name}
+                          </span>
+                        )}
+                        <h4 className="font-bold text-[13px] leading-snug text-dc-text group-hover:opacity-75 transition-opacity line-clamp-3">
+                          {a.title}
+                        </h4>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Newsletter */}
+            <section>
+              <h3 className="font-headline font-black text-xs uppercase tracking-[0.18em] text-dc-text-muted mb-5 pb-3 border-b border-dc-border">
+                Newsletter
+              </h3>
+              <p className="text-sm text-dc-text-muted leading-relaxed mb-5">
+                Bangladesh's most vital stories, curated and delivered every morning.
+              </p>
+              <NewsletterForm variant="default" />
+            </section>
+
+            {/* Sidebar Ad */}
+            <AdBanner position="sidebar_sticky" className="w-full h-[400px] border border-dc-border" />
           </div>
         </aside>
 

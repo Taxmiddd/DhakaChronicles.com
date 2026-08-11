@@ -145,16 +145,11 @@ body {
 /* ── Article Card ── */
 .article-card {
   background: var(--background);
-  border: 1px solid var(--dc-border);
-  border-radius: 12px;
   overflow: hidden;
-  transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
-  box-shadow: var(--card-shadow);
+  transition: opacity 0.2s ease;
 }
 .article-card:hover {
-  border-color: rgba(220,26,44,0.2);
-  box-shadow: var(--card-shadow-hover);
-  transform: translateY(-2px);
+  opacity: 0.8;
 }
 
 /* ── Image-first card overlay (Cablgram-inspired) ── */
