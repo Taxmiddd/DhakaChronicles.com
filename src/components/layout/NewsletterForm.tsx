@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { ArrowRight, CheckCircle2, Loader2 } from 'lucide-react'
@@ -35,7 +35,7 @@ export function NewsletterForm({ variant = 'default' }: { variant?: 'default' | 
 
   if (status === 'success') {
     return (
-      <div className="flex items-center gap-3 text-dc-red py-2">
+      <div className="flex items-center gap-3 text-dc-text py-2">
         <CheckCircle2 className="w-5 h-5 shrink-0" />
         <p className="text-sm font-medium">{message}</p>
       </div>
@@ -60,7 +60,7 @@ export function NewsletterForm({ variant = 'default' }: { variant?: 'default' | 
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="shrink-0 bg-dc-red hover:bg-dc-red-dark text-white rounded-lg px-4 py-2.5 transition-colors disabled:opacity-60 flex items-center gap-2 text-sm font-semibold"
+          className="shrink-0 bg-dc-text hover:bg-black text-white rounded-lg px-4 py-2.5 transition-colors disabled:opacity-60 flex items-center gap-2 text-sm font-semibold"
           aria-label="Subscribe"
         >
           {status === 'loading' ? (
@@ -71,7 +71,7 @@ export function NewsletterForm({ variant = 'default' }: { variant?: 'default' | 
         </button>
       </div>
       {status === 'error' && (
-        <p className="text-xs text-dc-red">{message}</p>
+        <p className="text-xs text-dc-text-muted">{message}</p>
       )}
     </form>
   )

@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import { Mail } from 'lucide-react'
 import { NewsletterForm } from '@/components/layout/NewsletterForm'
 import { FooterSocials } from '@/components/layout/FooterSocials'
@@ -41,7 +41,7 @@ export function PublicFooter() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="mt-16 bg-dc-surface border-t-[3px] border-dc-red text-dc-text overflow-hidden relative">
+    <footer className="mt-16 bg-dc-surface border-t border-dc-border text-dc-text overflow-hidden relative">
       {/* Decorative cinematic glow - only visible in dark mode */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-dc-red opacity-0 dark:opacity-[0.03] blur-[120px] rounded-full pointer-events-none" />
 
@@ -51,8 +51,8 @@ export function PublicFooter() {
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 mb-16 lg:mb-24 pb-12 lg:pb-16 border-b border-dc-border">
           <div className="flex-1 max-w-2xl">
             <div className="flex items-center gap-2 mb-4">
-              <Mail className="w-5 h-5 text-dc-red" />
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-dc-red">
+              <Mail className="w-5 h-5 text-dc-text-muted" />
+              <span className="text-xs font-black uppercase tracking-[0.2em] text-dc-text-muted">
                 Daily Briefing
               </span>
             </div>
@@ -66,8 +66,7 @@ export function PublicFooter() {
           </div>
           
           <div className="w-full lg:w-[420px] shrink-0 flex flex-col justify-center">
-            <div className="bg-dc-surface-2 border border-dc-border rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden group hover:border-dc-red/50 transition-colors">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-dc-red/5 blur-[40px] group-hover:bg-dc-red/10 transition-colors" />
+            <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
               <div className="relative z-10" id="newsletter">
                 <NewsletterForm variant="default" />
                 <p className="text-xs text-dc-text-muted mt-4 text-center font-medium">
@@ -83,8 +82,7 @@ export function PublicFooter() {
           <div className="col-span-2 lg:col-span-2 pr-0 lg:pr-12 flex flex-col justify-between">
             <div>
               <Link href="/" aria-label="Dhaka Chronicles" className="inline-block mb-6">
-                <img src="/dc-mark-black.svg" alt="Dhaka Chronicles" className="h-10 w-auto light-only-ib" />
-                <img src="/dc-mark-white.svg" alt="Dhaka Chronicles" className="h-10 w-auto dark-only-ib" />
+                <img src="/dc-mark-black.svg" alt="Dhaka Chronicles" className="h-10 w-auto" />
               </Link>
               <p className="text-sm text-dc-text-muted leading-relaxed max-w-sm mb-8">
                 The premier digital news platform redefining journalism in Bangladesh. Independent, uncompromising, and aesthetically driven.
@@ -101,11 +99,8 @@ export function PublicFooter() {
               <ul className="space-y-3.5">
                 {section.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-sm font-medium text-dc-text-muted hover:text-dc-text transition-colors relative group inline-flex items-center">
-                      <span className="w-0 h-px bg-dc-red absolute -left-3 top-1/2 -translate-y-1/2 transition-all group-hover:w-2 opacity-0 group-hover:opacity-100" />
-                      <span className="group-hover:translate-x-2 transition-transform">
+                    <Link href={link.href} className="text-sm font-medium text-dc-text-muted hover:text-dc-text transition-colors">
                         {link.label}
-                      </span>
                     </Link>
                   </li>
                 ))}

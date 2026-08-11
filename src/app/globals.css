@@ -2,11 +2,11 @@
 
 /* ── Design Tokens: Light Mode (Default) ── */
 :root {
-  /* Brand — crimson red as primary */
-  --dc-green: #DC1A2C;        /* name preserved so Tailwind classes don't need renaming */
-  --dc-green-dark: #A8121F;   /* hover/active shade */
-  --dc-red: #DC1A2C;          /* explicit alias */
-  --dc-red-dark: #A8121F;
+  /* Brand — minimal monochrome as primary */
+  --dc-green: #171717;        /* name preserved so Tailwind classes don't need renaming */
+  --dc-green-dark: #000000;   /* hover/active shade */
+  --dc-red: #171717;          /* explicit alias */
+  --dc-red-dark: #000000;
 
   /* Static darks (used in admin, always dark) */
   --dc-black: #0a0a0a;
@@ -74,14 +74,14 @@ body {
 }
 
 ::selection {
-  background: var(--dc-red);
+  background: var(--dc-text);
   color: #fff;
 }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--dc-surface); }
-::-webkit-scrollbar-thumb { background: var(--dc-red); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--dc-text-muted); border-radius: 3px; }
 
 /* ── Typography ── */
 .font-headline {
@@ -195,15 +195,15 @@ body {
 /* ── Buttons ── */
 .btn-primary {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-  background: var(--dc-red); color: #fff; font-weight: 600;
+  background: var(--dc-text); color: #fff; font-weight: 600;
   padding: 0.625rem 1.25rem; border-radius: 8px;
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
   border: none; cursor: pointer; text-decoration: none;
 }
 .btn-primary:hover {
-  background: var(--dc-red-dark);
+  background: #000;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(220,26,44,0.35);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
 }
 .btn-primary:active { transform: translateY(0); box-shadow: none; }
 
@@ -280,8 +280,8 @@ body {
 }
 .form-input::placeholder { color: var(--dc-muted); }
 .form-input:focus {
-  border-color: var(--dc-red);
-  box-shadow: 0 0 0 3px rgba(220,26,44,0.1);
+  border-color: var(--dc-text);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
 }
 .form-label {
   display: block;
@@ -338,7 +338,7 @@ body {
   display: inline-block;
   width: 4px;
   height: 1.25rem;
-  background: var(--dc-red);
+  background: var(--dc-text);
   border-radius: 2px;
   flex-shrink: 0;
 }
@@ -348,20 +348,20 @@ body {
   font-family: var(--font-playfair), serif;
   font-weight: 800;
   font-size: 1.5rem;
-  color: var(--dc-red);
+  color: var(--dc-text);
   letter-spacing: -0.02em;
   line-height: 1.1;
 }
 
 /* ── Focus visible ── */
-:focus-visible { outline: 2px solid var(--dc-red); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--dc-text); outline-offset: 2px; }
 
 /* ── Red glow utility ── */
 .red-glow {
-  box-shadow: 0 0 0 1px rgba(220,26,44,0.2), 0 4px 20px rgba(220,26,44,0.15);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1), 0 4px 20px rgba(0,0,0,0.05);
 }
 .red-glow:hover {
-  box-shadow: 0 0 0 1px rgba(220,26,44,0.35), 0 8px 32px rgba(220,26,44,0.25);
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.2), 0 8px 32px rgba(0,0,0,0.1);
 }
 
 /* ── Scrollbar hide utility ── */

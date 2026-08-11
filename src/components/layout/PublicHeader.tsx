@@ -51,12 +51,12 @@ export async function PublicHeader() {
   ])
 
   const navCats: Category[] = categories.length > 0 ? categories : [
-    { name: 'Politics',   slug: 'politics',   color: '#F42A41' },
-    { name: 'Business',   slug: 'business',   color: '#DC1A2C' },
-    { name: 'Sports',     slug: 'sports',     color: '#F59E0B' },
-    { name: 'Culture',    slug: 'culture',    color: '#8B5CF6' },
-    { name: 'Technology', slug: 'technology', color: '#06B6D4' },
-    { name: 'Education',  slug: 'education',  color: '#EC4899' },
+    { name: 'Politics',   slug: 'politics',   color: '#171717' },
+    { name: 'Business',   slug: 'business',   color: '#171717' },
+    { name: 'Sports',     slug: 'sports',     color: '#171717' },
+    { name: 'Culture',    slug: 'culture',    color: '#171717' },
+    { name: 'Technology', slug: 'technology', color: '#171717' },
+    { name: 'Education',  slug: 'education',  color: '#171717' },
   ]
 
   const dateStr = new Date().toLocaleDateString('en-US', {
@@ -81,7 +81,7 @@ export async function PublicHeader() {
         <nav className="hidden lg:flex items-center gap-1 h-full flex-1 justify-center">
           <Link href="/" className="px-3 h-full flex items-center text-[13px] font-bold text-dc-text relative group">
             Latest
-            <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-t-full bg-dc-red" />
+            <span className="absolute bottom-0 left-2 right-2 h-[2px] rounded-t-full bg-dc-text" />
           </Link>
           {navCats.map((cat) => (
             <Link key={cat.slug} href={`/category/${cat.slug}`} className="px-3 h-full flex items-center text-[13px] font-semibold text-dc-text-muted hover:text-dc-text transition-colors relative group">
@@ -96,11 +96,11 @@ export async function PublicHeader() {
           <Link href="/search" className="p-2 rounded-full transition-colors hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text" aria-label="Search">
             <Search className="w-4 h-4" />
           </Link>
-          <Link href="/tips" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-dc-border text-dc-text-muted hover:border-dc-red hover:text-dc-red transition-all">
+          <Link href="/tips" className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-dc-border text-dc-text-muted hover:border-dc-text hover:text-dc-text transition-all">
             <Lightbulb className="w-3.5 h-3.5" />
             Tip Us
           </Link>
-          <Link href="#newsletter" className="hidden sm:inline-flex px-4 py-1.5 rounded-full text-xs font-bold text-white bg-dc-red hover:bg-[#A8121F] transition-colors">
+          <Link href="#newsletter" className="hidden sm:inline-flex px-4 py-1.5 rounded-full text-xs font-bold text-white bg-dc-text hover:bg-black transition-colors">
             Subscribe
           </Link>
           <MobileMenuButton categories={navCats} />

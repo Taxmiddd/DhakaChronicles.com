@@ -27,13 +27,13 @@ interface ArticleCardProps {
 }
 
 const FALLBACK_COLORS: Record<string, string> = {
-  Politics: '#F42A41', Business: '#6366F1', Sports: '#F59E0B',
-  Culture: '#8B5CF6', Technology: '#06B6D4', Education: '#EC4899',
+  Politics: '#171717', Business: '#171717', Sports: '#171717',
+  Culture: '#171717', Technology: '#171717', Education: '#171717',
 }
 
 function getCatColor(cat?: { name: string; color?: string | null } | null) {
-  if (!cat) return '#DC1A2C'
-  const raw = cat.color || FALLBACK_COLORS[cat.name] || '#DC1A2C'
+  if (!cat) return '#171717'
+  const raw = cat.color || FALLBACK_COLORS[cat.name] || '#171717'
   return getCategoryColor(raw)
 }
 
@@ -85,13 +85,13 @@ function HeroCard({ article }: { article: ArticleCardProps }) {
       <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
         <div className="flex items-center gap-3 mb-3">
           {article.is_breaking && (
-            <span className="inline-block bg-dc-red text-white text-xs font-black uppercase tracking-widest px-2.5 py-0.5 rounded-sm">
+            <span className="inline-block bg-black text-white text-xs font-black uppercase tracking-widest px-2.5 py-0.5 rounded-sm">
               Breaking
             </span>
           )}
           <CategoryBadge category={article.category} />
         </div>
-        <h2 className="font-headline font-bold text-white text-2xl sm:text-3xl leading-tight mb-3 group-hover:text-dc-red transition-colors line-clamp-3">
+        <h2 className="font-headline font-bold text-white text-2xl sm:text-3xl leading-tight mb-3 group-hover:opacity-75 transition-opacity line-clamp-3">
           {article.title}
         </h2>
         {article.excerpt && (
@@ -138,7 +138,7 @@ function FeaturedCard({ article }: { article: ArticleCardProps }) {
       <div className="flex-1 min-w-0 py-0.5">
         <CategoryBadge category={article.category} />
         <h3
-          className="font-headline font-bold text-sm leading-snug mt-1 line-clamp-2 transition-colors group-hover:text-dc-red"
+          className="font-headline font-bold text-sm leading-snug mt-1 line-clamp-2 transition-opacity group-hover:opacity-75"
           style={{ color: 'var(--dc-text)' }}
         >
           {article.title}
@@ -168,7 +168,7 @@ function ListCard({ article }: { article: ArticleCardProps }) {
       <div className="flex-1 min-w-0">
         <CategoryBadge category={article.category} />
         <h3
-          className="font-headline font-semibold text-base leading-snug mt-1 group-hover:text-dc-red transition-colors"
+          className="font-headline font-semibold text-base leading-snug mt-1 group-hover:opacity-75 transition-opacity"
           style={{ color: 'var(--dc-text)' }}
         >
           {article.title}
@@ -225,7 +225,7 @@ function GridCard({ article }: { article: ArticleCardProps }) {
       <div className="p-4">
         <CategoryBadge category={article.category} />
         <h3
-          className="font-headline font-bold text-xl leading-snug mt-1.5 line-clamp-3 group-hover:text-dc-red transition-colors"
+          className="font-headline font-bold text-xl leading-snug mt-1.5 line-clamp-3 group-hover:opacity-75 transition-opacity"
           style={{ color: 'var(--dc-text)' }}
         >
           {article.title}

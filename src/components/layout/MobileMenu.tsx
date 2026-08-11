@@ -130,7 +130,7 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
             href="#newsletter"
             onClick={close}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-white transition-all hover:opacity-90"
-            style={{ background: 'var(--dc-red)' }}
+            style={{ background: 'var(--dc-text)' }}
           >
             Subscribe
           </Link>
@@ -150,10 +150,10 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
             className="flex items-center justify-between mx-3 px-3 py-3 rounded-lg transition-colors hover:bg-dc-surface-2 group"
           >
             <div className="flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: 'var(--dc-red)' }} />
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: 'var(--dc-text)' }} />
               <span className="text-sm font-semibold" style={{ color: 'var(--dc-text)' }}>Latest</span>
             </div>
-            <ChevronRight className="w-4 h-4 transition-colors group-hover:text-dc-red" style={{ color: 'var(--dc-text-muted)' }} />
+            <ChevronRight className="w-4 h-4 transition-colors group-hover:text-dc-text" style={{ color: 'var(--dc-text-muted)' }} />
           </Link>
 
           {filtered.length > 0 ? filtered.map((cat) => (
@@ -167,7 +167,7 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: getCategoryColor(cat.color) }} />
                 <span className="text-sm font-medium" style={{ color: 'var(--dc-text)' }}>{cat.name}</span>
               </div>
-              <ChevronRight className="w-4 h-4 transition-colors group-hover:text-dc-red" style={{ color: 'var(--dc-text-muted)' }} />
+              <ChevronRight className="w-4 h-4 transition-colors group-hover:text-dc-text" style={{ color: 'var(--dc-text-muted)' }} />
             </Link>
           )) : (
             <p className="px-7 py-4 text-sm" style={{ color: 'var(--dc-text-muted)' }}>No sections found</p>
@@ -192,7 +192,7 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
               className="flex items-center justify-between mx-3 px-3 py-2.5 rounded-lg transition-colors hover:bg-dc-surface-2 group"
             >
               <span className="text-sm" style={{ color: 'var(--dc-text-muted)' }}>{label}</span>
-              <ChevronRight className="w-4 h-4 transition-colors group-hover:text-dc-red" style={{ color: 'var(--dc-text-muted)' }} />
+              <ChevronRight className="w-4 h-4 transition-colors group-hover:text-dc-text" style={{ color: 'var(--dc-text-muted)' }} />
             </Link>
           ))}
         </nav>
@@ -207,7 +207,7 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={label}
-                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-dc-red hover:text-white"
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-dc-text hover:text-white"
                 style={{ background: 'var(--dc-surface-2)', color: 'var(--dc-text-muted)', border: '1px solid var(--dc-border)' }}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -216,7 +216,7 @@ export function MobileMenuButton({ categories }: { categories: Category[] }) {
             <a
               href="/api/rss"
               aria-label="RSS Feed"
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-dc-red hover:text-white"
+              className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-dc-text hover:text-white"
               style={{ background: 'var(--dc-surface-2)', color: 'var(--dc-text-muted)', border: '1px solid var(--dc-border)' }}
             >
               <Rss className="w-3.5 h-3.5" />

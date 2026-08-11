@@ -144,12 +144,12 @@ async function getCategories(): Promise<CategoryRow[]> {
 }
 
 const FALLBACK_CATEGORIES = [
-  { id: '1', name: 'Politics', slug: 'politics', color: '#F42A41', display_order: 0, article_count: 0 },
-  { id: '2', name: 'Business', slug: 'business', color: '#DC1A2C', display_order: 1, article_count: 0 },
-  { id: '3', name: 'Sports', slug: 'sports', color: '#F59E0B', display_order: 2, article_count: 0 },
-  { id: '4', name: 'Culture', slug: 'culture', color: '#8B5CF6', display_order: 3, article_count: 0 },
-  { id: '5', name: 'Technology', slug: 'technology', color: '#06B6D4', display_order: 4, article_count: 0 },
-  { id: '6', name: 'Education', slug: 'education', color: '#EC4899', display_order: 5, article_count: 0 },
+  { id: '1', name: 'Politics', slug: 'politics', color: '#171717', display_order: 0, article_count: 0 },
+  { id: '2', name: 'Business', slug: 'business', color: '#171717', display_order: 1, article_count: 0 },
+  { id: '3', name: 'Sports', slug: 'sports', color: '#171717', display_order: 2, article_count: 0 },
+  { id: '4', name: 'Culture', slug: 'culture', color: '#171717', display_order: 3, article_count: 0 },
+  { id: '5', name: 'Technology', slug: 'technology', color: '#171717', display_order: 4, article_count: 0 },
+  { id: '6', name: 'Education', slug: 'education', color: '#171717', display_order: 5, article_count: 0 },
 ]
 
 export default async function HomePage() {
@@ -180,7 +180,7 @@ export default async function HomePage() {
               </h3>
               <nav className="flex flex-col gap-1.5">
                 <Link href="/" className="px-3 py-2 rounded-lg bg-dc-surface-2 text-dc-text font-bold text-sm flex items-center justify-between group">
-                  <span className="flex items-center gap-2"><Star className="w-4 h-4 text-dc-red" /> For You</span>
+                  <span className="flex items-center gap-2"><Star className="w-4 h-4" /> For You</span>
                 </Link>
                 <Link href="/news" className="px-3 py-2 rounded-lg hover:bg-dc-surface-2 text-dc-text-muted hover:text-dc-text font-semibold text-sm transition-colors">
                   Latest Feed
@@ -225,7 +225,7 @@ export default async function HomePage() {
                 
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="px-2.5 py-1 rounded bg-dc-red text-white text-[10px] font-black uppercase tracking-widest">
+                    <span className="px-2.5 py-1 rounded bg-black text-white text-[10px] font-black uppercase tracking-widest">
                       Top Story
                     </span>
                     {hero.category && (
@@ -273,20 +273,20 @@ export default async function HomePage() {
             
             {/* Top Stories Leaderboard */}
             <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-dc-red/5 blur-[40px] pointer-events-none" />
+              <div className="absolute top-0 right-0 w-32 h-32 opacity-0 pointer-events-none" />
               
               <h3 className="font-headline font-black text-lg text-dc-text mb-6 flex items-center gap-2 relative z-10">
-                <TrendingUp className="w-5 h-5 text-dc-red" /> Trending Now
+                <TrendingUp className="w-5 h-5" /> Trending Now
               </h3>
               
               <div className="flex flex-col gap-5 relative z-10">
                 {trending.map((a, i) => (
                   <Link key={a.id} href={`/news/${a.slug}`} className="group flex gap-4 items-start">
-                    <span className="text-4xl font-black text-dc-border group-hover:text-dc-red transition-colors leading-none -mt-1 w-6 text-center">{i + 1}</span>
+                    <span className="text-4xl font-black text-dc-border group-hover:text-dc-text transition-colors leading-none -mt-1 w-6 text-center">{i + 1}</span>
                     <div className="flex-1">
-                      <h4 className="font-bold text-[13px] text-dc-text group-hover:text-dc-red transition-colors line-clamp-3 leading-snug">{a.title}</h4>
+                      <h4 className="font-bold text-[13px] text-dc-text group-hover:opacity-75 transition-opacity line-clamp-3 leading-snug">{a.title}</h4>
                       <p className="text-[11px] text-dc-text-muted mt-2 font-semibold tracking-wide uppercase flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: getCategoryColor(a.category?.color) }} />
+                        <span className="w-1.5 h-1.5 rounded-full bg-dc-text-muted" />
                         {a.category?.name}
                       </p>
                     </div>
@@ -296,12 +296,11 @@ export default async function HomePage() {
             </div>
 
             {/* Newsletter Mini Widget */}
-            <div className="bg-[#141414] rounded-2xl p-6 shadow-sm border border-dc-border relative overflow-hidden">
-              <div className="absolute -right-10 -top-10 w-40 h-40 bg-dc-red/20 blur-[50px] pointer-events-none" />
+            <div className="bg-dc-surface border border-dc-border rounded-2xl p-6 shadow-sm relative overflow-hidden">
               <div className="relative z-10">
-                <h3 className="font-headline font-black text-white text-xl mb-2">Stay Informed</h3>
-                <p className="text-xs text-gray-400 mb-5">Bangladesh's most vital stories, delivered straight to you.</p>
-                <NewsletterForm variant="dark" />
+                <h3 className="font-headline font-black text-dc-text text-xl mb-2">Stay Informed</h3>
+                <p className="text-xs text-dc-text-muted mb-5">Bangladesh's most vital stories, delivered straight to you.</p>
+                <NewsletterForm variant="default" />
               </div>
             </div>
 
