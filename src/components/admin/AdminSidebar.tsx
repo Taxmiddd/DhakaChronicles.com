@@ -86,8 +86,8 @@ export function AdminSidebar({ isMobile = false, onClose }: AdminSidebarProps) {
   const pathname = usePathname()
 
   const sidebarClasses = isMobile
-    ? "w-full bg-[#111111] border-r border-[rgba(255,255,255,0.06)] flex flex-col h-full"
-    : "fixed inset-y-0 left-0 z-50 w-64 bg-[#111111] border-r border-[rgba(255,255,255,0.06)] flex flex-col"
+    ? "w-full bg-background border-r border-dc-border flex flex-col h-full"
+    : "fixed inset-y-0 left-0 z-50 w-64 bg-background border-r border-dc-border flex flex-col"
 
   return (
     <aside className={sidebarClasses}>
@@ -97,14 +97,14 @@ export function AdminSidebar({ isMobile = false, onClose }: AdminSidebarProps) {
             onClick={onClose}
             className="mr-4 p-2 rounded-lg hover:bg-dc-border transition-colors"
           >
-            <span className="text-white text-xl">×</span>
+            <span className="text-dc-text text-xl">×</span>
           </button>
         )}
         <Link href="/admin/dashboard" className="flex items-center gap-2.5" onClick={onClose}>
           <div className="w-7 h-7 bg-white rounded flex items-center justify-center">
             <img src="/dc-mark-black.svg" alt="DC" className="h-4 w-auto" />
           </div>
-          <span className="font-headline font-bold text-sm text-white tracking-wide">Chronicles Admin</span>
+          <span className="font-headline font-bold text-sm text-dc-text tracking-wide">Chronicles Admin</span>
         </Link>
       </div>
 
@@ -141,9 +141,9 @@ export function AdminSidebar({ isMobile = false, onClose }: AdminSidebarProps) {
             await fetch('/api/auth/logout', { method: 'POST' })
             window.location.href = '/login'
           }}
-          className="admin-sidebar-link w-full text-left group hover:text-white"
+          className="admin-sidebar-link w-full text-left group hover:text-dc-text"
         >
-          <LogOut className="w-4 h-4 text-dc-muted group-hover:text-white" />
+          <LogOut className="w-4 h-4 text-dc-muted group-hover:text-dc-text" />
           <span className="text-sm">Sign Out</span>
         </button>
       </div>

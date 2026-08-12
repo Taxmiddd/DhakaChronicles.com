@@ -115,12 +115,12 @@ export default function ProfilePage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-headline font-bold text-white">My Profile</h1>
+        <h1 className="text-2xl font-headline font-bold text-dc-text">My Profile</h1>
         <p className="text-dc-muted text-sm mt-1">Manage your personal information and account security.</p>
       </div>
 
       {/* Avatar preview */}
-      <div className="glass rounded-xl p-5 flex items-center gap-5">
+      <div className="admin-card p-5 flex items-center gap-5">
         <div className="w-16 h-16 rounded-full bg-dc-green/20 border border-dc-green/30 flex items-center justify-center shrink-0 overflow-hidden">
           {profile.avatar_url ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -130,7 +130,7 @@ export default function ProfilePage() {
           )}
         </div>
         <div>
-          <p className="text-white font-headline font-bold text-lg">{profile.full_name || 'Your Name'}</p>
+          <p className="text-dc-text font-headline font-bold text-lg">{profile.full_name || 'Your Name'}</p>
           <p className="text-dc-muted text-sm">{profile.email}</p>
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function ProfilePage() {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`pb-3 px-4 text-sm font-medium flex items-center gap-2 border-b-2 -mb-px transition-colors capitalize ${
-              activeTab === tab ? 'border-dc-green text-dc-green' : 'border-transparent text-dc-muted hover:text-white'
+              activeTab === tab ? 'border-dc-green text-dc-green' : 'border-transparent text-dc-muted hover:text-dc-text'
             }`}
           >
             {tab === 'profile' ? <User className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
@@ -153,8 +153,8 @@ export default function ProfilePage() {
 
       {activeTab === 'profile' ? (
         <form onSubmit={handleProfileSubmit} className="space-y-5">
-          <div className="glass p-6 rounded-xl space-y-5">
-            <h2 className="font-headline font-bold text-white border-b border-dc-border pb-3">Basic Information</h2>
+          <div className="admin-card p-6 space-y-5">
+            <h2 className="font-headline font-bold text-dc-text border-b border-dc-border pb-3">Basic Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="form-label">Full Name *</label>
@@ -205,8 +205,8 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="glass p-6 rounded-xl space-y-4">
-            <h2 className="font-headline font-bold text-white border-b border-dc-border pb-3">Social Links</h2>
+          <div className="admin-card p-6 space-y-4">
+            <h2 className="font-headline font-bold text-dc-text border-b border-dc-border pb-3">Social Links</h2>
             {(['facebook_url', 'twitter_url', 'linkedin_url'] as const).map(field => (
               <div key={field}>
                 <label className="form-label capitalize">{field.replace('_url', '').replace('_', ' ')} URL</label>
@@ -229,8 +229,8 @@ export default function ProfilePage() {
         </form>
       ) : (
         <form onSubmit={handlePasswordSubmit} className="space-y-5">
-          <div className="glass p-6 rounded-xl max-w-lg space-y-4">
-            <h2 className="font-headline font-bold text-white border-b border-dc-border pb-3">Change Password</h2>
+          <div className="admin-card p-6 max-w-lg space-y-4">
+            <h2 className="font-headline font-bold text-dc-text border-b border-dc-border pb-3">Change Password</h2>
             <div>
               <label className="form-label">Current Password *</label>
               <input

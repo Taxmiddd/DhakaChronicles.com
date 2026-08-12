@@ -276,20 +276,28 @@ body {
   color: var(--dc-text-muted);
 }
 
-/* ── Admin sidebar (always dark) ── */
+/* ── Admin sidebar ── */
 .admin-sidebar-link {
   display: flex; align-items: center; gap: 0.75rem;
   padding: 0.625rem 0.875rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
-  color: var(--dc-text-muted-dark); text-decoration: none;
+  color: var(--dc-text-muted); text-decoration: none;
   transition: background 0.15s, color 0.15s;
 }
 .admin-sidebar-link:hover {
-  background: var(--dc-surface-2-dark);
-  color: var(--dc-text-dark);
+  background: var(--dc-surface-2);
+  color: var(--dc-text);
 }
 .admin-sidebar-link.active {
-  background: rgba(255,255,255,0.1);
-  color: #ffffff;
+  background: var(--dc-surface);
+  color: var(--dc-text);
+  border: 1px solid var(--dc-border);
+}
+
+/* ── Admin Form/Card Utils ── */
+.admin-card {
+  background: var(--background);
+  border: 1px solid var(--dc-border);
+  border-radius: 12px;
 }
 
 /* ── Table ── */

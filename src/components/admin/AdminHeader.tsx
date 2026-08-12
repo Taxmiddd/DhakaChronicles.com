@@ -64,7 +64,7 @@ export function AdminHeader() {
               )}
             </div>
             <div className="hidden lg:block text-left">
-              <p className="text-sm font-semibold text-white leading-tight group-hover:text-dc-green transition-colors">
+              <p className="text-sm font-semibold text-dc-text leading-tight group-hover:text-dc-green transition-colors">
                 {user?.full_name || 'Loading…'}
               </p>
               <p className={`text-xs font-medium capitalize leading-tight ${ROLE_COLORS[user?.role || ''] || 'text-dc-muted'}`}>
