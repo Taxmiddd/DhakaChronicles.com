@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { TrendingUp, Users, FileText, Activity, RefreshCw, Eye } from 'lucide-react'
+import { TrendingUp, Users, FileText, Activity, RefreshCw, Eye, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
@@ -26,13 +26,6 @@ interface TopArticle {
 interface TrafficSource {
   source: string
   percentage: number
-}
-
-interface RecentActivity {
-  id: string
-  type: 'article_published' | 'comment' | 'tip' | 'subscriber'
-  message: string
-  created_at: string
 }
 
 const FALLBACK_TRAFFIC: TrafficSource[] = [
@@ -92,10 +85,7 @@ function normalizeTraffic(payload: unknown): TrafficSource[] {
       if (!item || typeof item !== 'object') return null
       const row = item as Record<string, unknown>
       if (typeof row.source !== 'string') return null
-      return {
-        source: row.source,
-        percentage: toSafeNumber(row.percentage),
-      }
+      return { source: row.source, percentage: toSafeNumber(row.percentage) }
     })
     .filter((item): item is TrafficSource => item !== null)
   return parsed.length > 0 ? parsed : FALLBACK_TRAFFIC
@@ -139,35 +129,38 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     fetchData()
-    const interval = setInterval(() => {
-      fetchData(true)
-    }, 15000)
+    const interval = setInterval(() => fetchData(true), 15000)
     return () => clearInterval(interval)
   }, [])
 
   const displayStats = stats ?? DEFAULT_STATS
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-7xl">
+
+      {/* Page Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-headline font-bold text-white">Dashboard</h1>
+        <div>
+          <h1 className="text-2xl font-headline font-bold text-[#fafafa]">Dashboard</h1>
+          <p className="text-[#a1a1aa] text-sm mt-0.5">Your newsroom at a glance.</p>
+        </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-dc-muted">
-            Updated {formatDistanceToNow(lastRefresh, { addSuffix: true })}
-          </span>
+          <div className="flex items-center gap-1.5 text-sm bg-green-500/10 border border-green-500/20 text-green-400 px-3 py-1.5 rounded-full">
+            <Activity className="w-3.5 h-3.5" />
+            <span className="font-bold">{displayStats.active_now}</span>
+            <span className="text-green-500/70">live</span>
+          </div>
           <button
             onClick={() => fetchData()}
             disabled={loading}
-            className="btn-ghost px-3 py-2 text-sm flex items-center gap-2"
+            className="flex items-center gap-2 text-sm text-[#a1a1aa] hover:text-[#fafafa] transition-colors px-3 py-1.5 rounded-lg border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.16)]"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
-          <div className="flex items-center gap-1.5 text-sm text-dc-muted">
-            <Activity className="w-4 h-4 text-dc-green" />
-            <span className="text-dc-green font-bold">{displayStats.active_now}</span>
-            <span>live visitors</span>
-          </div>
+          <span className="text-xs text-[#52525b] hidden lg:block">
+            {formatDistanceToNow(lastRefresh, { addSuffix: true })}
+          </span>
         </div>
       </div>
 
@@ -175,73 +168,67 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Articles"
-          value={loading ? '…' : displayStats.total_articles.toLocaleString()}
-          icon={<FileText className="w-5 h-5" />}
+          value={loading ? '—' : displayStats.total_articles.toLocaleString()}
+          icon={<FileText className="w-4 h-4" />}
           trend={displayStats.published_today ? `+${displayStats.published_today} today` : undefined}
+          trendColor="text-green-400"
         />
         <StatCard
           title="Total Views"
-          value={loading ? '…' : formatViews(displayStats.total_views)}
-          icon={<Eye className="w-5 h-5" />}
+          value={loading ? '—' : formatViews(displayStats.total_views)}
+          icon={<Eye className="w-4 h-4" />}
           trend="+8% this week"
+          trendColor="text-green-400"
         />
         <StatCard
           title="Team Members"
-          value={loading ? '…' : displayStats.total_users.toLocaleString()}
-          icon={<Users className="w-5 h-5" />}
+          value={loading ? '—' : displayStats.total_users.toLocaleString()}
+          icon={<Users className="w-4 h-4" />}
         />
         <StatCard
           title="Pending Review"
-          value={loading ? '…' : (displayStats.pending_review ?? 0).toString()}
-          icon={<TrendingUp className="w-5 h-5" />}
-          className="border-amber-500/20"
-          valueClassName="text-amber-400"
+          value={loading ? '—' : (displayStats.pending_review ?? 0).toString()}
+          icon={<TrendingUp className="w-4 h-4" />}
+          accent="amber"
         />
       </div>
 
+      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
         {/* Top Articles */}
-        <div className="lg:col-span-2 glass rounded-xl p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-headline font-bold text-white">Top Performing Articles</h2>
-            <Link href="/admin/analytics" className="text-sm text-dc-green hover:underline">
-              Full analytics →
+        <div className="lg:col-span-2 admin-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-base font-semibold text-[#fafafa]">Top Performing Articles</h2>
+            <Link href="/admin/analytics" className="flex items-center gap-1 text-xs text-[#a1a1aa] hover:text-[#fafafa] transition-colors">
+              View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
           {loading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="skeleton h-10 rounded-lg" />
+                <div key={i} className="h-10 rounded-lg bg-[rgba(255,255,255,0.04)] animate-pulse" />
               ))}
             </div>
           ) : topArticles.length === 0 ? (
-            <p className="text-dc-muted text-sm italic">No data yet. Publish articles to see stats.</p>
+            <p className="text-[#a1a1aa] text-sm italic py-8 text-center">No data yet. Publish articles to see stats.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="dc-table">
-                <thead>
-                  <tr>
-                    <th>Article Title</th>
-                    <th className="text-right">Views</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topArticles.map(article => (
-                    <tr key={article.id}>
-                      <td className="font-medium text-dc-text truncate max-w-[320px]">{article.title}</td>
-                      <td className="text-right font-mono text-dc-green">{(article.views ?? article.view_count ?? 0).toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-1">
+              {topArticles.map((article, i) => (
+                <div key={article.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-[rgba(255,255,255,0.04)] transition-colors group">
+                  <span className="text-xs font-mono text-[#52525b] w-5 shrink-0">{i + 1}</span>
+                  <p className="flex-1 text-sm text-[#d4d4d8] group-hover:text-[#fafafa] truncate transition-colors">{article.title}</p>
+                  <span className="text-xs font-mono text-[#a1a1aa] shrink-0">{(article.views ?? 0).toLocaleString()} views</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
 
         {/* Traffic Sources */}
-        <div className="glass rounded-xl p-6">
-          <h2 className="text-lg font-headline font-bold text-white mb-5">Traffic Sources</h2>
-          <div className="space-y-4">
+        <div className="admin-card p-6">
+          <h2 className="text-base font-semibold text-[#fafafa] mb-6">Traffic Sources</h2>
+          <div className="space-y-5">
             {traffic.map(src => (
               <TrafficBar key={src.source} label={src.source} percentage={src.percentage} />
             ))}
@@ -250,14 +237,24 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="glass rounded-xl p-6">
-        <h2 className="text-lg font-headline font-bold text-white mb-4">Quick Actions</h2>
+      <div className="admin-card p-6">
+        <h2 className="text-base font-semibold text-[#fafafa] mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
-          <Link href="/admin/articles/new" className="btn-primary text-sm py-2 px-4">+ New Article</Link>
-          <Link href="/admin/comments" className="btn-ghost text-sm py-2 px-4">Moderate Comments</Link>
-          <Link href="/admin/tips" className="btn-ghost text-sm py-2 px-4">Tips Queue</Link>
-          <Link href="/admin/newsletter" className="btn-ghost text-sm py-2 px-4">Send Newsletter</Link>
-          <Link href="/admin/assignments" className="btn-ghost text-sm py-2 px-4">Story Assignments</Link>
+          <Link href="/admin/articles/new" className="flex items-center gap-2 bg-[#fafafa] text-[#09090b] rounded-lg font-semibold text-sm px-4 py-2 hover:bg-white transition-colors">
+            + New Article
+          </Link>
+          <Link href="/admin/comments" className="flex items-center gap-2 text-sm text-[#a1a1aa] hover:text-[#fafafa] transition-colors px-4 py-2 rounded-lg border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.16)]">
+            Moderate Comments
+          </Link>
+          <Link href="/admin/tips" className="flex items-center gap-2 text-sm text-[#a1a1aa] hover:text-[#fafafa] transition-colors px-4 py-2 rounded-lg border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.16)]">
+            Tips Queue
+          </Link>
+          <Link href="/admin/newsletter" className="flex items-center gap-2 text-sm text-[#a1a1aa] hover:text-[#fafafa] transition-colors px-4 py-2 rounded-lg border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.16)]">
+            Send Newsletter
+          </Link>
+          <Link href="/admin/assignments" className="flex items-center gap-2 text-sm text-[#a1a1aa] hover:text-[#fafafa] transition-colors px-4 py-2 rounded-lg border border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.16)]">
+            Story Assignments
+          </Link>
         </div>
       </div>
     </div>
@@ -271,23 +268,26 @@ function formatViews(n: number) {
 }
 
 function StatCard({
-  title, value, icon, trend, className = '', valueClassName = 'text-white',
+  title, value, icon, trend, trendColor = 'text-green-400', accent,
 }: {
   title: string
   value: string
   icon: React.ReactNode
   trend?: string
-  className?: string
-  valueClassName?: string
+  trendColor?: string
+  accent?: 'amber'
 }) {
+  const borderColor = accent === 'amber' ? 'border-amber-500/20' : 'border-[rgba(255,255,255,0.08)]'
+  const valueColor = accent === 'amber' ? 'text-amber-400' : 'text-[#fafafa]'
+
   return (
-    <div className={`glass rounded-xl p-5 flex flex-col ${className}`}>
-      <div className="flex items-center justify-between text-dc-muted mb-3">
-        <span className="font-medium text-xs uppercase tracking-wider">{title}</span>
+    <div className={`bg-[#111111] border ${borderColor} rounded-xl p-5 flex flex-col`}>
+      <div className="flex items-center justify-between text-[#a1a1aa] mb-4">
+        <span className="font-medium text-[10px] uppercase tracking-widest">{title}</span>
         {icon}
       </div>
-      <div className={`text-3xl font-headline font-bold mb-1 ${valueClassName}`}>{value}</div>
-      {trend && <div className="text-xs text-dc-green">{trend}</div>}
+      <div className={`text-3xl font-headline font-bold mb-1 ${valueColor}`}>{value}</div>
+      {trend && <div className={`text-xs ${trendColor}`}>{trend}</div>}
     </div>
   )
 }
@@ -295,12 +295,15 @@ function StatCard({
 function TrafficBar({ label, percentage }: { label: string; percentage: number }) {
   return (
     <div>
-      <div className="flex items-center justify-between text-sm mb-1">
-        <span className="text-dc-text">{label}</span>
-        <span className="text-dc-muted font-mono">{percentage}%</span>
+      <div className="flex items-center justify-between text-sm mb-2">
+        <span className="text-[#d4d4d8]">{label}</span>
+        <span className="text-[#a1a1aa] font-mono text-xs">{percentage}%</span>
       </div>
-      <div className="h-1.5 w-full bg-dc-surface-2 rounded-full overflow-hidden">
-        <div className="h-full bg-dc-green rounded-full transition-all" style={{ width: `${percentage}%` }} />
+      <div className="h-1.5 w-full bg-[rgba(255,255,255,0.06)] rounded-full overflow-hidden">
+        <div
+          className="h-full bg-[#fafafa] rounded-full transition-all"
+          style={{ width: `${percentage}%` }}
+        />
       </div>
     </div>
   )

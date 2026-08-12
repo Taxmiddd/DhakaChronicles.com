@@ -33,7 +33,7 @@ export function AdminHeader() {
     : 'DC'
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center gap-x-4 border-b border-dc-border bg-dc-surface/80 backdrop-blur-md px-4 sm:gap-x-6 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 flex h-16 items-center gap-x-4 border-b border-[rgba(255,255,255,0.08)] bg-[#09090b]/80 backdrop-blur-md px-4 sm:gap-x-6 sm:px-6 lg:px-8">
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
         <form className="relative flex flex-1" action="#" method="GET">
           <label htmlFor="search-field" className="sr-only">Search</label>
@@ -64,7 +64,7 @@ export function AdminHeader() {
               )}
             </div>
             <div className="hidden lg:block text-left">
-              <p className="text-sm font-semibold text-dc-text leading-tight group-hover:text-dc-green transition-colors">
+              <p className="text-sm font-semibold text-white leading-tight group-hover:text-dc-green transition-colors">
                 {user?.full_name || 'Loading…'}
               </p>
               <p className={`text-xs font-medium capitalize leading-tight ${ROLE_COLORS[user?.role || ''] || 'text-dc-muted'}`}>

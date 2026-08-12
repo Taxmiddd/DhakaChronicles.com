@@ -280,27 +280,49 @@ body {
 .admin-sidebar-link {
   display: flex; align-items: center; gap: 0.75rem;
   padding: 0.625rem 0.875rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
-  color: var(--dc-text-muted); text-decoration: none;
+  color: #a1a1aa; text-decoration: none;
   transition: background 0.15s, color 0.15s;
 }
 .admin-sidebar-link:hover {
-  background: var(--dc-surface-2);
-  color: var(--dc-text);
+  background: #1a1a1a;
+  color: #f0f0f0;
 }
 .admin-sidebar-link.active {
-  background: var(--dc-surface);
-  color: var(--dc-text);
-  border: 1px solid var(--dc-border);
+  background: rgba(255,255,255,0.06);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.08);
 }
 
-/* ── Admin Form/Card Utils ── */
+/* ── Admin Form/Card Utils (Polished Dark Mode) ── */
 .admin-card {
-  background: var(--background);
-  border: 1px solid var(--dc-border);
+  background: #111111;
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
 }
+.admin-input {
+  width: 100%;
+  background: #09090b;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  color: #f0f0f0;
+  font-size: 0.9375rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.admin-input:focus {
+  border-color: rgba(255,255,255,0.3);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
+}
+.admin-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.375rem;
+  color: #a1a1aa;
+}
 
-/* ── Table ── */
+/* ── Table (light, default) ── */
 .dc-table { width: 100%; border-collapse: collapse; }
 .dc-table th {
   background: var(--dc-surface-2);
@@ -309,9 +331,18 @@ body {
   letter-spacing: 0.06em; padding: 0.75rem 1rem; text-align: left;
   border-bottom: 1px solid var(--dc-border);
 }
-.dc-table td { padding: 0.875rem 1rem; border-bottom: 1px solid var(--dc-border); font-size: 0.9rem; }
+.dc-table td { padding: 0.875rem 1rem; border-bottom: 1px solid var(--dc-border); font-size: 0.9rem; color: var(--dc-text); }
 .dc-table tr:last-child td { border-bottom: none; }
 .dc-table tr:hover td { background: var(--dc-surface); }
+
+/* ── Admin table (dark context) ── */
+.dark .dc-table th {
+  background: rgba(255,255,255,0.04);
+  color: #a1a1aa;
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+.dark .dc-table td { color: #d4d4d8; border-bottom-color: rgba(255,255,255,0.06); }
+.dark .dc-table tr:hover td { background: rgba(255,255,255,0.04); }
 
 /* ── Divider ── */
 .divider { height: 1px; background: var(--dc-border); margin: 1.5rem 0; }

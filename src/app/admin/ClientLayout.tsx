@@ -23,7 +23,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
 
   if (isMobile) {
     return (
-      <div className="bg-dc-surface text-dc-text min-h-screen">
+      <div className="dark min-h-screen" style={{ background: '#09090b', color: '#f0f0f0' }}>
         <MobileAdminHeader
           onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
         />
@@ -48,7 +48,7 @@ export function ClientLayout({ children }: ClientLayoutProps) {
 
   // Desktop layout
   return (
-    <div className="bg-dc-surface text-dc-text min-h-screen">
+    <div className="dark min-h-screen" style={{ background: '#09090b', color: '#f0f0f0' }}>
       <AdminSidebar />
       <div className="pl-64 flex flex-col min-h-screen">
         <AdminHeader />
