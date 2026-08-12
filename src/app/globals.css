@@ -17,17 +17,17 @@
   --dc-text-muted-dark: #9ca3af;
 
   /* Light mode adaptive tokens */
-  --background: #FCFBF9;
+  --background: #FFFFFF;
   --foreground: #111827;
-  --dc-surface: #F6F5F0;
-  --dc-surface-2: #EAE8DF;
-  --dc-border: #DEDCD3;
+  --dc-surface: #FAFAFA;
+  --dc-surface-2: #F5F5F5;
+  --dc-border: #EAEAEA;
   --dc-text: #171717;
   --dc-text-muted: #666666;
   --dc-muted: #9CA3AF;
   --dc-white: #ffffff;
   --card-shadow: none;
-  --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.04);
+  --card-shadow-hover: none;
   /* Header/nav accent */
   --dc-header-border: var(--dc-border);
   --dc-nav-strip-bg: var(--background);
@@ -56,7 +56,7 @@
   --color-dc-text-muted: var(--dc-text-muted);
   --color-dc-muted: var(--dc-muted);
   --font-sans: var(--font-inter);
-  --font-serif: var(--font-lora);
+  --font-serif: var(--font-inter);
 }
 
 /* ── Base ── */
@@ -84,7 +84,7 @@ body {
 
 /* ── Typography ── */
 .font-headline {
-  font-family: var(--font-lora), Georgia, serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -96,14 +96,14 @@ body {
   font-size: 1.0625rem;
 }
 .prose-dc h2 {
-  font-family: var(--font-lora), serif;
+  font-family: var(--font-inter), sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
   margin: 2rem 0 1rem;
   color: var(--dc-text);
 }
 .prose-dc h3 {
-  font-family: var(--font-lora), serif;
+  font-family: var(--font-inter), sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
   margin: 1.5rem 0 0.75rem;
@@ -175,15 +175,8 @@ body {
 
 /* ── Glass / Surface card ── */
 .glass {
-  background: var(--dc-surface);
-  border: 1px solid var(--dc-border);
-  border-radius: 12px;
-}
-.dark .glass {
-  background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--background);
+  border: none;
 }
 
 /* ── Buttons ── */
@@ -191,15 +184,13 @@ body {
   display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
   background: var(--dc-text); color: #fff; font-weight: 600;
   padding: 0.625rem 1.25rem; border-radius: 8px;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition: background 0.2s, transform 0.1s;
   border: none; cursor: pointer; text-decoration: none;
 }
 .btn-primary:hover {
   background: #000;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
 }
-.btn-primary:active { transform: translateY(0); box-shadow: none; }
+.btn-primary:active { transform: translateY(1px); }
 
 .btn-ghost {
   display: inline-flex; align-items: center; gap: 0.5rem;
@@ -319,7 +310,7 @@ body {
 
 /* ── Section heading accent ── */
 .section-heading {
-  font-family: var(--font-lora), serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 700;
   font-size: 1.125rem;
   color: var(--dc-text);
@@ -339,7 +330,7 @@ body {
 
 /* ── Bold editorial section title (Cablgram-inspired) ── */
 .section-title-bold {
-  font-family: var(--font-lora), serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 800;
   font-size: 1.5rem;
   color: var(--dc-text);

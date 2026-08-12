@@ -1,15 +1,15 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Search, Mic2, Info, Menu } from 'lucide-react'
+import { Home, Search, Mic2, LayoutGrid, Menu } from 'lucide-react'
 import { useMobileNav } from './MobileNavContext'
 
 const TABS = [
-  { icon: Home,   label: 'Home',     href: '/'         },
-  { icon: Search, label: 'Search',   href: '/search'   },
-  { icon: Mic2,   label: 'Podcasts', href: '/podcasts' },
-  { icon: Info,   label: 'About',    href: '/about'    },
+  { icon: Home,       label: 'Home',       href: '/'           },
+  { icon: Search,     label: 'Search',     href: '/search'     },
+  { icon: Mic2,       label: 'Podcasts',   href: '/podcasts'   },
+  { icon: LayoutGrid, label: 'Categories', href: '/categories' },
 ] as const
 
 export function MobileTabBar() {
@@ -20,9 +20,7 @@ export function MobileTabBar() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-[55] sm:hidden"
       style={{
-        background: 'var(--background)',
-        borderTop: '1px solid var(--dc-border)',
-        boxShadow: '0 -8px 32px rgba(0,0,0,0.12)',
+        background: 'var(--dc-surface)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
       aria-label="Main navigation"
@@ -35,7 +33,7 @@ export function MobileTabBar() {
               key={href}
               href={href}
               className="flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors"
-              style={{ color: active ? 'var(--dc-red)' : 'var(--dc-text-muted)' }}
+              style={{ color: active ? 'var(--dc-text)' : 'var(--dc-text-muted)' }}
             >
               <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.5 : 1.75} />
               <span className="text-[9px] font-semibold tracking-wide">{label}</span>

@@ -39,7 +39,7 @@ export async function PublicHeader() {
   })
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-dc-border">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm">
 
       {/* ── Masthead ── */}
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,7 +76,7 @@ export async function PublicHeader() {
       </div>
 
       {/* ── Section Nav ── */}
-      <div className="border-t border-dc-border">
+      <div>
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="hidden lg:flex items-center gap-0 overflow-x-auto scrollbar-none">
             <Link

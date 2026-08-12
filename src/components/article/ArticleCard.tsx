@@ -162,8 +162,7 @@ function ListCard({ article }: { article: ArticleCardProps }) {
   return (
     <Link
       href={`/news/${article.slug}`}
-      className="group flex items-start gap-4 py-4 border-b hover:no-underline"
-      style={{ borderColor: 'var(--dc-border)' }}
+      className="group flex items-start gap-4 py-4 hover:no-underline"
     >
       <div className="flex-1 min-w-0">
         <CategoryBadge category={article.category} />
